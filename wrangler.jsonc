@@ -1,14 +1,37 @@
 {
-  "name": "yolo-county-veterans",
-  "main": "dist/worker.mjs",
-  "compatibility_date": "2026-09-02",
-  "workers_dev": true,
+  "name": "norcal-veterans",
+  "main": "src/norcal-worker.mjs",
+  "compatibility_date": "2026-09-07",
+  "account_id": "7a3b9bb1a94bac5dea646e821afa9aa6",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "vars": {
+    "OWNER_EMAIL": "sterling.koliba@gmail.com",
+    "ACCESS_TEAM_DOMAIN": "frosty-lake-fcde.cloudflareaccess.com",
+    "ACCESS_AUD": "ccb0ed2e0d61574737f9f0a8203496497a77238cb13e8101d602b0ca36b750ce"
+  },
+  "observability": {
+    "enabled": false
+  },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "yolo-county-veterans-hq",
-      "database_id": "0e731d4e-ec33-49f0-a01b-9e9c659fcdc5"
+      "database_name": "norcal-veterans",
+      "database_id": "3133f3c9-0e2b-4012-9069-024c00e31d00"
     }
   ],
-  "r2_buckets": [{"binding":"ATTACHMENTS","bucket_name":"yolo-veterans-hq-attachments"}]
+  "routes": [
+    {
+      "pattern": "norcalveterans.org/*",
+      "zone_name": "norcalveterans.org"
+    },
+    {
+      "pattern": "www.norcalveterans.org/*",
+      "zone_name": "norcalveterans.org"
+    }
+  ],
+  "workers_dev": true
 }

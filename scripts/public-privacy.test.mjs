@@ -90,7 +90,7 @@ test('organization photo galleries retain safe sources through repeated sanitati
 });
 
 test('all organization pages offer photos and a sign-in path even before their first image',()=>{
- for(const record of records){const page=render(new URL('https://test/organizations/'+record.id));assert.ok(page.html.includes('id="photos"'),record.id);assert.ok(page.html.includes('/organization?org='+record.id+'#photos'),record.id);assert.ok(page.html.includes('Authorized representatives can add photos'));}
+ for(const record of records){const page=render(new URL('https://test/organizations/'+record.id));assert.ok(page.html.includes('id="photos"'),record.id);assert.ok(page.html.includes('/hq?org='+record.id+'#photos'),record.id);assert.ok(page.html.includes('Authorized representatives can add photos'));}
 });
 
 test('published gallery joins the correct organization and exports source and license without uploader identity',async t=>{

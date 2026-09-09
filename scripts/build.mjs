@@ -8,13 +8,13 @@ for(const [name,type] of [['styles.css','text/css; charset=utf-8'],['app.js','ap
  const bytes=await fs.readFile(path.join(root,'public',name));assets['/'+name]={type,base64:bytes.toString('base64')};
 }
 for(const [name,type] of [['ysv-logo.png','image/png'],['og.png','image/png']]){
- const bytes=(await fs.readFile(path.join(root,'public',name))).subarray(0,128);assets['/'+name]={type,base64:bytes.toString('base64')};
+ const bytes=(await fs.readFile(path.join(root,'public',name)));assets['/'+name]={type,base64:bytes.toString('base64')};
 }
 const usedLogoPaths=new Set(Object.values(brandLogos).map(logo=>logo.src));
 for(const name of await fs.readdir(path.join(root,'public','logos'))){
  if(!usedLogoPaths.has('/logos/'+name))continue;
  const ext=path.extname(name).toLowerCase(),type={'.png':'image/png','.svg':'image/svg+xml','.jpg':'image/jpeg'}[ext];if(!type)continue;
- const bytes=(await fs.readFile(path.join(root,'public','logos',name))).subarray(0,128);assets['/logos/'+name]={type,base64:bytes.toString('base64')};
+ const bytes=(await fs.readFile(path.join(root,'public','logos',name)));assets['/logos/'+name]={type,base64:bytes.toString('base64')};
 }
 async function source(name){return (await fs.readFile(path.join(root,'src',name),'utf8')).replace(/^import .*;\r?\n/gm,'').replace(/^export \{dataset\};?\r?\n?/gm,'').replace(/^export /gm,'');}
 const shared=(await Promise.all(['public-privacy.mjs','buddy-poppy-events.mjs','research-additions.mjs','data.mjs','logos.mjs','organization-links.mjs','public-calendar.mjs','resources.mjs','site.mjs','storage.mjs','published-request-assets.mjs','speaker-submissions.mjs','organization-meetings.mjs','event-collaboration.mjs','organization-photos.mjs','organization-officers.mjs'].map(source))).join('\n');
@@ -41,7 +41,7 @@ export default {async fetch(request,env={}){
   if(url.pathname==='/data.json')return new Response(head?null:JSON.stringify({...dataset,records:live.records.map(({officer_profiles,...record})=>record),events:live.events,memorial_services:memorialServices},null,2),{headers:{...securityHeaders,'Content-Type':'application/json; charset=utf-8','Cache-Control':'public, max-age=30'}});
   if(url.pathname==='/events.ics'){const events=url.searchParams.has('event')?live.events.filter(e=>e.id===url.searchParams.get('event')):upcomingEvents(live.events);return new Response(head?null:eventCalendar(events),{headers:{...securityHeaders,'Content-Type':'text/calendar; charset=utf-8','Content-Disposition':'attachment; filename="yolo-solano-veterans.ics"','Cache-Control':'public, max-age=30'}});}
   const page=publicExtension(url,live.events)||render(url,live.records,live.events);return responseHTML(head?'':page.html,page.status);
- }catch{return responseHTML(shell('Temporarily unavailable | Yolo Solano Veterans','Please try again soon.','<section class="wrap about-page"><h1>We'll be back shortly.</h1><p>The directory service is temporarily unavailable. Please try again in a few minutes.</p></section>'),503,true);}
+ }catch{return responseHTML(shell('Temporarily unavailable | Yolo Solano Veterans','Please try again soon.','<section class="wrap about-page"><h1>We will be back shortly.</h1><p>The directory service is temporarily unavailable. Please try again in a few minutes.</p></section>'),503,true);}
 }};
 `;
 const hqAssets=Object.fromEntries(Object.entries(assets).filter(([name])=>['/styles.css','/favicon.svg','/hq.js'].includes(name)));

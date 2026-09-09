@@ -1,3 +1,15 @@
+# NorCal Veterans deployment
+
+Production: https://www.norcalveterans.org/yolo-solano
+
+The September 9 replacement uses the imported public design with the existing NorCal database and private `/hq` application. `wrangler.jsonc` is the production configuration; `src/norcal-worker.mjs` is the entry point. Do not deploy the imported `wrangler.hq.jsonc` or apply its migrations to NorCal. Those describe the separate source system. See [deployment and recovery](docs/norcal-deployment.md).
+
+Build: `npm run build`. Tests: `npm test` with Node 24 or newer. Cloudflare builds `main` with `npm run build`, then `npx wrangler deploy`.
+
+The following imported notes describe the source version and may refer to features or accounts that are not deployed in NorCal.
+
+---
+
 # Yolo Solano Veterans
 
 The project now uses the supplied circular Yolo-Solano Veterans seal in the public website, headquarters and organization editor, as well as the favicon and homepage sharing image. The original PNG is unchanged, displayed at its square aspect ratio, and included in both Worker asset packages. Its public source note is in public/ysv-logo-source.json. The private uploaded original remains attached to the originating HQ request.

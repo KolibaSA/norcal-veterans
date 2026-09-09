@@ -123,13 +123,14 @@ export async function organizationPhotoAction(request,env,principal){
  }else if(action==='photo_edit')statement=env.DB.prepare(`UPDATE organization_photos SET caption=?,alt_text=?,credit=?,source_url=?,album_id=?,updated_at=?,version=version+1 WHERE id=? AND org_id=? AND version=? AND ${organizationPhotoScope} AND (? IS NULL OR EXISTS(SELECT 1 FROM organization_photo_albums WHERE id=? AND org_id=?)) RETURNING id`).bind(caption,alt,credit,source,albumId,now,id,orgId,version,...scope,albumId,albumId,orgId);
  else statement=env.DB.prepare(`DELETE FROM organization_photos WHERE id=? AND org_id=? AND version=? AND ${organizationPhotoScope} RETURNING id`).bind(id,orgId,version,...scope);
  let out;
- const statements=[statement];
+ // Gate side effects on this mutation, including when two edits share a timestamp.
+ const auditId=crypto.randomUUID();
+ const statements=[statement,env.DB.prepare('INSERT INTO audit(id,actor,action,record_id,created_at) SELECT ?,?,?,?,? WHERE changes()>0').bind(auditId,actor,'organization_'+action,id,now)];
  if(action!=='photo_remove'){
-  if(action==='photo_edit')statements.push(env.DB.prepare("DELETE FROM organization_photo_presence WHERE photo_id=? AND org_id!=? AND status='approved' AND EXISTS(SELECT 1 FROM organization_photos WHERE id=? AND org_id=? AND updated_at=?)").bind(id,orgId,id,orgId,now));
+  if(action==='photo_edit')statements.push(env.DB.prepare("DELETE FROM organization_photo_presence WHERE photo_id=? AND org_id!=? AND status='approved' AND EXISTS(SELECT 1 FROM audit WHERE id=?)").bind(id,orgId,auditId));
   const associations=[orgId,...presentOrgIds];
-  for(const presentOrg of associations)statements.push(env.DB.prepare("INSERT INTO organization_photo_presence(id,photo_id,org_id,status,requested_by,requested_at,reviewed_by,reviewed_at) SELECT ?,?,?,'approved',?,?,?,? WHERE EXISTS(SELECT 1 FROM organization_photos WHERE id=? AND org_id=? AND updated_at=?) ON CONFLICT(photo_id,org_id) DO UPDATE SET status='approved',reviewed_by=excluded.reviewed_by,reviewed_at=excluded.reviewed_at,version=organization_photo_presence.version+1").bind(crypto.randomUUID(),id,presentOrg,actor,now,actor,now,id,orgId,now));
+  for(const presentOrg of associations)statements.push(env.DB.prepare("INSERT INTO organization_photo_presence(id,photo_id,org_id,status,requested_by,requested_at,reviewed_by,reviewed_at) SELECT ?,?,?,'approved',?,?,?,? WHERE EXISTS(SELECT 1 FROM audit WHERE id=?) ON CONFLICT(photo_id,org_id) DO UPDATE SET status='approved',reviewed_by=excluded.reviewed_by,reviewed_at=excluded.reviewed_at,version=organization_photo_presence.version+1").bind(crypto.randomUUID(),id,presentOrg,actor,now,actor,now,auditId));
  }
- statements.push(action==='photo_remove'?env.DB.prepare('INSERT INTO audit(id,actor,action,record_id,created_at) SELECT ?,?,?,?,? WHERE changes()>0').bind(crypto.randomUUID(),actor,'organization_'+action,id,now):env.DB.prepare('INSERT INTO audit(id,actor,action,record_id,created_at) SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM organization_photos WHERE id=? AND org_id=? AND updated_at=?)').bind(crypto.randomUUID(),actor,'organization_'+action,id,now,id,orgId,now));
  try{out=await env.DB.batch(statements);}
  catch(error){
   // A lost response can follow a committed upload; preserve uncertain originals.

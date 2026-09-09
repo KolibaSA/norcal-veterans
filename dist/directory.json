@@ -57,7 +57,7 @@
     },
     {
       "id": "vfw-8151-venue",
-      "title": "Hall Rental - Dixon VFW Post 8151",
+      "title": "Hall Rental — Dixon VFW Post 8151",
       "publisher": "VFW Post 8151",
       "url": "https://vfw8151.org/di/vfw/v2/default.asp?pid=122920",
       "fields": [
@@ -87,7 +87,7 @@
     },
     {
       "id": "leg-178-contact",
-      "title": "Contact Us - Rio Vista Post 178",
+      "title": "Contact Us — Rio Vista Post 178",
       "publisher": "American Legion Rio Vista Post 178",
       "url": "https://post178rvca.org/site/contactus",
       "fields": [
@@ -177,7 +177,7 @@
     {
       "id": "rememberavet-volunteer-2026",
       "title": "RememberAVet Wreath Project: 2026 Volunteer Opportunities",
-      "publisher": "RememberAVet - Wreath Project",
+      "publisher": "RememberAVet — Wreath Project",
       "url": "https://www.wreathproject.org/",
       "fields": [
         "events",
@@ -192,7 +192,7 @@
     {
       "id": "rememberavet-boughs-2026",
       "title": "2026 Bough Laying",
-      "publisher": "RememberAVet - Wreath Project",
+      "publisher": "RememberAVet — Wreath Project",
       "url": "https://www.wreathproject.org/home-1-1-2",
       "fields": [
         "event",
@@ -231,7 +231,7 @@
     },
     {
       "id": "leg-550-national-news",
-      "title": "Post 550 in Vallejo - national American Legion news",
+      "title": "Post 550 in Vallejo — national American Legion news",
       "publisher": "The American Legion",
       "url": "https://www.legion.org/information-center/news/baseball/2025/july/legion-baseball-alumni-among-baseball-hall-of-fame-class",
       "fields": [
@@ -525,14 +525,14 @@
         "Remembrance",
         "Volunteering"
       ],
-      "audience": "Community volunteers; check each activity's participation instructions.",
+      "audience": "Community volunteers; check each activity’s participation instructions.",
       "eligibility": null,
       "event_information": null,
       "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
       "partnership_notes": null,
       "officers": [],
       "officers_status": "not_verified",
-      "member_information": "Coordinates fundraising and volunteers for holiday bough placement and cleanup at Sacramento Valley National Cemetery in Dixon. Its Winters address is a mailing address, not a visitor office. RememberAVet bough activities and the cemetery's Wreaths Across America ceremony are separate programs.",
+      "member_information": "Coordinates fundraising and volunteers for holiday bough placement and cleanup at Sacramento Valley National Cemetery in Dixon. Its Winters address is a mailing address, not a visitor office. RememberAVet bough activities and the cemetery’s Wreaths Across America ceremony are separate programs.",
       "source_ids": [
         "rememberavet-home",
         "rememberavet-volunteer-2026",
@@ -669,7 +669,7 @@
         "website": "https://vfw8151.org/di/vfw/v2/default.asp?nid=1"
       },
       "hours": null,
-      "meeting_schedule": "Third Wednesday � social 6:30 p.m.; meeting 7 p.m.",
+      "meeting_schedule": "Third Wednesday · social 6:30 p.m.; meeting 7 p.m.",
       "timezone": "America/Los_Angeles",
       "service_categories": [
         "Veteran community",
@@ -687,7 +687,7 @@
       "partnership_notes": null,
       "officers": [],
       "officers_status": "not_published",
-      "member_information": "Meets at the Olde Vets Hall. The post advertises Voice of Democracy and Patriot's Pen scholarships and Buddy Poppy activities. Contact the post for current participation rules.",
+      "member_information": "Meets at the Olde Vets Hall. The post advertises Voice of Democracy and Patriot’s Pen scholarships and Buddy Poppy activities. Contact the post for current participation rules.",
       "source_ids": [
         "vfw-8151-home",
         "vfw-8151-venue"
@@ -706,7 +706,7 @@
     },
     {
       "id": "legion-ca-165",
-      "verified_name": "American Legion Post 165 - Vacaville",
+      "verified_name": "American Legion Post 165 — Vacaville",
       "organization_type": "American Legion",
       "entity_kind": "organization",
       "city": "Vacaville",
@@ -828,7 +828,7 @@
         "website": "https://reamspost182.org/"
       },
       "hours": null,
-      "meeting_schedule": "Third Thursday � 6:30 p.m.",
+      "meeting_schedule": "Third Thursday · 6:30 p.m.",
       "timezone": "America/Los_Angeles",
       "service_categories": [
         "Veteran community"
@@ -1365,7 +1365,7 @@
       "partnership_notes": null,
       "officers": [],
       "officers_status": "not_verified",
-      "member_information": "Post gatherings at Vacaville Veterans Hall. Use the post's general email or website for organization inquiries. For Veterans Memorial Building or hall-rental inquiries, the separate public venue number is 707-447-6354.",
+      "member_information": "Post gatherings at Vacaville Veterans Hall. Use the post’s general email or website for organization inquiries. For Veterans Memorial Building or hall-rental inquiries, the separate public venue number is 707-447-6354.",
       "source_ids": [
         "vacaville-vfw"
       ],
@@ -1553,7 +1553,7 @@
     },
     {
       "id": "mcl-ca-1486",
-      "verified_name": "Marine Corps League - Charles "Bud" Hallam Detachment 1486",
+      "verified_name": "Marine Corps League - Charles \"Bud\" Hallam Detachment 1486",
       "organization_type": "Marine Corps League",
       "entity_kind": "organization",
       "city": "Vacaville",
@@ -1740,7 +1740,7 @@
       "partnership_notes": null,
       "officers": [],
       "officers_status": "not_verified",
-      "member_information": "Use the chapter's general email or website for organization inquiries. For Veterans Memorial Building or hall-rental inquiries, use the separate venue contact 707-447-6354. Enter through the back door; the chapter describes elevator access to the meeting hall.",
+      "member_information": "Use the chapter’s general email or website for organization inquiries. For Veterans Memorial Building or hall-rental inquiries, use the separate venue contact 707-447-6354. Enter through the back door; the chapter describes elevator access to the meeting hall.",
       "source_ids": [
         "dav-84-contact",
         "dav-84-area",

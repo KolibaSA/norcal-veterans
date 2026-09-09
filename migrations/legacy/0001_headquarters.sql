@@ -1,0 +1,11 @@
+PRAGMA foreign_keys=ON;
+CREATE TABLE records(id TEXT PRIMARY KEY,kind TEXT NOT NULL CHECK(kind IN ('request','task','organization','event','coordination','library','submission')),title TEXT NOT NULL,body TEXT NOT NULL DEFAULT '',region_id TEXT NOT NULL,organization_id TEXT, status TEXT NOT NULL DEFAULT 'draft',payload TEXT NOT NULL DEFAULT '{}',created_by TEXT NOT NULL,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,mutation_id TEXT NOT NULL);
+CREATE INDEX idx_records_kind_region ON records(kind,region_id,status);
+CREATE INDEX idx_records_org ON records(organization_id,kind);
+CREATE TABLE grants(id TEXT PRIMARY KEY,email TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN ('region_admin','organization_admin','editor')),region_id TEXT,organization_id TEXT,CHECK((region_id IS NULL)!=(organization_id IS NULL)),CHECK(role!='region_admin' OR region_id IS NOT NULL),CHECK(role!='organization_admin' OR organization_id IS NOT NULL));
+CREATE INDEX idx_grants_email ON grants(email);
+CREATE TABLE audit(id TEXT PRIMARY KEY,actor TEXT NOT NULL,action TEXT NOT NULL,record_id TEXT NOT NULL,created_at TEXT NOT NULL);
+CREATE INDEX idx_audit_created ON audit(created_at);
+CREATE TABLE attachments(id TEXT PRIMARY KEY,record_id TEXT NOT NULL REFERENCES records(id),filename TEXT NOT NULL,content_type TEXT NOT NULL,size INTEGER NOT NULL,object_key TEXT NOT NULL,created_by TEXT NOT NULL,created_at TEXT NOT NULL);
+CREATE INDEX idx_attachments_record ON attachments(record_id);
+CREATE TABLE submission_limits(bucket TEXT PRIMARY KEY,count INTEGER NOT NULL);
