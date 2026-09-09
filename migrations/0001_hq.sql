@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS requests (id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK(kind IN ('profile','event','claim','other')), org_id TEXT, title TEXT NOT NULL, details TEXT NOT NULL, sender_name TEXT NOT NULL, sender_email TEXT NOT NULL, source_url TEXT, status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','reviewed','archived')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS requests_status_date ON requests(status,created_at);
+CREATE TABLE IF NOT EXISTS tasks (id TEXT PRIMARY KEY, title TEXT NOT NULL, category TEXT NOT NULL, notes TEXT NOT NULL DEFAULT '', priority TEXT NOT NULL DEFAULT 'normal' CHECK(priority IN ('high','normal')), status TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open','in_progress','done')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS tasks_status ON tasks(status);
+CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, body_json TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','published','archived')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS events_status ON events(status);
+CREATE TABLE IF NOT EXISTS profile_updates (org_id TEXT PRIMARY KEY, body_json TEXT NOT NULL, source_url TEXT NOT NULL, reviewed_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS coordination (id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK(kind IN ('partnership','volunteer','fundraising','history')), title TEXT NOT NULL, notes TEXT NOT NULL DEFAULT '', next_step TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'idea' CHECK(status IN ('idea','contacted','active','closed')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS audit (id TEXT PRIMARY KEY, actor TEXT NOT NULL, action TEXT NOT NULL, record_id TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS audit_date ON audit(created_at);
+CREATE TABLE IF NOT EXISTS intake_limits (bucket TEXT PRIMARY KEY, count INTEGER NOT NULL, expires_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS revisions (id INTEGER PRIMARY KEY AUTOINCREMENT, entity TEXT NOT NULL, record_id TEXT NOT NULL, body_json TEXT NOT NULL, preserved_at TEXT NOT NULL);
+CREATE TRIGGER IF NOT EXISTS preserve_event BEFORE UPDATE ON events BEGIN INSERT INTO revisions(entity,record_id,body_json,preserved_at) VALUES ('event',OLD.id,json_object('body_json',OLD.body_json,'status',OLD.status,'created_at',OLD.created_at,'updated_at',OLD.updated_at),NEW.updated_at); END;
+CREATE TRIGGER IF NOT EXISTS preserve_profile BEFORE UPDATE ON profile_updates BEGIN INSERT INTO revisions(entity,record_id,body_json,preserved_at) VALUES ('profile',OLD.org_id,json_object('body_json',OLD.body_json,'source_url',OLD.source_url,'reviewed_at',OLD.reviewed_at),NEW.reviewed_at); END;

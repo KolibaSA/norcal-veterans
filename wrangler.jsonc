@@ -1,0 +1,14 @@
+{
+  "name": "yolo-county-veterans",
+  "main": "dist/worker.mjs",
+  "compatibility_date": "2026-09-02",
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "yolo-county-veterans-hq",
+      "database_id": "0e731d4e-ec33-49f0-a01b-9e9c659fcdc5"
+    }
+  ],
+  "r2_buckets": [{"binding":"ATTACHMENTS","bucket_name":"yolo-veterans-hq-attachments"}]
+}

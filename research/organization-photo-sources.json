@@ -1,0 +1,263 @@
+{
+  "researched_at": "2026-09-03T05:43:47.733Z",
+  "request_id": "652b8608-5fc2-4b31-8cf0-80c3e67d3ec4",
+  "note": "Official external images remain hosted by their sources. Attribution and known open licenses are retained. Venue, historical and representative images are expressly captioned; no current local event or blanket reuse permission is implied.",
+  "photos": [
+    {
+      "org_id": "rememberavet",
+      "image_url": "https://images.squarespace-cdn.com/content/v1/6525deb7cae2f47837d1805a/b2501de4-0036-4610-9dc3-ea9bd8a9249f/2025+Wreath+Laying+%282%29.jpg?format=750w",
+      "source_url": "https://www.wreathproject.org/",
+      "caption": "RememberAVet volunteers place holiday boughs at Sacramento Valley National Cemetery.",
+      "alt_text": "Volunteers among rows of cemetery headstones decorated with evergreen boughs and red bows.",
+      "credit": "RememberAVet / Wreath Project; rights retained by the original owner",
+      "license": "Official source; external image",
+      "notes": "Read from the official Place Boughs section and visually inspected. File name identifies a 2025 image; caption does not present it as a current event. This is RememberAVet, not Wreaths Across America. Small 750-pixel preview successfully fetched; no reuse license established. Local preview: work/photo-research-yolo/wreath.jpg. Verified 2026-09-03 UTC."
+    },
+    {
+      "org_id": "little-reata-veterans",
+      "image_url": "https://lh3.googleusercontent.com/sitesv/AG8ngQX_cV9-DYQBKVrdE_1epmJuXjpgD0ZDdZ3nLZdUYeB4AOvQ7aMa7Zx2Fiif0bfZMNszqomVUQrwyhoqcw9GNAKOo5yz3dVv3Y4ITjDCm-iLnZttlVJTboZs9-Dgoc0-xmFVZERYSOIOx_kfdoF83Ure6SR9ski69l5oNgFkWyDc6HqBQ_oSxzwA4iYwAxw=w1000",
+      "source_url": "https://www.veteransequinetherapy.com/",
+      "caption": "Photo banner from the Veterans Equine Therapy website.",
+      "alt_text": "Veterans Equine Therapy website banner showing horses in a sunlit pasture with the VETs emblem above.",
+      "credit": "Veterans Equine Therapy website; rights retained by the original owner",
+      "license": "Official source; external image",
+      "notes": "Visually inspected the exact official background banner: horse/pasture photographic background plus VETs logo overlay. This is organizational website artwork; the photo location, authorship and whether any compositing or AI was used are unverified. Do not describe it as a local therapy session, specific ranch, or actual VETs program participants. Google Sites serves an opaque URL which varied between page fetches, so a future broken reference may require refreshing from the official page. No reuse license established. Local preview: work/photo-research-yolo/vets-background.jpg. Verified 2026-09-03 UTC."
+    },
+    {
+      "org_id": "vfw-ca-6949",
+      "image_url": "https://daviscemetery.org/wp-content/uploads/2017/07/cemetery3W-768x512.jpg",
+      "source_url": "https://daviscemetery.org/ten-things-to-do-during-your-visit/",
+      "caption": "Community remembrance venue: Davis Cemetery, where Davis VFW Post 6949 has helped host Memorial Day ceremonies.",
+      "alt_text": "Tree-lined grounds and historic monuments at Davis Cemetery.",
+      "credit": "Davis Cemetery District & Arboretum; rights retained by the original owner",
+      "license": "Official source; external image",
+      "notes": "Actual cemetery grounds photo from official district visitor page, visually inspected. Historical Post 6949 ceremony partnership established by https://theaggie.org/2018/06/08/davis-remembers-those-who-served/ and post community role confirmed by https://veterans.ucdavis.edu/services/community. It is a community remembrance venue photo, not a photo of the post's headquarters or current meeting location. Do not assign a routine meeting location from this photo. No reuse license established. Local preview: work/photo-research-yolo/davis-cemetery.jpg. Verified 2026-09-03 UTC."
+    },
+    {
+      "org_id": "vfw-ca-8762",
+      "image_url": "https://img1.wsimg.com/isteam/ip/81020d2c-1129-47fc-8834-eb871f4e4689/Drever%20St.png/:/rs=w:600,h:300,cg:true,m/cr=w:600,h:300",
+      "source_url": "https://westsacvfw.com/",
+      "caption": "West Sacramento VFW Post 8762 on Drever Street.",
+      "alt_text": "Front entrance of VFW Post 8762, with a green awning and post emblem beside the door.",
+      "credit": "West Sacramento VFW Post 8762; rights retained by the original owner",
+      "license": "Official source; external image",
+      "notes": "Exact official home-page photo is explicitly labeled front of VFW Post 8762. Visually inspected: entrance number 905 matches the public post venue. Uses the site's own 600 by 300 rendition. No reuse license established. Local preview: work/photo-research-yolo/west-sac.png. Verified 2026-09-03 UTC."
+    },
+    {
+      "org_id": "legion-ca-77",
+      "image_url": "https://www.legion.org/getmedia/b50e6cf9-edf5-40c9-8a47-50ed200217c0/68384.jpeg",
+      "source_url": "https://www.legion.org/information-center/news/membership/2026/april/veterans-benefits-assistance-coming-to-sacramento-area",
+      "caption": "The American Legion Yolo Post 77 hall in Woodland.",
+      "alt_text": "American Legion hall exterior with a yellow and blue Yolo Post 77 sign.",
+      "credit": "Post 77 Facebook photo, published by The American Legion; rights retained by the original owner",
+      "license": "Official source; external image",
+      "notes": "Official national Legion article identifies this as a Post 77 Facebook photo. Visually inspected: sign clearly reads Yolo Post 77. The article's April 2026 outreach is historical; this gallery caption makes no current event claim. No reuse license established. Local preview: work/photo-research-yolo/legion77.jpg. Verified 2026-09-03 UTC."
+    },
+    {
+      "org_id": "mcl-yolo",
+      "image_url": "https://www.elks.org/SharedElksOrg/lodges/images/1299_Elks1299.jpg",
+      "source_url": "https://www.elks.org/lodges/home.cfm?lodgenumber=1299",
+      "caption": "Woodland Elks Lodge, the detachment's listed meeting venue. Confirm current meeting details with the organization.",
+      "alt_text": "Woodland Elks Lodge exterior with an American flag and a sign for Lodge 1299.",
+      "credit": "Woodland Elks Lodge 1299 / BPO Elks; rights retained by the original owner",
+      "license": "Official source; external image",
+      "notes": "Official Elks lodge page identifies the pictured building at 500 Bush Street, matching the existing MCL Yolo profile's listed venue. Visually inspected. Photo shows the venue, not Marine Corps League members or activities, and does not verify current meeting arrangements. No roster/officer page used as image source. No reuse license established. Local preview: work/photo-research-yolo/elks1299.jpg. Verified 2026-09-03 UTC."
+    },
+    {
+      "org_id": "toys-yolo",
+      "image_url": "https://supplychain.ucdavis.edu/sites/g/files/dgvnsk2181/files/styles/sf_landscape_16x9/public/media/images/23haul_0.jpg?h=19f14c2c&itok=1dvwVmhS",
+      "source_url": "https://supplychain.ucdavis.edu/events/mail-services-24-toy-drive",
+      "caption": "UC Davis Mail Services' Toys for Tots collection, supporting children in Yolo County. Photo from the 2024 campaign page.",
+      "alt_text": "UC Davis Mail Services staff behind tables filled with donated toys.",
+      "credit": "UC Davis Supply Chain Management / The Regents of the University of California; rights retained",
+      "license": "Official source; external image",
+      "notes": "Official UC Davis campaign partner page explicitly says the toys benefit Yolo County children and identifies the Marine Corps Reserve partnership. Photo is displayed with alt text Mail Services team shows off toys. Visually inspected and direct image fetched successfully. File name suggests earlier 2023 photography reused on 2024 page, so caption deliberately describes source page date rather than date taken. No reuse license established; UC Davis page states all rights reserved. Local preview: work/photo-research-yolo/uc-toy-drive.jpg. Verified 2026-09-03 UTC."
+    },
+    {
+      "org_id": "vso-yolo",
+      "image_url": "https://sunsetrotarydavis.org/wp-content/uploads/bingo3.jpg",
+      "source_url": "https://sunsetrotarydavis.org/in-the-community/",
+      "caption": "Davis Senior Center, a Yolo VSO outreach venue, shown during a Rotary bingo activity.",
+      "alt_text": "Community room at Davis Senior Center with people seated at tables during a Rotary bingo activity.",
+      "credit": "Sunset Rotary Club of Davis; rights retained by the original owner",
+      "license": "Official source; external image",
+      "notes": "Replaces blocked City of Davis exterior with a working official community-partner photo. Exact image appears under BINGO at the Davis Senior Center on the official Sunset Rotary community page. Downloaded successfully over HTTPS (87,296 bytes) and visually inspected: a full community-room interior with tables and bingo activity. Exact VSO relationship is explicit at https://www.yolocounty.gov/government/general-government-departments/health-human-services/adults/veterans-service-office, which lists Davis Senior Center, 646 A Street, as Davis outreach location. This photograph is a Rotary activity in the venue, NOT a VSO appointment or evidence of VSO clientele. NOT the main VSO office at 137 N. Cottonwood Street. No reuse license established. Local preview: work/photo-research-yolo/senior-bingo-room3.jpg. Verified 2026-09-03 UTC."
+    },
+    {
+      "org_id": "vfw-ca-8151",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Luke%27s_Lounge_and_Olde_Vets_Hall_on_First_Street_in_downtown_Dixon%2C_California.jpg/960px-Luke%27s_Lounge_and_Olde_Vets_Hall_on_First_Street_in_downtown_Dixon%2C_California.jpg",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Luke%27s_Lounge_and_Olde_Vets_Hall_on_First_Street_in_downtown_Dixon,_California.jpg",
+      "caption": "Olde Vets Hall on First Street in Dixon, the meeting venue listed by VFW Post 8151. Photographed in August 2022.",
+      "alt_text": "Olde Vets Hall beside Luke's Lounge on First Street in Dixon.",
+      "credit": "Kiddo27 / Wikimedia Commons",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "notes": "Original photograph unchanged; Commons thumbnail. Venue confirmed by https://vfw8151.org/di/vfw/v2/default.asp?nid=1. This is a different facility from Post 208's hall."
+    },
+    {
+      "org_id": "legion-ca-165",
+      "image_url": "https://static.berqwp.com/www.vacavets.org/mw1920-q80-original/https://www.vacavets.org/wp-content/uploads/vacaville-vets-hall-2019-rededication.webp",
+      "source_url": "https://www.vacavets.org/about-us/",
+      "caption": "The shared Vacaville Veterans Memorial Building at its June 2019 rededication.",
+      "alt_text": "Ribbon cutting inside the remodeled Vacaville Veterans Memorial Building.",
+      "credit": "John Vasquez, via Vacaville Veterans Memorial Building",
+      "license": "Official source; external image",
+      "notes": "Historical venue photo. Post 165 is listed on the venue website. No reuse license claimed."
+    },
+    {
+      "org_id": "legion-ca-178",
+      "image_url": "https://post178rvca.org/photos/044cb1a2-c917-4021-9c30-87da41cc8cd9.jpg",
+      "source_url": "https://post178rvca.org/post-location",
+      "caption": "Rio Vista Veterans Memorial Hall, the public venue shown on American Legion Post 178's location page.",
+      "alt_text": "Rio Vista Veterans Memorial Hall with an American Legion Post 178 sign and flagpoles.",
+      "credit": "American Legion Rio Vista Post 178",
+      "license": "Official source; external image",
+      "notes": "Exact official post location photograph. Photo date and reuse terms not stated; no event or service hours inferred."
+    },
+    {
+      "org_id": "legion-ca-182",
+      "image_url": "https://static.wixstatic.com/media/074a8e_48ccfa3dc12a4b5bbddd33801b7d1fb8~mv2.jpeg",
+      "source_url": "https://suisunveteranshall.wixsite.com/svmb",
+      "caption": "Inside Suisun Veterans Memorial Building, the shared venue listed by American Legion Reams Post 182.",
+      "alt_text": "Suisun Veterans Memorial Building's empty assembly hall and stage.",
+      "credit": "Suisun Veterans Memorial Building",
+      "license": "Official source; external image",
+      "notes": "Official venue image; affiliation confirmed by https://reamspost182.org/. No reuse license claimed."
+    },
+    {
+      "org_id": "legion-ca-208",
+      "image_url": "https://dsva-vagov-prod-cms-files.s3.us-gov-west-1.amazonaws.com/styles/3_2_medium_thumbnail/public/2021-08/Dixon%20CAP_0.jpg",
+      "source_url": "https://www.va.gov/concord-vet-center/locations/",
+      "caption": "Dixon American Legion's public hall at 1305 North First Street, pictured by the Concord Vet Center.",
+      "alt_text": "Entrance to Dixon American Legion's hall, with 1305 above the doors and flags outside.",
+      "credit": "U.S. Department of Veterans Affairs / Concord Vet Center",
+      "license": "Official source; external image",
+      "notes": "Exact photo accompanying the VA's Dixon American Legion location. Post identity and address also verified in the City of Dixon resource directory. No specific photo license stated."
+    },
+    {
+      "org_id": "legion-ca-550",
+      "image_url": "https://www.legion.org/getmedia/0a005855-b425-4e04-99c9-f131ccf5c48d/62945.png",
+      "source_url": "https://www.legion.org/information-center/news/baseball/2025/july/legion-baseball-alumni-sabathia-allen-join-hall-of-fame",
+      "caption": "Post 550 baseball alumnus CC Sabathia at his 2025 Hall of Fame induction, featured by The American Legion.",
+      "alt_text": "CC Sabathia speaking at a Baseball Hall of Fame induction ceremony.",
+      "credit": "The American Legion / MLB ceremony image",
+      "license": "Official source; external image",
+      "notes": "Historical program-alumni image, not a local post meeting or current team. Exact national Legion article explicitly identifies Sabathia's Post 550 connection. MLB mark appears on image; no reuse license claimed."
+    },
+    {
+      "org_id": "vfw-ca-3928",
+      "image_url": "https://beniciavetshall.org/storage/2023/01/vethallfront.jpg",
+      "source_url": "https://beniciavetshall.org/",
+      "caption": "Benicia Veterans Memorial Hall, the shared meeting venue listed by VFW Post 3928.",
+      "alt_text": "Exterior of Benicia Veterans Memorial Hall with a memorial sign and garden.",
+      "credit": "Benicia Veterans Memorial Hall",
+      "license": "Official source; external image",
+      "notes": "Exact venue photograph; post connection confirmed by https://www.beniciavfw.org/. No reuse license claimed."
+    },
+    {
+      "org_id": "vfw-ca-7244",
+      "image_url": "https://static.berqwp.com/www.vacavets.org/mw1920-q80-original/https://www.vacavets.org/wp-content/uploads/vacaville-vets-hall-2019-rededication.webp",
+      "source_url": "https://www.vacavets.org/about-us/",
+      "caption": "The shared Vacaville Veterans Memorial Building at its June 2019 rededication.",
+      "alt_text": "Ribbon cutting inside the remodeled Vacaville Veterans Memorial Building.",
+      "credit": "John Vasquez, via Vacaville Veterans Memorial Building",
+      "license": "Official source; external image",
+      "notes": "Historical venue photo. Post 7244 is listed on the venue website. No reuse license claimed."
+    },
+    {
+      "org_id": "vfw-ca-1123",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/SE_exterior_Vallejo_Veterans_Memorial_Building.jpg/960px-SE_exterior_Vallejo_Veterans_Memorial_Building.jpg",
+      "source_url": "https://commons.wikimedia.org/wiki/File:SE_exterior_Vallejo_Veterans_Memorial_Building.jpg",
+      "caption": "Vallejo Veterans Memorial Building at 420 Admiral Callaghan Lane, the venue in this listing. June 2026 photo.",
+      "alt_text": "Vallejo Veterans Memorial Building viewed from the south parking entrance.",
+      "credit": "RightCowLeftCoast / Wikimedia Commons",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "notes": "Unchanged photograph; Commons thumbnail. Shared venue, not a current post event."
+    },
+    {
+      "org_id": "vfw-ca-2333",
+      "image_url": "https://static.wixstatic.com/media/074a8e_48ccfa3dc12a4b5bbddd33801b7d1fb8~mv2.jpeg",
+      "source_url": "https://suisunveteranshall.wixsite.com/svmb",
+      "caption": "Inside Suisun Veterans Memorial Building at 427 Main Street, the venue in this listing.",
+      "alt_text": "Suisun Veterans Memorial Building's empty assembly hall and stage.",
+      "credit": "Suisun Veterans Memorial Building",
+      "license": "Official source; external image",
+      "notes": "Exact official venue image, not a post event. No reuse license claimed."
+    },
+    {
+      "org_id": "legion-ca-101",
+      "image_url": "https://beniciavetshall.org/storage/2023/01/vethallfront.jpg",
+      "source_url": "https://beniciavetshall.org/",
+      "caption": "Benicia Veterans Memorial Hall, the shared public venue in this listing.",
+      "alt_text": "Exterior of Benicia Veterans Memorial Hall with a memorial sign and garden.",
+      "credit": "Benicia Veterans Memorial Hall",
+      "license": "Official source; external image",
+      "notes": "The venue website identifies its American Legion connection. No event date or reuse license claimed."
+    },
+    {
+      "org_id": "legion-ca-603",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/SE_exterior_Vallejo_Veterans_Memorial_Building.jpg/960px-SE_exterior_Vallejo_Veterans_Memorial_Building.jpg",
+      "source_url": "https://commons.wikimedia.org/wiki/File:SE_exterior_Vallejo_Veterans_Memorial_Building.jpg",
+      "caption": "Vallejo Veterans Memorial Building at 420 Admiral Callaghan Lane, the venue in this listing. June 2026 photo.",
+      "alt_text": "Vallejo Veterans Memorial Building viewed from the south parking entrance.",
+      "credit": "RightCowLeftCoast / Wikimedia Commons",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "notes": "Unchanged photograph; Commons thumbnail. Shared venue, not a current post event."
+    },
+    {
+      "org_id": "mcl-ca-1486",
+      "image_url": "https://static.berqwp.com/www.vacavets.org/mw1920-q80-original/https://www.vacavets.org/wp-content/uploads/vacaville-vets-hall-2019-rededication.webp",
+      "source_url": "https://www.vacavets.org/about-us/",
+      "caption": "The shared Vacaville Veterans Memorial Building at its June 2019 rededication.",
+      "alt_text": "Ribbon cutting inside the remodeled Vacaville Veterans Memorial Building.",
+      "credit": "John Vasquez, via Vacaville Veterans Memorial Building",
+      "license": "Official source; external image",
+      "notes": "Historical venue photo. Detachment 1486 is listed on the venue website. No reuse license claimed."
+    },
+    {
+      "org_id": "toys-solano",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/%22Toys_for_Tots%22_at_CIA_-_Flickr_-_The_Central_Intelligence_Agency.jpg/500px-%22Toys_for_Tots%22_at_CIA_-_Flickr_-_The_Central_Intelligence_Agency.jpg",
+      "source_url": "https://commons.wikimedia.org/wiki/File:%22Toys_for_Tots%22_at_CIA_-_Flickr_-_The_Central_Intelligence_Agency.jpg",
+      "caption": "Representative national Toys for Tots activity: Quantico Marines loading donated toys in 2012. This photo is not from the Solano campaign.",
+      "alt_text": "Marines loading boxes of donated toys into a truck for Toys for Tots.",
+      "credit": "Central Intelligence Agency / Wikimedia Commons",
+      "license": "Public domain — U.S. government work",
+      "license_url": "https://commons.wikimedia.org/wiki/File:%22Toys_for_Tots%22_at_CIA_-_Flickr_-_The_Central_Intelligence_Agency.jpg#Licensing",
+      "notes": "Local campaign page exposes only template imagery and its logo, so this clearly labeled representative national program photo is used. Original photograph unchanged; Commons thumbnail."
+    },
+    {
+      "org_id": "dav-ca-21",
+      "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/SE_exterior_Vallejo_Veterans_Memorial_Building.jpg/960px-SE_exterior_Vallejo_Veterans_Memorial_Building.jpg",
+      "source_url": "https://commons.wikimedia.org/wiki/File:SE_exterior_Vallejo_Veterans_Memorial_Building.jpg",
+      "caption": "Vallejo Veterans Memorial Building at 420 Admiral Callaghan Lane, the venue in this listing. June 2026 photo.",
+      "alt_text": "Vallejo Veterans Memorial Building viewed from the south parking entrance.",
+      "credit": "RightCowLeftCoast / Wikimedia Commons",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "notes": "Unchanged photograph; Commons thumbnail. Shared venue, not a current chapter event."
+    },
+    {
+      "org_id": "dav-ca-84",
+      "image_url": "https://images.squarespace-cdn.com/content/v1/66142c9ac300147ee9bbcae6/076bafe7-d519-4dac-8bc4-0473708b5929/Part%2Bof%2Bthe%2BCrew%2B1.jpeg",
+      "source_url": "https://www.cadav84.org/",
+      "caption": "A chapter group photo shared on DAV Chapter 84's official website.",
+      "alt_text": "A group of veterans and volunteers standing together inside a hall.",
+      "credit": "DAV Chapter 84",
+      "license": "Official source; external image",
+      "notes": "Photo appears beside Join Our Chapter on the official homepage. Names and event date are not inferred; no reuse license claimed."
+    },
+    {
+      "org_id": "vso-solano",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/09/Solanocountygovoffice.jpg",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Solanocountygovoffice.jpg",
+      "caption": "Solano County Government Center in downtown Fairfield, home to the Veterans Service Office. Historical photograph uploaded in 2007.",
+      "alt_text": "Exterior of the Solano County Government Center in Fairfield.",
+      "credit": "Ryanloney at English Wikipedia / Wikimedia Commons",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "notes": "Original photograph unchanged. Veterans Service Office address verified separately on its official Solano County page; the photo does not establish current hours."
+    }
+  ]
+}

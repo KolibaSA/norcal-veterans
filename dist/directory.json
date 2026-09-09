@@ -1,0 +1,1810 @@
+{
+  "schema_version": "1.1",
+  "project": "Yolo Solano Veterans",
+  "research_counties": [
+    "Yolo",
+    "Solano"
+  ],
+  "last_verified_date": "2026-09-02",
+  "verification_note": "Public sources reviewed; no organization has claimed or confirmed its profile. The directory is not exhaustive.",
+  "sources": [
+    {
+      "id": "rememberavet-home",
+      "title": "RememberAVet Wreath Project",
+      "publisher": "RememberAVet",
+      "url": "https://www.wreathproject.org/",
+      "fields": [
+        "identity",
+        "mailing_address",
+        "public_contacts",
+        "program"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": null
+    },
+    {
+      "id": "vets-official",
+      "title": "Veterans Equine Therapy - official website",
+      "publisher": "Veterans Equine Therapy",
+      "url": "https://www.veteransequinetherapy.com/",
+      "fields": [
+        "identity",
+        "public_contacts",
+        "program",
+        "nonprofit_self_description"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Describes the organization as a nonprofit supporting veterans through equine-assisted therapy. Lists general organization contacts; current intake, schedule and visit location are not established."
+    },
+    {
+      "id": "vfw-8151-home",
+      "title": "Dixon VFW Post 8151",
+      "publisher": "VFW Post 8151",
+      "url": "https://vfw8151.org/di/vfw/v2/default.asp?nid=1",
+      "fields": [
+        "identity",
+        "address",
+        "public_contacts",
+        "meetings",
+        "activities",
+        "events"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Official homepage supports the post's public meeting venue, generic contact phone, meeting schedule and activities. The website's November poppy announcement is dated 2025; November 2026 listings separately use Sterling's project update."
+    },
+    {
+      "id": "vfw-8151-venue",
+      "title": "Hall Rental - Dixon VFW Post 8151",
+      "publisher": "VFW Post 8151",
+      "url": "https://vfw8151.org/di/vfw/v2/default.asp?pid=122920",
+      "fields": [
+        "venue_relationship",
+        "referral",
+        "legion_208_contact"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "VFW Post 8151 does not own or operate the Olde Vets Hall. Page identifies American Legion Post 208 as operator of the separate Veterans Memorial Hall and refers hall inquiries there."
+    },
+    {
+      "id": "leg-178-home",
+      "title": "American Legion Rio Vista Post 178",
+      "publisher": "American Legion Rio Vista Post 178",
+      "url": "https://post178rvca.org/",
+      "fields": [
+        "identity",
+        "address",
+        "public_contacts",
+        "member_information",
+        "events"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Homepage displayed September 3 and September 10, 2026 social hours. Business meeting schedule and event guest rules not verified."
+    },
+    {
+      "id": "leg-178-contact",
+      "title": "Contact Us - Rio Vista Post 178",
+      "publisher": "American Legion Rio Vista Post 178",
+      "url": "https://post178rvca.org/site/contactus",
+      "fields": [
+        "public_contacts",
+        "contact_routing"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Public Watch Office phone and contact form route inquiries to organization roles; no old newsletter email carried forward."
+    },
+    {
+      "id": "leg-182",
+      "title": "American Legion Reams Post 182",
+      "publisher": "American Legion Reams Post 182",
+      "url": "https://reamspost182.org/",
+      "fields": [
+        "identity",
+        "meeting_venue",
+        "phone",
+        "meetings",
+        "member_information"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Official homepage supports the public meeting venue, general post/hall phone and third-Thursday meeting at 6:30 p.m."
+    },
+    {
+      "id": "vfw-6949-ucd",
+      "title": "Connect to Your Community",
+      "publisher": "UC Davis Veterans Success Center",
+      "url": "https://veterans.ucdavis.edu/services/community",
+      "fields": [
+        "identity",
+        "city",
+        "partnership"
+      ],
+      "published_date": "2024-07-05",
+      "accessed_date": "2026-09-02",
+      "notes": "Page last updated July 5, 2024 describes an event partnership with Davis VFW Post 6949. Current public contact, venue and meeting schedule were not verified."
+    },
+    {
+      "id": "toys-yolo-halloween-2026",
+      "title": "The Toys for Tots Halloween Train",
+      "publisher": "Zombie Bike Parade Festival",
+      "url": "https://www.zombiebikeparade.com/events/halloween-train",
+      "fields": [
+        "event",
+        "venue",
+        "audience",
+        "partnership"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Organizer-published October 31, 2026 schedule was retrieved through search; direct page opening failed. Local timezone inferred from Davis venue. This is not a family toy-application or toy-distribution appointment."
+    },
+    {
+      "id": "waa-davis-2026",
+      "title": "Davis Cemetery District Wreaths Across America",
+      "publisher": "Wreaths Across America",
+      "url": "https://www.wreathsacrossamerica.org/pages/174790/Overview",
+      "fields": [
+        "event",
+        "venue",
+        "audience",
+        "volunteering",
+        "timezone"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Location page explicitly publishes December 19, 2026 at 10 a.m. PST and requests volunteer registration for updates."
+    },
+    {
+      "id": "waa-sacramento-valley-2026",
+      "title": "Sacramento Valley National Cemetery Wreaths Across America",
+      "publisher": "Wreaths Across America",
+      "url": "https://wreathsacrossamerica.org/pages/15553/overview/",
+      "fields": [
+        "event",
+        "venue",
+        "volunteering",
+        "timezone"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Cemetery location page explicitly publishes December 19, 2026 at 9 a.m. PST. Older sponsorship-group pages contain stale 2025 text."
+    },
+    {
+      "id": "rememberavet-volunteer-2026",
+      "title": "RememberAVet Wreath Project: 2026 Volunteer Opportunities",
+      "publisher": "RememberAVet - Wreath Project",
+      "url": "https://www.wreathproject.org/",
+      "fields": [
+        "events",
+        "volunteering",
+        "audience",
+        "public_contacts"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Home page publishes December 18 unloading, December 19 placement, and January 16, 2027 cleanup. Local timezone inferred from Dixon venue. The separate detail page still says cleanup date TBA."
+    },
+    {
+      "id": "rememberavet-boughs-2026",
+      "title": "2026 Bough Laying",
+      "publisher": "RememberAVet - Wreath Project",
+      "url": "https://www.wreathproject.org/home-1-1-2",
+      "fields": [
+        "event",
+        "venue",
+        "audience",
+        "partnership"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Bough placement and the Wreaths Across America ceremony are distinct same-day activities. Cleanup date is stale on this page; use the project home schedule. Numeric coverage and fundraising claims excluded."
+    },
+    {
+      "id": "leg-165-venue",
+      "title": "American Legion Post 165 at the Vacaville Veterans Hall",
+      "publisher": "Vacaville Veterans Memorial Building",
+      "url": "https://www.vacavets.org/",
+      "fields": [
+        "identity",
+        "meeting_venue"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Venue homepage identifies Post 165 among its organizations and gives the public hall address. A one-day calendar entry does not establish a recurring meeting schedule. Hall contacts are not republished as personal or post contacts."
+    },
+    {
+      "id": "dixon-hall-city",
+      "title": "Dixon Veterans Memorial Hall public venue",
+      "publisher": "City of Dixon",
+      "url": "https://www.cityofdixonca.gov/NoticeofNomineesandMeasures",
+      "fields": [
+        "public_venue"
+      ],
+      "published_date": "2024",
+      "accessed_date": "2026-09-02",
+      "notes": "City notice identifies Veterans Memorial Hall at 1305 N. First Street, Dixon. Used only to establish the public venue; historical election hours are not organization hours."
+    },
+    {
+      "id": "leg-550-national-news",
+      "title": "Post 550 in Vallejo - national American Legion news",
+      "publisher": "The American Legion",
+      "url": "https://www.legion.org/information-center/news/baseball/2025/july/legion-baseball-alumni-among-baseball-hall-of-fame-class",
+      "fields": [
+        "identity",
+        "city"
+      ],
+      "published_date": "2025-07",
+      "accessed_date": "2026-09-02",
+      "notes": "National article identifies Post 550 in Vallejo. It does not establish current contact details, meetings or program availability. No individual names or personal contact details are imported."
+    },
+    {
+      "id": "west-sac",
+      "title": "West Sacramento VFW",
+      "publisher": "VFW Post 8762",
+      "url": "https://westsacvfw.com/",
+      "fields": [
+        "identity",
+        "public_contacts",
+        "member_information"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": null
+    },
+    {
+      "id": "benicia-vfw",
+      "title": "Benicia VFW",
+      "publisher": "VFW Post 3928",
+      "url": "https://www.beniciavfw.org/",
+      "fields": [
+        "identity",
+        "member_information"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": null
+    },
+    {
+      "id": "vacaville-vfw",
+      "title": "Vacaville VFW",
+      "publisher": "VFW Post 7244",
+      "url": "https://www.vfwpost7244.org/",
+      "fields": [
+        "identity",
+        "venue",
+        "public_contacts"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": null
+    },
+    {
+      "id": "legion-77",
+      "title": "Sacramento Valley veterans outreach",
+      "publisher": "The American Legion",
+      "url": "https://www.legion.org/information-center/news/membership/2026/april/veterans-benefits-assistance-coming-to-sacramento-area",
+      "fields": [
+        "identity",
+        "address",
+        "past_event"
+      ],
+      "published_date": "2026-04",
+      "accessed_date": "2026-09-02",
+      "notes": "April 17-19 outreach is historical, not continuing service hours."
+    },
+    {
+      "id": "vfw-7143-official",
+      "title": "VFW Post 7143 in Esparto CA",
+      "publisher": "VFW Post 7143",
+      "url": "https://vfw7143.org/di/vfw/v2/default.asp",
+      "fields": [
+        "identity",
+        "city",
+        "mailing_address",
+        "website",
+        "programs"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Official post website. The published PO box is a mailing address, not a visitor location; current meeting details still require confirmation."
+    },
+    {
+      "id": "vacavets",
+      "title": "Veterans Memorial Building and calendar",
+      "publisher": "Vacaville Veterans Memorial Building",
+      "url": "https://www.vacavets.org/",
+      "fields": [
+        "venue",
+        "meetings",
+        "events"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Meeting venue; hall contact is not a detachment contact."
+    },
+    {
+      "id": "mcl-funding",
+      "title": "Marine Corps League contribution, File 25-292",
+      "publisher": "Solano County",
+      "url": "https://solano.legistar.com/LegislationDetail.aspx?GUID=A35327E8-C770-4843-97BB-7356132DF1C5&ID=7319441&Options=&Search=",
+      "fields": [
+        "identity",
+        "historical_activities"
+      ],
+      "published_date": "2025-04-22",
+      "accessed_date": "2026-09-02",
+      "notes": null
+    },
+    {
+      "id": "toys-yolo",
+      "title": "Mail Services Toy Drive 2025",
+      "publisher": "UC Davis Supply Chain Management",
+      "url": "https://supplychain.ucdavis.edu/events/mail-services-toy-drive-2025",
+      "fields": [
+        "campaign",
+        "service_area",
+        "past_event"
+      ],
+      "published_date": "2025",
+      "accessed_date": "2026-09-02",
+      "notes": "December 1-11, 2025 collection dates are historical."
+    },
+    {
+      "id": "toys-chamber",
+      "title": "Community organizations directory",
+      "publisher": "Davis Chamber of Commerce",
+      "url": "https://web.davischamber.com/davis/Community-Organizations?ysort=true",
+      "fields": [
+        "campaign_link",
+        "public_contact"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Chamber directory; campaign confirmation needed."
+    },
+    {
+      "id": "toys-solano",
+      "title": "Solano County campaign",
+      "publisher": "Marine Toys for Tots",
+      "url": "https://solano-county-ca.toysfortots.org/local-coordinator-sites/lco-sites/default.aspx?nPageID=0&nPreviewInd=0&nRedirectInd=3",
+      "fields": [
+        "campaign",
+        "service_area",
+        "intake",
+        "partnership"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Official search extraction; direct opening unavailable. Page reports 2025 activity; 2026 dates unverified."
+    },
+    {
+      "id": "dav-21",
+      "title": "Ozie Boler Chapter 21",
+      "publisher": "DAV",
+      "url": "https://davwebsites.dav.org/ca/21/SystemPages/Home.aspx",
+      "fields": [
+        "identity",
+        "meeting_venue",
+        "meetings"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Phone conflicts and erroneous template text excluded."
+    },
+    {
+      "id": "dav-84-contact",
+      "title": "Chapter 84 contact and meetings",
+      "publisher": "DAV Chapter 84",
+      "url": "https://www.cadav84.org/contact",
+      "fields": [
+        "identity",
+        "address",
+        "meetings",
+        "email",
+        "audience",
+        "accessibility",
+        "venue_contact"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "The phone 707-447-6354 is explicitly listed for the Veterans Memorial Building and hall rental, not as the chapter contact."
+    },
+    {
+      "id": "dav-84-area",
+      "title": "Who we serve",
+      "publisher": "DAV Chapter 84",
+      "url": "https://www.cadav84.org/about-who-we-serve",
+      "fields": [
+        "service_area",
+        "audience"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": null
+    },
+    {
+      "id": "yolo-vso",
+      "title": "Veterans Services Office",
+      "publisher": "Yolo County",
+      "url": "https://www.yolocounty.gov/government/general-government-departments/health-human-services/adults/veterans-service-office",
+      "fields": [
+        "identity",
+        "service_categories",
+        "address",
+        "phone",
+        "hours",
+        "audience",
+        "referrals"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": null
+    },
+    {
+      "id": "solano-vso",
+      "title": "Veterans Services",
+      "publisher": "Solano County",
+      "url": "https://www.solanocounty.gov/government/veterans-services",
+      "fields": [
+        "identity",
+        "service_categories",
+        "address",
+        "phone",
+        "hours",
+        "audience",
+        "partnership"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": null
+    },
+    {
+      "id": "vbc-national",
+      "title": "Veterans Beer Club",
+      "publisher": "Veterans Beer Club",
+      "url": "https://veteransbeerclub.org/",
+      "fields": [
+        "identity",
+        "mission",
+        "audience",
+        "chapters"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "The national organization site includes Yolo-Solano chapter imagery and describes the club mission and audience."
+    },
+    {
+      "id": "vbc-yolo-solano-resource",
+      "title": "Local Resources",
+      "publisher": "VFW Post 8151",
+      "url": "https://vfw8151.org/di/vfw/v2/default.asp?nid=4",
+      "fields": [
+        "local_chapter_identity"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-09-02",
+      "notes": "Official VFW post resource page lists Veterans Beer Club Yolo-Solano Chapter."
+    }
+  ],
+  "records": [
+    {
+      "id": "rememberavet",
+      "verified_name": "RememberAVet - Wreath Project",
+      "organization_type": "Veteran remembrance program",
+      "entity_kind": "organization",
+      "city": "Winters",
+      "location_county": "Yolo",
+      "service_area": {
+        "counties": [
+          "Solano"
+        ],
+        "cities": [
+          "Dixon"
+        ],
+        "notes": "Holiday bough activities at Sacramento Valley National Cemetery in Dixon; the project publishes a Winters mailing address."
+      },
+      "address": {
+        "text": "PO Box 773, Winters, CA 95694",
+        "type": "mailing",
+        "map_eligible": false
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": "WreathProject@yahoo.com",
+        "website": "https://www.wreathproject.org/"
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Remembrance",
+        "Volunteering"
+      ],
+      "audience": "Community volunteers; check each activity's participation instructions.",
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Coordinates fundraising and volunteers for holiday bough placement and cleanup at Sacramento Valley National Cemetery in Dixon. Its Winters address is a mailing address, not a visitor office. RememberAVet bough activities and the cemetery's Wreaths Across America ceremony are separate programs.",
+      "source_ids": [
+        "rememberavet-home",
+        "rememberavet-volunteer-2026",
+        "rememberavet-boughs-2026"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "high",
+      "missing_data_flags": [
+        "office_hours_unknown",
+        "organization_confirmation_pending"
+      ]
+    },
+    {
+      "id": "little-reata-veterans",
+      "verified_name": "Veterans Equine Therapy (VETs)",
+      "organization_type": "Equine program provider",
+      "entity_kind": "organization",
+      "city": "Davis",
+      "location_county": "Yolo",
+      "service_area": null,
+      "address": null,
+      "public_contacts": {
+        "phone": "530-867-5150",
+        "email": "vets@veteransequinetherapy.com",
+        "website": "https://www.veteransequinetherapy.com/"
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Equine-assisted therapy",
+        "Veteran support"
+      ],
+      "audience": "Veterans; current eligibility and participation details need confirmation.",
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Veterans Equine Therapy (VETs) describes itself as a nonprofit organization supporting veterans through equine-assisted therapy. Use its official website or general organization contact to ask about current participation, schedules and visits.",
+      "source_ids": [
+        "vets-official"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "current_intake_unconfirmed",
+        "schedule_unconfirmed",
+        "visit_location_unconfirmed",
+        "participation_details_unconfirmed"
+      ],
+      "display_name_update": {
+        "method": "authenticated_project_update",
+        "date": "2026-09-02",
+        "scope": "Display name supplied through an authenticated project update; organization information reviewed against its official website."
+      }
+    },
+    {
+      "id": "veterans-beer-club-yolo-solano",
+      "verified_name": "Veterans Beer Club Yolo-Solano",
+      "organization_type": "Veterans Beer Club",
+      "entity_kind": "organization",
+      "city": null,
+      "location_county": "Yolo",
+      "service_area": {
+        "counties": [
+          "Yolo",
+          "Solano"
+        ],
+        "cities": [],
+        "notes": "Yolo and Solano counties; monthly venue rotates between local breweries."
+      },
+      "address": null,
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": "https://veteransbeerclub.org/"
+      },
+      "hours": null,
+      "meeting_schedule": "Second Thursday of each month at a rotating Yolo or Solano County brewery. Confirm the current venue before attending.",
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Veteran networking",
+        "Career connections",
+        "Community outreach"
+      ],
+      "audience": "Veterans, active duty service members, reservists, Guard members, military retirees and spouses. Recruiters are welcome at national VBC events.",
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Use the chapter social pages to confirm the brewery and time for the next second-Thursday gathering.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "A local chapter of Veterans Beer Club, an informal networking community centered on camaraderie, career connections and community outreach.",
+      "source_ids": [
+        "vbc-national",
+        "vbc-yolo-solano-resource"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "high",
+      "missing_data_flags": [
+        "next_meeting_venue_unconfirmed",
+        "instagram_link_unverified"
+      ],
+      "display_name_update": {
+        "method": "authenticated_project_update",
+        "date": "2026-09-04",
+        "scope": "Chapter name, meeting pattern and official chapter social links supplied by an authenticated project editor."
+      }
+    },
+    {
+      "id": "vfw-ca-8151",
+      "verified_name": "Dixon VFW Post 8151",
+      "organization_type": "VFW",
+      "entity_kind": "organization",
+      "city": "Dixon",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "231 N. First Street, Dixon, CA 95620",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": "530-702-0508",
+        "email": null,
+        "website": "https://vfw8151.org/di/vfw/v2/default.asp?nid=1"
+      },
+      "hours": null,
+      "meeting_schedule": "Third Wednesday � social 6:30 p.m.; meeting 7 p.m.",
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Veteran community",
+        "Youth programs",
+        "Volunteering"
+      ],
+      "audience": null,
+      "eligibility": null,
+      "event_information": {
+        "status": "confirm_with_organizer",
+        "text": "Sterling supplied November 7, 8 and 11, 2026 Buddy Poppy fundraiser dates for Safeway in Dixon and Grocery Outlet in Davis. See the shared event calendar; table hours are to be confirmed.",
+        "source_kind": "project_team"
+      },
+      "referral_notes": "The post does not own or operate the Olde Vets Hall. Its website refers venue inquiries to the separate Veterans Memorial Hall operated by American Legion Dixon Post 208, at 707-678-6308.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_published",
+      "member_information": "Meets at the Olde Vets Hall. The post advertises Voice of Democracy and Patriot's Pen scholarships and Buddy Poppy activities. Contact the post for current participation rules.",
+      "source_ids": [
+        "vfw-8151-home",
+        "vfw-8151-venue"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "high",
+      "missing_data_flags": [
+        "email_missing",
+        "service_area_unknown",
+        "eligibility_unconfirmed",
+        "hours_unknown",
+        "event_details_incomplete"
+      ]
+    },
+    {
+      "id": "legion-ca-165",
+      "verified_name": "American Legion Post 165 - Vacaville",
+      "organization_type": "American Legion",
+      "entity_kind": "organization",
+      "city": "Vacaville",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "549 Merchant Street, Vacaville, CA 95688",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Veteran community"
+      ],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "The Veterans Memorial Building website identifies the post and its public venue. Personal contact details and dues-mailing information are not included.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_published",
+      "member_information": "American Legion Post 165 is based at the Vacaville Veterans Memorial Building. Use the public venue source for location information; a current general post contact and recurring meeting schedule are awaiting confirmation.",
+      "source_ids": [
+        "leg-165-venue"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "general_post_contact_pending",
+        "meeting_schedule_missing",
+        "program_availability_unconfirmed",
+        "service_area_unknown",
+        "eligibility_unconfirmed",
+        "hours_unknown",
+        "current_events_missing"
+      ]
+    },
+    {
+      "id": "legion-ca-178",
+      "verified_name": "American Legion Rio Vista Post 178",
+      "organization_type": "American Legion",
+      "entity_kind": "organization",
+      "city": "Rio Vista",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "610 St. Francis Way, Rio Vista, CA 94571",
+        "type": "post_location",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": "707-374-6554",
+        "email": null,
+        "website": "https://post178rvca.org/"
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Veteran community",
+        "Benefits navigation",
+        "Youth programs"
+      ],
+      "audience": "Veterans, service members, families and River Delta community participants; individual program and event rules need confirmation.",
+      "eligibility": null,
+      "event_information": {
+        "status": "confirm_with_organizer",
+        "text": "Official site lists social hours September 3 and September 10, 2026 at 5 p.m. Confirm attendance rules with the post; these are not verified business-meeting times.",
+        "source_id": "leg-178-home"
+      },
+      "referral_notes": "Use the official contact form at https://post178rvca.org/site/contactus or call the Watch Office to reach the Post Service Officer or another appropriate role. VA accreditation was not verified.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_published",
+      "member_information": "The Watch Office and official contact form route questions to post officers, including the Post Service Officer. The post describes scholarships, support for local veterans and families, and community activities.",
+      "source_ids": [
+        "leg-178-home",
+        "leg-178-contact"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "high",
+      "missing_data_flags": [
+        "business_meeting_schedule_missing",
+        "event_guest_rules_unconfirmed",
+        "email_missing",
+        "mailing_address_unconfirmed",
+        "service_area_unknown",
+        "eligibility_unconfirmed",
+        "hours_unknown"
+      ]
+    },
+    {
+      "id": "legion-ca-182",
+      "verified_name": "American Legion Reams Post 182",
+      "organization_type": "American Legion",
+      "entity_kind": "organization",
+      "city": "Suisun City",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "427 Main Street, Suisun City, CA 94585",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": "707-429-3110",
+        "email": null,
+        "website": "https://reamspost182.org/"
+      },
+      "hours": null,
+      "meeting_schedule": "Third Thursday � 6:30 p.m.",
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Veteran community"
+      ],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": "Shares the Suisun Veterans Memorial Building address and public phone with separately listed VFW Post 2333; shared facilities do not establish a formal referral partnership.",
+      "officers": [],
+      "officers_status": "not_published",
+      "member_information": "Meets at the Suisun Veterans Memorial Building. Its website describes broad support for veterans, families and community; specific assistance programs need confirmation.",
+      "source_ids": [
+        "leg-182"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "high",
+      "missing_data_flags": [
+        "email_missing",
+        "mailing_address_unconfirmed",
+        "specific_services_unconfirmed",
+        "service_area_unknown",
+        "eligibility_unconfirmed",
+        "hours_unknown",
+        "current_events_missing"
+      ]
+    },
+    {
+      "id": "legion-ca-208",
+      "verified_name": "American Legion Dixon Post 208",
+      "organization_type": "American Legion",
+      "entity_kind": "organization",
+      "city": "Dixon",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "1305 N. First Street, Dixon, CA 95620",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": "707-678-6308",
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Veteran community"
+      ],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "The phone listed here is the public Veterans Memorial Hall inquiry number. Personal member contacts are not included.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_published",
+      "member_information": "Dixon VFW Post 8151 identifies American Legion Post 208 as operator of Veterans Memorial Hall and provides the public hall inquiry number. Confirm the current post meeting schedule and programs with the organization.",
+      "source_ids": [
+        "vfw-8151-venue",
+        "dixon-hall-city"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "website_missing",
+        "service_area_unknown",
+        "eligibility_unconfirmed",
+        "hours_unknown",
+        "current_events_missing",
+        "general_post_email_pending",
+        "meeting_schedule_missing"
+      ]
+    },
+    {
+      "id": "vfw-ca-6949",
+      "verified_name": "Davis VFW Post 6949",
+      "organization_type": "VFW",
+      "entity_kind": "organization",
+      "city": "Davis",
+      "location_county": "Yolo",
+      "service_area": null,
+      "address": null,
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Veteran community"
+      ],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Direct public contact details have not yet been verified.",
+      "partnership_notes": "UC Davis Veterans Success Center describes a partnership with Post 6949 in hosting events; evidence last updated July 5, 2024.",
+      "officers": [],
+      "officers_status": "not_published",
+      "member_information": "UC Davis Veterans Success Center identifies Davis VFW Post 6949 as an event partner on a page last updated July 5, 2024. Current post contact details, meeting location and schedule are being verified.",
+      "source_ids": [
+        "vfw-6949-ucd"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "post_website_unavailable",
+        "current_contact_missing",
+        "address_missing",
+        "meeting_schedule_missing",
+        "partner_evidence_2024",
+        "current_operating_status_unconfirmed",
+        "service_area_unknown",
+        "eligibility_unconfirmed",
+        "hours_unknown",
+        "current_events_missing"
+      ]
+    },
+    {
+      "id": "legion-ca-550",
+      "verified_name": "American Legion Mare Island Navy Yard Post 550",
+      "organization_type": "American Legion",
+      "entity_kind": "organization",
+      "city": "Vallejo",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": null,
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Direct public contact details have not yet been verified.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_published",
+      "member_information": "American Legion national news identifies Post 550 in Vallejo. Current public contact details, meeting location, schedule and programs are awaiting organization confirmation.",
+      "source_ids": [
+        "leg-550-national-news"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "identity_only",
+        "current_contact_missing",
+        "address_missing",
+        "meeting_schedule_missing",
+        "website_missing",
+        "current_program_status_unconfirmed",
+        "service_area_unknown",
+        "eligibility_unconfirmed",
+        "hours_unknown",
+        "current_events_missing",
+        "historical_contacts_excluded"
+      ]
+    },
+    {
+      "id": "vfw-ca-8762",
+      "verified_name": "West Sacramento VFW Post 8762",
+      "organization_type": "VFW",
+      "entity_kind": "organization",
+      "city": "West Sacramento",
+      "location_county": "Yolo",
+      "service_area": null,
+      "address": {
+        "text": "905 Drever Street, West Sacramento, CA 95691",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": "916-371-7245",
+        "email": null,
+        "website": "https://westsacvfw.com/"
+      },
+      "hours": null,
+      "meeting_schedule": "Second Wednesday � 6:30 p.m.",
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Veteran community",
+        "Benefits navigation"
+      ],
+      "audience": "Veterans, families and community; program rules need confirmation.",
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Post website links to benefits assistance and hall rentals. Confirm how assistance is provided.",
+      "source_ids": [
+        "west-sac"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "service_area_unknown",
+        "eligibility_unconfirmed",
+        "hours_unknown"
+      ]
+    },
+    {
+      "id": "legion-ca-77",
+      "verified_name": "Yolo American Legion Post 77",
+      "organization_type": "American Legion",
+      "entity_kind": "organization",
+      "city": "Woodland",
+      "location_county": "Yolo",
+      "service_area": null,
+      "address": {
+        "text": "523 Bush Street, Woodland, CA 95695",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": {
+        "status": "past",
+        "text": "Benefits outreach held April 17-19, 2026. This does not establish ongoing service hours.",
+        "source_id": "legion-77"
+      },
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Woodland post documented as the host of an April 2026 veterans outreach session.",
+      "source_ids": [
+        "legion-77"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "routine_contact_missing",
+        "meeting_schedule_missing",
+        "service_area_unknown"
+      ]
+    },
+    {
+      "id": "vfw-ca-7143",
+      "verified_name": "Western Yolo VFW Post 7143",
+      "organization_type": "VFW",
+      "entity_kind": "organization",
+      "city": "Esparto",
+      "location_county": "Yolo",
+      "service_area": null,
+      "address": {
+        "text": "PO Box 232, Esparto, CA 95627",
+        "type": "mailing",
+        "map_eligible": false
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": "https://vfw7143.org/"
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "The official Post 7143 website identifies the organization in Esparto. Use the post website to confirm current meetings, activities and attendance details.",
+      "source_ids": [
+        "vfw-7143-official"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "meeting_venue_unconfirmed",
+        "meeting_schedule_unconfirmed",
+        "general_organization_contact_unconfirmed",
+        "service_area_unknown"
+      ]
+    },
+    {
+      "id": "mcl-yolo",
+      "verified_name": "Marine Corps League - Yolo County Detachment 627",
+      "organization_type": "Marine Corps League",
+      "entity_kind": "organization",
+      "city": "Woodland",
+      "location_county": "Yolo",
+      "service_area": null,
+      "address": {
+        "text": "500 Bush Street, Woodland, CA 95695",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Meetings have been listed at the Woodland Elks Lodge. Confirm current meeting and visitor details through an organization contact.",
+      "source_ids": [],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "public_source_withheld_for_privacy",
+        "meeting_schedule_unconfirmed",
+        "local_contact_missing",
+        "service_area_unknown",
+        "hours_unknown"
+      ],
+      "display_name_update": {
+        "method": "authenticated_project_update",
+        "date": "2026-09-02",
+        "scope": "Detachment number supplied through an authenticated project clarification; current contact and meeting details remain unconfirmed."
+      }
+    },
+    {
+      "id": "toys-yolo",
+      "verified_name": "Toys for Tots - Yolo County",
+      "organization_type": "Toys for Tots",
+      "entity_kind": "seasonal_campaign",
+      "city": null,
+      "location_county": "Yolo",
+      "service_area": {
+        "counties": [
+          "Yolo"
+        ],
+        "cities": [],
+        "notes": "Yolo County children; 2026 campaign rules not yet verified."
+      },
+      "address": null,
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": "https://woodland-ca.toysfortots.org/"
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Holiday toy assistance",
+        "Volunteering"
+      ],
+      "audience": "Children and families in Yolo County.",
+      "eligibility": null,
+      "event_information": {
+        "status": "past",
+        "text": "UC Davis collection ran December 1-11, 2025. Family application and distribution dates for 2026 remain unverified. See the shared calendar for campaign-related community events.",
+        "source_id": "toys-yolo"
+      },
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": "UC Davis Mail Services collection partnership documented for 2025.",
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Seasonal toy collection and distribution program. Follow the campaign for current application instructions.",
+      "source_ids": [
+        "toys-yolo",
+        "toys-chamber"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "campaign_page_unavailable",
+        "2026_dates_missing",
+        "address_missing",
+        "application_rules_unknown"
+      ]
+    },
+    {
+      "id": "vso-yolo",
+      "verified_name": "Yolo County Veterans Services Office",
+      "organization_type": "County Veterans Office",
+      "entity_kind": "organization",
+      "city": "Woodland",
+      "location_county": "Yolo",
+      "service_area": {
+        "counties": [
+          "Yolo"
+        ],
+        "cities": [],
+        "notes": "County veterans office; confirm requirements for the specific benefit."
+      },
+      "address": {
+        "text": "137 N. Cottonwood Street, Woodland, CA",
+        "type": "service_office",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": "530-406-4850",
+        "email": null,
+        "website": "https://www.yolocounty.gov/government/general-government-departments/health-human-services/adults/veterans-service-office"
+      },
+      "hours": "Monday-Thursday � 7:30 a.m.-4 p.m.; lunch closure noon-1 p.m.; Friday closed to public.",
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Benefits navigation",
+        "Claims assistance",
+        "Referrals"
+      ],
+      "audience": "Veterans, dependents and survivors.",
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "County benefit counseling, claims support and referrals. Contact the office for appointments and outreach locations.",
+      "source_ids": [
+        "yolo-vso"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "high",
+      "missing_data_flags": [
+        "program_eligibility_varies"
+      ]
+    },
+    {
+      "id": "vfw-ca-3928",
+      "verified_name": "Benicia VFW Post 3928",
+      "organization_type": "VFW",
+      "entity_kind": "organization",
+      "city": "Benicia",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "1150 1st Street, Benicia, CA 94510",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": "https://www.beniciavfw.org/"
+      },
+      "hours": null,
+      "meeting_schedule": "First Wednesday � 7 p.m.",
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Local veteran and community organization. Its website describes work with its Auxiliary.",
+      "source_ids": [
+        "benicia-vfw"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "service_area_unknown",
+        "program_details_unconfirmed",
+        "hours_unknown"
+      ]
+    },
+    {
+      "id": "vfw-ca-7244",
+      "verified_name": "Lt. Michael Libonati Jr. VFW Post 7244",
+      "organization_type": "VFW",
+      "entity_kind": "organization",
+      "city": "Vacaville",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "549 Merchant Street, Vacaville, CA 95688",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": "vfwpost7244@gmail.com",
+        "website": "https://www.vfwpost7244.org/"
+      },
+      "hours": null,
+      "meeting_schedule": "Second Tuesday � 7 p.m.",
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Post gatherings at Vacaville Veterans Hall. Use the post's general email or website for organization inquiries. For Veterans Memorial Building or hall-rental inquiries, the separate public venue number is 707-447-6354.",
+      "source_ids": [
+        "vacaville-vfw"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "multiple_contact_roles",
+        "service_area_unknown",
+        "hours_unknown"
+      ]
+    },
+    {
+      "id": "vfw-ca-1123",
+      "verified_name": "Carl H. Kreh VFW Post 1123",
+      "organization_type": "VFW",
+      "entity_kind": "organization",
+      "city": "Vallejo",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "420 Admiral Callaghan Lane, Vallejo, CA 94591",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Local veterans organization. Current organization contact details and activities need confirmation.",
+      "source_ids": [],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "public_source_withheld_for_privacy",
+        "meeting_schedule_unconfirmed",
+        "general_organization_contact_unconfirmed",
+        "website_missing",
+        "service_details_missing",
+        "eligibility_unconfirmed"
+      ]
+    },
+    {
+      "id": "vfw-ca-2333",
+      "verified_name": "Simmons-Sheldon VFW Post 2333",
+      "organization_type": "VFW",
+      "entity_kind": "organization",
+      "city": "Suisun City",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "427 Main Street, Suisun City, CA 94585",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Local veterans organization. Current organization contact details and activities need confirmation.",
+      "source_ids": [],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "public_source_withheld_for_privacy",
+        "meeting_schedule_unconfirmed",
+        "general_organization_contact_unconfirmed",
+        "website_missing",
+        "service_details_missing",
+        "eligibility_unconfirmed"
+      ]
+    },
+    {
+      "id": "legion-ca-101",
+      "verified_name": "American Legion Post 101 - Benicia",
+      "organization_type": "American Legion",
+      "entity_kind": "organization",
+      "city": "Benicia",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "1150 1st Street, Benicia, CA 94510",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Local American Legion post. Current gatherings, programs and a general organization contact need confirmation.",
+      "source_ids": [],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "public_source_withheld_for_privacy",
+        "meeting_schedule_unconfirmed",
+        "program_availability_unconfirmed",
+        "service_area_unknown"
+      ]
+    },
+    {
+      "id": "legion-ca-603",
+      "verified_name": "American Legion Post 603 - Manuel Quezon",
+      "organization_type": "American Legion",
+      "entity_kind": "organization",
+      "city": "Vallejo",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "420 Admiral Callaghan Lane, Vallejo, CA 94591",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": null
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Local American Legion post. A general organization contact for membership and activities has not been confirmed.",
+      "source_ids": [],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "public_source_withheld_for_privacy",
+        "meeting_schedule_unconfirmed",
+        "service_area_unknown",
+        "email_missing"
+      ]
+    },
+    {
+      "id": "mcl-ca-1486",
+      "verified_name": "Marine Corps League - Charles "Bud" Hallam Detachment 1486",
+      "organization_type": "Marine Corps League",
+      "entity_kind": "organization",
+      "city": "Vacaville",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "549 Merchant Street, Vacaville, CA 95688",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": "https://www.solanocountymcl1486.org/"
+      },
+      "hours": null,
+      "meeting_schedule": "First Wednesday � 7 p.m.",
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": {
+        "status": "confirm_with_organizer",
+        "text": "Check the venue calendar for the next detachment meeting.",
+        "source_id": "vacavets"
+      },
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Meets at Vacaville Veterans Hall, 549 Merchant Street. Confirm current meeting details through the public venue or organization website.",
+      "source_ids": [
+        "vacavets",
+        "mcl-funding"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "local_contact_missing",
+        "service_area_unknown"
+      ]
+    },
+    {
+      "id": "toys-solano",
+      "verified_name": "Toys for Tots - Solano County",
+      "organization_type": "Toys for Tots",
+      "entity_kind": "seasonal_campaign",
+      "city": null,
+      "location_county": "Solano",
+      "service_area": {
+        "counties": [
+          "Solano"
+        ],
+        "cities": [],
+        "notes": "Solano campaign; city-level exclusions unverified."
+      },
+      "address": null,
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": "https://solano-county-ca.toysfortots.org/local-coordinator-sites/lco-sites/default.aspx?nPageID=0&nPreviewInd=0&nRedirectInd=3"
+      },
+      "hours": null,
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Holiday toy assistance",
+        "Volunteering"
+      ],
+      "audience": "Children and families; current application rules need confirmation.",
+      "eligibility": null,
+      "event_information": {
+        "status": "not_verified",
+        "text": "2026 application and distribution dates have not been verified.",
+        "source_id": "toys-solano"
+      },
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": "Campaign lists nonprofit/agency and collection-site participation.",
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "The campaign provides family and agency request routes and toy-drop participation. Submit any required documents only to the campaign.",
+      "source_ids": [
+        "toys-solano"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "2026_dates_missing",
+        "service_location_missing",
+        "phone_email_missing",
+        "eligibility_incomplete"
+      ]
+    },
+    {
+      "id": "dav-ca-21",
+      "verified_name": "DAV - Ozie Boler Chapter 21",
+      "organization_type": "DAV",
+      "entity_kind": "organization",
+      "city": "Vallejo",
+      "location_county": "Solano",
+      "service_area": null,
+      "address": {
+        "text": "420 Admiral Callaghan Lane, Vallejo, CA 94591",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": null,
+        "website": "https://davwebsites.dav.org/ca/21/SystemPages/Home.aspx"
+      },
+      "hours": null,
+      "meeting_schedule": "Fourth Saturday � 10 a.m.",
+      "timezone": "America/Los_Angeles",
+      "service_categories": [],
+      "audience": null,
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "DAV-hosted page lists this chapter and its meeting. Public phone listings conflict; use the official page to confirm the best contact.",
+      "source_ids": [
+        "dav-21"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "medium",
+      "missing_data_flags": [
+        "phone_conflict",
+        "service_area_unknown",
+        "local_service_capacity_unconfirmed"
+      ]
+    },
+    {
+      "id": "dav-ca-84",
+      "verified_name": "DAV Chapter 84 - Vacaville",
+      "organization_type": "DAV",
+      "entity_kind": "organization",
+      "city": "Vacaville",
+      "location_county": "Solano",
+      "service_area": {
+        "counties": [
+          "Solano"
+        ],
+        "cities": [
+          "Cordelia",
+          "Travis AFB",
+          "Suisun City",
+          "Fairfield",
+          "Vacaville",
+          "Dixon"
+        ],
+        "notes": "Northern Solano and intervening unincorporated areas; not all of Solano County."
+      },
+      "address": {
+        "text": "549 Merchant Street, Vacaville, CA 95688",
+        "type": "meeting_venue",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": null,
+        "email": "cadisabledvets84@gmail.com",
+        "website": "https://www.cadav84.org/"
+      },
+      "hours": null,
+      "meeting_schedule": "Second Saturday � 10 a.m. � except December",
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Veteran community",
+        "Benefits navigation",
+        "Referrals"
+      ],
+      "audience": "All veterans may visit meetings. Chapter membership is described separately as for VA-rated disabled veterans.",
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "Use the chapter's general email or website for organization inquiries. For Veterans Memorial Building or hall-rental inquiries, use the separate venue contact 707-447-6354. Enter through the back door; the chapter describes elevator access to the meeting hall.",
+      "source_ids": [
+        "dav-84-contact",
+        "dav-84-area",
+        "vacavets"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "high",
+      "missing_data_flags": [
+        "multiple_contact_roles",
+        "stale_event_feed"
+      ]
+    },
+    {
+      "id": "vso-solano",
+      "verified_name": "Solano County Veterans Service Office",
+      "organization_type": "County Veterans Office",
+      "entity_kind": "organization",
+      "city": "Fairfield",
+      "location_county": "Solano",
+      "service_area": {
+        "counties": [
+          "Solano"
+        ],
+        "cities": [],
+        "notes": "County veterans office; individual program rules vary."
+      },
+      "address": {
+        "text": "675 Texas Street, Suite 4700, Fairfield, CA 94533",
+        "type": "service_office",
+        "map_eligible": true
+      },
+      "public_contacts": {
+        "phone": "707-784-6590",
+        "email": null,
+        "website": "https://www.solanocounty.gov/government/veterans-services"
+      },
+      "hours": "Monday-Thursday � 9 a.m.-4 p.m.; lunch closure noon-1 p.m.",
+      "meeting_schedule": null,
+      "timezone": "America/Los_Angeles",
+      "service_categories": [
+        "Benefits navigation",
+        "Claims assistance",
+        "Referrals"
+      ],
+      "audience": "Veterans, dependents and survivors.",
+      "eligibility": null,
+      "event_information": null,
+      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "partnership_notes": null,
+      "officers": [],
+      "officers_status": "not_verified",
+      "member_information": "County benefits assistance, healthcare enrollment guidance and records requests. Check current appointment and walk-in availability.",
+      "source_ids": [
+        "solano-vso"
+      ],
+      "last_verified_date": "2026-09-02",
+      "verification_method": "public_source_review",
+      "organization_confirmed_at": null,
+      "confidence": "high",
+      "missing_data_flags": [
+        "program_eligibility_varies"
+      ]
+    }
+  ]
+}

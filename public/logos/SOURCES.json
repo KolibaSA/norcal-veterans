@@ -1,0 +1,103 @@
+{
+  "checked_at": "2026-09-03",
+  "purpose": "Official identifying marks for the organization directory requested by Sterling. Marks remain unchanged and are not presented as sponsorship or endorsement.",
+  "assets": [
+    {
+      "file": "site/public/logos/vfw.png",
+      "organization": "Veterans of Foreign Wars",
+      "mark": "Cross of Malta emblem",
+      "source_page": "https://www.vfw.org/",
+      "download_url": "https://vfw-org-hqagarhxahbybyd9.z01.azurefd.net/-/media/VFWSite/Images/VFW-Logos/CrossOfMalta_vector-color-with-white-reg.png?h=180&la=en&w=450&v=1&d=20190111T155737Z",
+      "width": 450,
+      "height": 180,
+      "background": "Transparent exterior. Official image includes horizontal padding around the full-color emblem.",
+      "verification": "Downloaded exact emblem URL from national homepage image list; visually inspected. White VFW header variants were not used."
+    },
+    {
+      "file": "site/public/logos/american-legion.png",
+      "organization": "The American Legion",
+      "mark": "Primary brand mark",
+      "source_page": "https://www.legion.org/",
+      "download_url": "https://www.legion.org/getmedia/8c5b6b10-7ac5-4268-9a0b-1651dc2ed505/TAL-brand-primary-RGB.png",
+      "width": 1500,
+      "height": 413,
+      "background": "Transparent; dark blue text and red/blue flag mark, best on light background.",
+      "verification": "National homepage identifies this image as The American Legion. Visually inspected."
+    },
+    {
+      "file": "site/public/logos/marine-corps-league.png",
+      "organization": "Marine Corps League",
+      "mark": "Marine Corps League / Semper Fidelis round emblem",
+      "source_page": "https://www.mclnational.org/",
+      "download_url": "https://www.mcleaguelibrary.org/wp-content/uploads/2018/02/MCL_Logo_BWRG.png",
+      "width": 1610,
+      "height": 1610,
+      "background": "Transparent exterior with white outer ring and red center.",
+      "verification": "National website directs to Marine Corps League Library and uses this image as its homepage logo. Visually inspected."
+    },
+    {
+      "file": "site/public/logos/dav.svg",
+      "organization": "DAV",
+      "mark": "DAV wordmark",
+      "source_page": "https://www.dav.org/",
+      "download_url": "https://www.dav.org/wp-content/themes/dav-org/assets/img/dav-logo.svg",
+      "view_box": "0 0 136 46.99",
+      "background": "Transparent; dark gray and lime, best on light background.",
+      "verification": "Exact national homepage logo. SVG has path and style elements only; no scripts, external images or external links."
+    },
+    {
+      "file": "site/public/logos/toys-for-tots.svg",
+      "organization": "Marine Toys for Tots",
+      "mark": "White toy-train logo",
+      "source_page": "https://www.toysfortots.org/",
+      "download_url": "https://www.toysfortots.org/wp-content/uploads/2025/05/official-logo.svg",
+      "view_box": "0 0 1368 450",
+      "background": "Transparent with white logo paths; requires red or dark background to remain visible.",
+      "verification": "Exact official-logo.svg used by national homepage. SVG has paths only; no scripts, external images or external links."
+    },
+    {
+      "file": "site/public/logos/rememberavet.png",
+      "organization": "RememberAVet ~ Wreath Project",
+      "mark": "Wreath illustration from official website header",
+      "source_page": "https://www.wreathproject.org/",
+      "download_url": "https://images.squarespace-cdn.com/content/v1/6525deb7cae2f47837d1805a/5146da88-d28e-401a-9f93-1fa25bb69d60/RAV+no+bg.png?format=1500w",
+      "width": 312,
+      "height": 361,
+      "background": "Transparent; green wreath with red bow and black outline.",
+      "verification": "Exact first header logo image, alt text Wreath Project, from official homepage. Visually inspected."
+    },
+    {
+      "file": "site/public/logos/wild-horse-farms.png",
+      "organization": "Wild Horse Farms",
+      "mark": "Wild Horse Farms sign logo",
+      "source_page": "https://www.wildhorsefarms.org/",
+      "download_url": "https://static.wixstatic.com/media/9e2ba3_33a0c8269f6949a2b1a36aa1b1ef4bd4~mv2.png",
+      "width": 765,
+      "height": 239,
+      "background": "Transparent exterior; blue-green sign, white text and horse silhouette.",
+      "verification": "Original image behind the official homepage Logo.png Wix rendition. Visually inspected. This is the provider logo, not a separate veterans therapy program logo."
+    },
+    {
+      "file": "site/public/logos/little-reata-stables.jpg",
+      "organization": "Little Reata Stables",
+      "mark": "Round horse-head logo",
+      "source_page": "https://www.littlereatastables.com/",
+      "download_url": "https://static.wixstatic.com/media/b0d771_be2ae6521c684f8ba1a83e96ea0e3428~mv2.jpg/v1/fill/w_600,h_600,al_c,q_85/LRS_Rnd__04.jpg",
+      "original_image_url": "https://static.wixstatic.com/media/b0d771_be2ae6521c684f8ba1a83e96ea0e3428~mv2.jpg",
+      "width": 600,
+      "height": 600,
+      "background": "White, black linework and lettering.",
+      "verification": "Exact logo used on official homepage; downloaded through its Wix image delivery service at 600px instead of the 8400px original. Visually inspected. This identifies the stable, not a separate established nonprofit or clinical program."
+    },
+    {
+      "file": "site/public/logos/veterans-equine-therapy.jpg",
+      "organization": "Veterans Equine Therapy (VETs)",
+      "mark": "Horse and dog-tag emblem from official website artwork",
+      "source_page": "https://www.veteransequinetherapy.com/",
+      "download_url": "https://lh3.googleusercontent.com/sitesv/AG8ngQXIJ60F0URQmeN5yrGIgAxill4Pqpsqezz9y0PDGFI4O-goZNIJMhn7vjQEIgFxSPPmT9u2Ma5LzxvNgYWTXGUuXVjOU8hY7IhFfIY6ynqD4S26SPgPisSScgQMlKwpWPCQiIGOb_BOrALfM66FQmZ3xgTdRqyOsEEt5noRJInj4gH_iFrYmRJ0ChsU_cmjkTr381D45SiLFZX7znQr-p74A1s63PFx5lQd00AkiQ4=w1280",
+      "width": 1122,
+      "verification": "Exact official website artwork, visually inspected. The original image is retained unaltered. CSS frames only its upper emblem area; undated promotional dates are not displayed as directory events.",
+      "height": 1401
+    }
+  ]
+}
