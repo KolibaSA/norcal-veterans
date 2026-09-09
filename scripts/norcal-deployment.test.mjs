@@ -30,7 +30,7 @@ function setup() {
 test('replacement renders the existing published directory, events and profiles without private data',async()=>{
   const env=setup();
   try {
-    for(const path of ['/yolo-solano','/events','/resources','/share','/about','/for-organizations','/data.json','/events.ics',...records.map(r=>'/organizations/'+r.id)]) {
+    for(const path of ['/regions','/yolo-solano','/events','/resources','/share','/about','/for-organizations','/data.json','/events.ics',...records.map(r=>'/organizations/'+r.id)]) {
       const response=await worker.fetch(new Request('https://www.norcalveterans.org'+path),env);
       assert.equal(response.status,200,path);
       const text=await response.text();

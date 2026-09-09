@@ -73,6 +73,7 @@ export default {
       const asset = await env.ASSETS.fetch(request);
       return new Response(asset.body, { status: asset.status, headers: { ...Object.fromEntries(asset.headers), ...securityHeaders, 'Cache-Control': 'public, max-age=300' } });
     }
+    if (path === '/regions' && ['GET','HEAD'].includes(request.method)) return localPage(head ? '' : shell('Regions | NorCal Veterans', 'Explore the NorCal Veterans community.', '<section class="wrap"><h1>Explore our regions</h1><p><a class="button" href="/yolo-solano">Yolo-Solano: organizations, events and resources</a></p></section>', {path:'/regions'}));
     if (path === '/health' && ['GET','HEAD'].includes(request.method)) return Response.json({ status: 'ok', project: 'NorCal Veterans', release: 'replacement-20260909' }, { headers: { 'Cache-Control': 'no-store' } });
     try {
       if (!['GET','HEAD'].includes(request.method) && !(request.method === 'POST' && ['/submit','/speaker-submissions'].includes(path))) return new Response('Method not allowed.', { status: 405 });
