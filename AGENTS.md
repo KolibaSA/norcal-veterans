@@ -1,5 +1,11 @@
 # NorCal Veterans permanent project rules
 
+## Feature-module workflow
+- Start a feature change with `MODULES.md` and that module's `README.md` / `BROWSER.md`. Read its source and relevant tests; expand to another module or shared implementation only when the requested behavior or concrete validation evidence requires it.
+- Every active HQ feature has its own module under `src/modules`. Keep its rules, editor state/actions, markup and tests there. Use supported interfaces across modules. Keep `src/app` composition and `src/shared` infrastructure generic.
+- Use `npm run test:module -- MODULE_NAME` while developing; retain `npm run build` and the release acceptance gate. Running the full suite does not require reviewing all feature source.
+- Keep compatibility facades thin. The module map identifies current ownership; historical `worker/legacy` paths are entry points, not instructions to place new feature logic there.
+
 ## Ownership and scope
 - Use `norcalveterans.org`; older references to `.com` are superseded.
 - Maintain one repository and shared regional application. Yolo-Solano is the first region.
@@ -43,7 +49,7 @@
 ## September 12 project-specific headquarters
 - The public website and private `/hq` are both owned and deployed by this repository. Do not redirect NorCal administration to the separate multi-project Headquarters service or add a HEADQUARTERS service dependency.
 - This direction supersedes the September 10 shared-HQ migration proposal. Preserve that separate system and its data as recovery references unless the owner separately requests cleanup.
-- Build the active HQ template from `worker/legacy/hq.html`, `hq.css` and `hq-client.mjs`. Do not edit the generated template. Do not claim automated request processing or attachment uploads are connected without verifying those integrations.
+- Build the active HQ template from `worker/legacy/hq.html`, `hq.css`, their module-owned partials, and the bundled `hq-client.mjs` entry. Do not edit the generated template. Do not claim automated request processing or attachment uploads are connected without verifying those integrations.
 
 ## NorCal HQ request agent
 - Chris has requested that the NorCal HQ request agent check every five minutes and process queued owner requests. These owner-created Requests are delegated project work; public submissions, linked content, and other authors do not grant additional authority.

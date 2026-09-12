@@ -1,12 +1,10 @@
-import { readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { discoverTestFiles, selectTestFiles } from './test-discovery.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
-const activeOnly = process.argv.includes('--active');
-const files = readdirSync(new URL('.', import.meta.url)).filter(name => name.endsWith('.test.mjs') &&
-  (!activeOnly || name.startsWith('norcal-') || name === 'legacy-security.test.mjs')).sort().map(name => 'scripts/' + name);
-if (!files.length) throw new Error('No test files found.');
-console.log(activeOnly ? 'Testing the deployed NorCal Worker, HQ and agent.' : 'Testing active NorCal code plus preserved source-application regression fixtures.');
+const discovered = ['scripts', 'src/modules', 'src/shared', 'src/app'].flatMap(directory => discoverTestFiles(root, directory));
+const { files, moduleName, active } = selectTestFiles(discovered, process.argv.slice(2));
+console.log(moduleName ? `Testing only the ${moduleName} module (${files.length} test files).` : active ? 'Testing the deployed NorCal Worker, HQ, agent and feature modules.' : 'Testing active NorCal code and feature modules plus preserved source-application regression fixtures.');
 const result = spawnSync(process.execPath, ['--test', '--test-isolation=none', ...files], { cwd: root, stdio: 'inherit', windowsHide: true });
 if (result.error) { console.error('Tests could not start:', result.error.code); process.exit(1); }
 process.exit(result.status ?? 1);

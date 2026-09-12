@@ -1,0 +1,28 @@
+<section id="organizationFields" hidden aria-labelledby="organizationHeading">
+              <h3 id="organizationHeading">Public organization information</h3>
+              <div class="grid">
+                <div><label for="city">City</label><input id="city" maxlength="120"></div>
+                <div><label for="county">Location county</label><input id="county" list="countyOptions" maxlength="120"></div>
+                <div><label for="type">Organization type</label><input id="type" list="typeOptions" maxlength="120"></div>
+                <div><label for="website">Public website</label><input id="website" type="url" maxlength="2000" placeholder="https://"></div>
+                <div><label for="phone">Public phone</label><input id="phone" type="tel" maxlength="80"></div>
+                <div><label for="publicEmail">Public email</label><input id="publicEmail" type="email" maxlength="250"></div>
+                <div><label for="address">Public address</label><textarea id="address" rows="2" maxlength="1000"></textarea></div>
+                <div><label for="addressType">Address use</label><select id="addressType"><option value="">Not recorded</option></select><label class="check"><input id="mapEligible" type="checkbox"> Visitors can use this address for directions</label></div>
+                <div><label for="serviceCounties">Counties served</label><input id="serviceCounties" maxlength="1000" aria-describedby="listHelp"></div>
+                <div><label for="serviceCities">Cities served</label><input id="serviceCities" maxlength="1000"></div>
+                <div><label for="serviceCategories">Services or activities</label><input id="serviceCategories" maxlength="1000"></div>
+                <div><label for="serviceNotes">Service area notes</label><textarea id="serviceNotes" maxlength="2000"></textarea></div>
+              </div>
+              <p id="listHelp" class="small muted">Separate multiple counties, cities, or activities with commas. Use only confirmed service areas.</p>
+              <label for="referralNotes">Information to confirm before visiting</label><textarea id="referralNotes" maxlength="3000"></textarea>
+              <h3>Sources and review</h3>
+              <p class="small muted">Recording a review date is a claim that you checked a source. Leave it blank until that review is complete.</p>
+              <div class="grid">
+                <div><label for="sourceIds">Imported source references</label><input id="sourceIds" maxlength="3000" aria-describedby="sourceIdsHelp"><p id="sourceIdsHelp" class="small muted">Existing source IDs, separated by commas. Keep the references that support this listing.</p></div>
+                <div><label for="reviewSource">Source reviewed</label><input id="reviewSource" type="url" maxlength="2000" placeholder="https://"></div>
+                <div><label for="verifiedDate">Source review date</label><input id="verifiedDate" type="date"></div>
+                <div><label for="confirmationDate">Organization confirmation date</label><input id="confirmationDate" type="date"></div>
+                <div><label for="confirmationSource">Evidence of organization confirmation</label><input id="confirmationSource" type="url" maxlength="2000" placeholder="https://"></div>
+              </div>
+            </section>

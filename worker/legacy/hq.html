@@ -26,20 +26,20 @@
       <div class="label owner">PLATFORM MANAGEMENT</div>
       <a href="?tab=access" data-tab="access" class="owner">Organization &amp; region access</a>
       <a href="?tab=audit" data-tab="audit" class="owner">Change history</a>
-      <a href="/api/hq/export" class="owner" download="norcal-headquarters-backup.json">Download backup</a>
+      <!-- HQ_PARTIAL: src/modules/backup/navigation.html -->
     </nav>
     <main id="main">
       <p class="eyebrow">SHARED PURPOSE · ONE PLACE TO KEEP THINGS MOVING</p>
       <h1 id="title" tabindex="-1">Your headquarters</h1>
       <p class="lead">Requests, community information, and the work between meetings.</p>
       <div id="message" role="status" aria-live="polite" hidden></div>
-      <section id="processor" class="notice" aria-label="Request processing" hidden></section>
+      <!-- HQ_PARTIAL: src/modules/requests/health.html -->
       <div id="content"><p class="notice">Checking secure access…</p></div>
 
       <section id="editor" class="panel" aria-labelledby="editorTitle" hidden>
         <div class="bar"><h2 id="editorTitle" tabindex="-1">New item</h2><a id="itemLink" hidden>Link to this item</a></div>
         <p id="editorNotice" class="notice" hidden></p>
-        <section id="submissionSource" class="notice" hidden aria-label="Original public submission"></section>
+        <!-- HQ_PARTIAL: src/modules/submissions/source.html -->
         <section id="conflict" class="notice error" hidden aria-labelledby="conflictTitle">
           <h3 id="conflictTitle">This item changed while you were editing</h3>
           <p>Your unsaved draft is still in this tab. Compare it with the latest saved item before choosing which values to keep.</p>
@@ -58,56 +58,9 @@
               <div><label for="recordStatus">Status</label><select id="recordStatus"></select></div>
             </div>
 
-            <section id="organizationFields" hidden aria-labelledby="organizationHeading">
-              <h3 id="organizationHeading">Public organization information</h3>
-              <div class="grid">
-                <div><label for="city">City</label><input id="city" maxlength="120"></div>
-                <div><label for="county">Location county</label><input id="county" list="countyOptions" maxlength="120"></div>
-                <div><label for="type">Organization type</label><input id="type" list="typeOptions" maxlength="120"></div>
-                <div><label for="website">Public website</label><input id="website" type="url" maxlength="2000" placeholder="https://"></div>
-                <div><label for="phone">Public phone</label><input id="phone" type="tel" maxlength="80"></div>
-                <div><label for="publicEmail">Public email</label><input id="publicEmail" type="email" maxlength="250"></div>
-                <div><label for="address">Public address</label><textarea id="address" rows="2" maxlength="1000"></textarea></div>
-                <div><label for="addressType">Address use</label><select id="addressType"><option value="">Not recorded</option></select><label class="check"><input id="mapEligible" type="checkbox"> Visitors can use this address for directions</label></div>
-                <div><label for="serviceCounties">Counties served</label><input id="serviceCounties" maxlength="1000" aria-describedby="listHelp"></div>
-                <div><label for="serviceCities">Cities served</label><input id="serviceCities" maxlength="1000"></div>
-                <div><label for="serviceCategories">Services or activities</label><input id="serviceCategories" maxlength="1000"></div>
-                <div><label for="serviceNotes">Service area notes</label><textarea id="serviceNotes" maxlength="2000"></textarea></div>
-              </div>
-              <p id="listHelp" class="small muted">Separate multiple counties, cities, or activities with commas. Use only confirmed service areas.</p>
-              <label for="referralNotes">Information to confirm before visiting</label><textarea id="referralNotes" maxlength="3000"></textarea>
-              <h3>Sources and review</h3>
-              <p class="small muted">Recording a review date is a claim that you checked a source. Leave it blank until that review is complete.</p>
-              <div class="grid">
-                <div><label for="sourceIds">Imported source references</label><input id="sourceIds" maxlength="3000" aria-describedby="sourceIdsHelp"><p id="sourceIdsHelp" class="small muted">Existing source IDs, separated by commas. Keep the references that support this listing.</p></div>
-                <div><label for="reviewSource">Source reviewed</label><input id="reviewSource" type="url" maxlength="2000" placeholder="https://"></div>
-                <div><label for="verifiedDate">Source review date</label><input id="verifiedDate" type="date"></div>
-                <div><label for="confirmationDate">Organization confirmation date</label><input id="confirmationDate" type="date"></div>
-                <div><label for="confirmationSource">Evidence of organization confirmation</label><input id="confirmationSource" type="url" maxlength="2000" placeholder="https://"></div>
-              </div>
-            </section>
+            <!-- HQ_PARTIAL: src/modules/organizations/editor.html -->
 
-            <section id="eventFields" hidden aria-labelledby="eventHeading">
-              <h3 id="eventHeading">Event details</h3>
-              <label class="check"><input id="dateOnly" type="checkbox"> Date only; a time has not been announced</label>
-              <p class="small muted">Enter local Pacific time. Daylight saving time is applied automatically. If a time falls in the repeated or missing hour when clocks change, choose a clear time or add a note.</p>
-              <div class="grid">
-                <div><label for="start">Starts (Pacific time)</label><input id="start" type="datetime-local"></div>
-                <div><label for="end">Ends (Pacific time, optional)</label><input id="end" type="datetime-local"></div>
-                <div><label for="venue">Venue</label><input id="venue" maxlength="500"></div>
-                <div><label for="eventCity">City</label><input id="eventCity" maxlength="120"></div>
-                <div><label for="eventCounty">County</label><input id="eventCounty" list="countyOptions" maxlength="120"></div>
-                <div><label for="eventKind">Event type</label><input id="eventKind" maxlength="120" placeholder="Community event"></div>
-                <div><label for="organizer">Organizer</label><input id="organizer" maxlength="200"></div>
-                <div><label for="audience">Who can attend</label><input id="audience" maxlength="1000"></div>
-                <div><label for="source">Original event information</label><input id="source" type="url" maxlength="2000" placeholder="https://"></div>
-                <div><label for="sourceChecked">Date source was checked</label><input id="sourceChecked" type="date"></div>
-                <div><label for="sourceKind">Source type</label><select id="sourceKind"><option value="">Not recorded</option><option value="public_source">Public source</option><option value="project_team">Project team</option></select></div>
-                <div><label for="sourceNote">Source and verification notes</label><textarea id="sourceNote" maxlength="2000"></textarea></div>
-              </div>
-              <label for="timeNote">Attendance and timing notes</label><textarea id="timeNote" maxlength="2000"></textarea>
-              <p class="small muted">A source-check date requires a source URL. Leave the date blank for an unverified draft.</p>
-            </section>
+            <!-- HQ_PARTIAL: src/modules/events/editor.html -->
             <section id="reviewFields" hidden>
               <label for="reviewNotes">Private review notes</label><textarea id="reviewNotes" maxlength="5000"></textarea>
               <p class="small muted">Use these notes for source questions and review work. They are excluded from the public listing.</p>
@@ -116,36 +69,10 @@
           <div class="actions"><button type="submit" id="save">Save item</button><button type="button" class="secondary" id="cancel">Close item</button></div>
         </form>
 
-        <section id="requestActivity" hidden aria-labelledby="activityTitle">
-          <div class="bar"><h3 id="activityTitle">Results and comments</h3><button type="button" id="refreshActivity" class="secondary">Refresh activity</button></div>
-          <div id="activity"></div>
-          <form id="commentForm">
-            <label for="commentBody">Add a comment or clarification</label><textarea id="commentBody" maxlength="12000" required></textarea>
-            <p class="small muted">Comments do not change instructions that are already being processed. To change the work, reconcile the current run first.</p>
-            <button type="submit">Add comment</button>
-          </form>
-          <details id="recovery" class="notice">
-            <summary>Reconcile interrupted or finished work</summary>
-            <p>First check what the agent actually changed. Record the outcome here to release a stuck request without repeating its work.</p>
-            <form id="reconcileForm">
-              <label for="reconcileStatus">Verified outcome</label><select id="reconcileStatus"><option value="needs_input">Needs input or more investigation</option><option value="completed">Work is verified complete</option><option value="cancelled">Cancel further work</option></select>
-              <label for="reconcileNote">What happened, and what was checked?</label><textarea id="reconcileNote" required maxlength="12000"></textarea>
-              <label class="check"><input id="reconcileConfirmed" type="checkbox" required> I checked the current work and understand it must not be repeated automatically.</label>
-              <button type="submit">Record outcome and release request</button>
-            </form>
-          </details>
-        </section>
-        <section id="submissionActions" hidden class="notice">
-          <h3>Review this public submission</h3>
-          <p>Use the submission as a lead. Check its source, then prepare a draft with the information suitable for the public website. Creating a draft does not publish or approve the submission.</p>
-          <div class="actions"><button id="draftEvent" type="button" class="secondary">Prepare event draft</button><button id="draftOrganization" type="button" class="secondary">Prepare organization draft</button></div>
-        </section>
-        <details id="revisionSection" hidden><summary>Saved revision history</summary><div id="revisions"></div></details>
-        <section id="attachmentSection" hidden>
-          <h3>Attachments</h3><div id="files" class="filelist"></div>
-          <form id="fileForm"><label for="file">Attach a file (up to 10 MB)</label><input type="file" id="file" required><button type="submit">Upload attachment</button></form>
-          <p id="storageNote" class="small muted" hidden>Attachment storage has not been connected yet.</p>
-        </section>
+        <!-- HQ_PARTIAL: src/modules/requests/activity.html -->
+        <!-- HQ_PARTIAL: src/modules/submissions/actions.html -->
+        <!-- HQ_PARTIAL: src/modules/history/revisions.html -->
+        <!-- HQ_PARTIAL: src/modules/attachments/editor.html -->
       </section>
       <datalist id="countyOptions"></datalist><datalist id="typeOptions"></datalist>
       <footer>Keep this workspace to organization operations. Store veteran case details, discharge papers, and medical information with an appropriate service provider.</footer>

@@ -1,7 +1,7 @@
 # NorCal website and project HQ deployment
 
 ## Active architecture
-GitHub `KolibaSA/norcal-veterans`, branch `main`, deploys `wrangler.jsonc` and `src/norcal-worker.mjs` to the existing `norcal-veterans` Cloudflare Worker. The embedded HQ uses `worker/legacy` and the dedicated NorCal D1 database. Website and HQ remain one project; there is no shared Headquarters service binding.
+GitHub `KolibaSA/norcal-veterans`, branch `main`, deploys `wrangler.jsonc` and `src/norcal-worker.mjs` to the existing `norcal-veterans` Cloudflare Worker. The embedded HQ uses feature modules under `src/modules`, composed through `src/app` and the compatible `worker/legacy` entry points, with the dedicated NorCal D1 database. Start feature work with [the module map](../MODULES.md). Website and HQ remain one project; there is no shared Headquarters service binding.
 
 Public site: https://www.norcalveterans.org/yolo-solano
 Private HQ: https://www.norcalveterans.org/hq
@@ -17,7 +17,7 @@ npm run build
 npm run test:active
 ```
 
-The connected Cloudflare production build runs `npm run build`, then `npx wrangler deploy`. Build now generates artifacts and executes the entire test suite; a failure stops publication. The active HTML/CSS/client module generates `hq-template.mjs` plus a CSP script hash. Do not edit generated files.
+The connected Cloudflare production build runs `npm run build`, then `npx wrangler deploy`. Build generates artifacts, enforces feature dependency boundaries, and executes the entire test suite; a failure stops publication. Module-owned HTML/CSS partials and the bundled browser entry generate `hq-template.mjs`; the CSP hash uses the exact embedded script bytes. Do not edit generated files. `npm run test:module -- MODULE_NAME` runs focused tests; the full gate discovers tests in modules, shared code and application composition as well as scripts.
 
 `test:active` runs the NorCal Worker, embedded HQ, queue, content and recovery tests. The full suite additionally preserves imported application regressions. Imported deployment configuration is archived as `fixtures/imported/wrangler.hq.jsonc.txt`; its source modules and flat `dist` outputs are regression fixtures, not production entry points.
 

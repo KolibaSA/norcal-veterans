@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs && node scripts/run-tests.mjs",
+    "build": "node scripts/build.mjs && node scripts/check-architecture.mjs && node scripts/run-tests.mjs",
     "test": "node scripts/run-tests.mjs",
     "test:active": "node scripts/run-tests.mjs --active",
+    "test:module": "node scripts/run-tests.mjs --module",
+    "check:architecture": "node scripts/check-architecture.mjs",
     "dev": "wrangler dev"
   },
   "engines": {

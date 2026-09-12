@@ -1,0 +1,3 @@
+.timeline { border-left: 3px solid #d3deea; padding: 2px 0 15px 20px; margin: 18px 0; }
+.timeline h4 { margin: 12px 0 6px; }
+.timeline pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; max-height: 420px; overflow: auto; }

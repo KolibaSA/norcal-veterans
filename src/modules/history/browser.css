@@ -1,0 +1,4 @@
+.audit { overflow: auto; }
+.audit td, .audit th { padding: 12px; text-align: left; border-bottom: 1px solid #d7e1eb; overflow-wrap: anywhere; }
+.audit table { width: 100%; border-collapse: collapse; }
+#revisions pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; max-height: 420px; overflow: auto; }

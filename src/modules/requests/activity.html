@@ -1,0 +1,19 @@
+<section id="requestActivity" hidden aria-labelledby="activityTitle">
+          <div class="bar"><h3 id="activityTitle">Results and comments</h3><button type="button" id="refreshActivity" class="secondary">Refresh activity</button></div>
+          <div id="activity"></div>
+          <form id="commentForm">
+            <label for="commentBody">Add a comment or clarification</label><textarea id="commentBody" maxlength="12000" required></textarea>
+            <p class="small muted">Comments do not change instructions that are already being processed. To change the work, reconcile the current run first.</p>
+            <button type="submit">Add comment</button>
+          </form>
+          <details id="recovery" class="notice">
+            <summary>Reconcile interrupted or finished work</summary>
+            <p>First check what the agent actually changed. Record the outcome here to release a stuck request without repeating its work.</p>
+            <form id="reconcileForm">
+              <label for="reconcileStatus">Verified outcome</label><select id="reconcileStatus"><option value="needs_input">Needs input or more investigation</option><option value="completed">Work is verified complete</option><option value="cancelled">Cancel further work</option></select>
+              <label for="reconcileNote">What happened, and what was checked?</label><textarea id="reconcileNote" required maxlength="12000"></textarea>
+              <label class="check"><input id="reconcileConfirmed" type="checkbox" required> I checked the current work and understand it must not be repeated automatically.</label>
+              <button type="submit">Record outcome and release request</button>
+            </form>
+          </details>
+        </section>

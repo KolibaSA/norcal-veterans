@@ -3,9 +3,15 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {dataset} from '../src/data.mjs';
 import {brandLogos} from '../src/logos.mjs';
+import {bundleJavaScript,expandHeadquartersMarkup,expandHeadquartersStyles} from './build-support.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 // The embedded NorCal HQ is served as a module; keep it generated from its HTML source.
-const [hqMarkup,hqStyles,hqScript]=await Promise.all(['hq.html','hq.css','hq-client.mjs'].map(name=>fs.readFile(path.join(root,'worker','legacy',name),'utf8')));
+const [hqSource,hqStyleSource,hqScript]=await Promise.all([
+ fs.readFile(path.join(root,'worker/legacy/hq.html'),'utf8'),
+ fs.readFile(path.join(root,'worker/legacy/hq.css'),'utf8'),
+ bundleJavaScript({entryPoints:['worker/legacy/hq-client.mjs']})
+]);
+const [hqMarkup,hqStyles]=await Promise.all([expandHeadquartersMarkup(hqSource),expandHeadquartersStyles(hqStyleSource)]);
 if(!hqMarkup.includes('<!-- HQ_STYLES -->')||!hqMarkup.includes('<!-- HQ_SCRIPT -->'))throw new Error('HQ asset placeholders are missing.');
 if(/<\/script/i.test(hqScript))throw new Error('HQ client contains a closing script tag.');
 const headquarters=hqMarkup.replace('<!-- HQ_STYLES -->',()=>'<style>'+hqStyles+'</style>').replace('<!-- HQ_SCRIPT -->',()=>'<script type="module">'+hqScript+'</script>');
@@ -24,13 +30,8 @@ for(const name of await fs.readdir(path.join(root,'public','logos'))){
  const ext=path.extname(name).toLowerCase(),type={'.png':'image/png','.svg':'image/svg+xml','.jpg':'image/jpeg'}[ext];if(!type)continue;
  const bytes=(await fs.readFile(path.join(root,'public','logos',name)));assets['/logos/'+name]={type,base64:bytes.toString('base64')};
 }
-async function source(name){return (await fs.readFile(path.join(root,'src',name),'utf8')).replace(/^import .*;\r?\n/gm,'').replace(/^export \{dataset\};?\r?\n?/gm,'').replace(/^export /gm,'');}
-// The imported bundle remains a regression fixture. Scope the active validation
-// module so its internal helper names cannot collide in the older flat bundle.
-const validationSource=(await fs.readFile(path.join(root,'worker/legacy/validation.mjs'),'utf8')).replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'');
-const validationNames=['contentMetadata','canonicalDate','canonicalInstant','pacificLocal','pacificToInstant','validateRecordPayload'];
-const validationFixture='const {'+validationNames.join(',')+'}=(()=>{'+validationSource+'\nreturn {'+validationNames.join(',')+'};})();\n';
-const shared=validationFixture+(await Promise.all(['public-privacy.mjs','buddy-poppy-events.mjs','research-additions.mjs','data.mjs','logos.mjs','organization-links.mjs','public-calendar.mjs','resources.mjs','site.mjs','storage.mjs','published-request-assets.mjs','speaker-submissions.mjs','organization-meetings.mjs','event-collaboration.mjs','organization-photos.mjs','organization-officers.mjs'].map(source))).join('\n');
+// Preserve the imported application as regression fixtures. Real module
+// bundling follows compatibility exports and keeps each module's helpers scoped.
 const publicRuntime=`
 const assets=${JSON.stringify(assets)};
 export default {async fetch(request,env={}){
@@ -59,8 +60,21 @@ export default {async fetch(request,env={}){
 `;
 const hqAssets=Object.fromEntries(Object.entries(assets).filter(([name])=>['/styles.css','/favicon.svg','/hq.js'].includes(name)));
 const hqRuntime=`\nconst hqAssets=${JSON.stringify(hqAssets)};\nexport default {fetch(request,env,ctx){return hqFetch(request,env,ctx,hqAssets);}};\n`;
-const publicCode=shared+'\n'+await source('memorial-day.mjs')+'\n'+await source('public-tools.mjs')+'\n'+publicRuntime;
-const hqCode=shared+'\n'+await source('hq-library.mjs')+'\n'+await source('work-requests.mjs')+'\n'+await source('request-attachments.mjs')+'\n'+await source('organization-access.mjs')+'\n'+await source('organization-pages.mjs')+'\n'+await source('organization-profile.mjs')+'\n'+await source('hq.mjs')+'\n'+hqRuntime;
+const publicImports=`
+import {dataset,records} from './src/data.mjs';
+import {seedEvents} from './src/research-additions.mjs';
+import {render,shell} from './src/site.mjs';
+import {submitIntake,redirect,responseHTML,securityHeaders,readStaticAsset,publicData} from './src/storage.mjs';
+import {readPublishedRequestAsset} from './src/published-request-assets.mjs';
+import {readOrganizationPhoto} from './src/organization-photos.mjs';
+import {submitSpeakerSubmission,speakerSubmissionPage} from './src/speaker-submissions.mjs';
+import {submissionPage,upcomingEvents,eventCalendar,publicExtension} from './src/public-tools.mjs';
+import {memorialServices} from './src/memorial-day.mjs';
+`;
+const [publicCode,hqCode]=await Promise.all([
+ bundleJavaScript({stdin:{contents:publicImports+publicRuntime,resolveDir:root,sourcefile:'imported-public-entry.mjs'}}),
+ bundleJavaScript({stdin:{contents:"import {hqFetch} from './src/hq.mjs';\n"+hqRuntime,resolveDir:root,sourcefile:'imported-hq-entry.mjs'}})
+]);
 await fs.mkdir(path.join(root,'dist'),{recursive:true});
 await fs.writeFile(path.join(root,'dist/worker.mjs'),publicCode);
 await fs.writeFile(path.join(root,'dist/hq-worker.mjs'),hqCode);

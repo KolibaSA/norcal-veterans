@@ -1,60 +1,14 @@
+import {norcalPublicData} from './app/public-content.mjs';
+export {norcalPublicData};
 import legacy from '../worker/legacy/index.mjs';
-import { publicPayload } from '../worker/legacy/public.mjs';
 import { dataset, sources } from './data.mjs';
-import { render, shell } from './site.mjs';
+import { render } from './site.mjs';
+import { shell } from './shared/public-shell.mjs';
+import { submitPublicForm } from './app/public-intake.mjs';
 import { publicExtension, eventCalendar, submissionPage, upcomingEvents } from './public-tools.mjs';
-import { speakerSubmissionPage } from './speaker-submissions.mjs';
-import { securityHeaders, responseHTML, formData, field, choice, safeURL, redirect } from './storage.mjs';
+import { shareProgramPage } from './modules/share-program/public.mjs';
+import { securityHeaders, responseHTML, redirect } from './shared/public-http.mjs';
 import { memorialServices } from './memorial-day.mjs';
-
-export async function norcalPublicData(db) {
-  if (!db) throw new Error('Public storage is unavailable.');
-  const rows = (await db.prepare("SELECT id,kind,title,body,status,organization_id,payload FROM records WHERE kind IN ('organization','event') AND status='published'").all()).results;
-  const serialized = rows.map(row => ({ kind: row.kind, payload: publicPayload(row) }));
-  const invalidCount = serialized.filter(row => !row.payload).length;
-  if (invalidCount) console.warn(JSON.stringify({ event: 'public_content_rows_excluded', count: invalidCount }));
-  return {
-    records: serialized.filter(row => row.kind === 'organization' && row.payload).map(row => row.payload),
-    events: serialized.filter(row => row.kind === 'event' && row.payload).map(row => row.payload)
-  };
-}
-
-async function saveSubmission(request, env, live) {
-  const form = await formData(request);
-  if (field(form, 'website_check')) throw new Error('Submission could not be accepted.');
-  const speaker = new URL(request.url).pathname === '/speaker-submissions';
-  const validIds = live.records.map(record => record.id);
-  let title, detail;
-  if (speaker) {
-    if (form.get('consent') !== 'yes') throw new Error('Please confirm permission to share your introduction.');
-    const name = field(form, 'presenter_name', 120, true), phone = field(form, 'phone', 40, true), email = field(form, 'email', 254, true);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Please enter a valid email address.');
-    const selected = form.get('all_orgs') === 'yes' ? validIds : [...new Set(form.getAll('org_id'))];
-    if (!selected.length || selected.some(id => !validIds.includes(id))) throw new Error('Choose organizations from the list.');
-    title = 'Program introduction: ' + field(form, 'organization_name', 150, true);
-    detail = JSON.stringify({ kind: 'speaker', name, phone, email, organizations: selected,
-      description: field(form, 'organization_description', 1800, true), topic: field(form, 'topic', 1000, true),
-      request: field(form, 'request_text', 1200), website: safeURL(field(form, 'website', 2000)) }, null, 2);
-  } else {
-    if (form.get('privacy') !== 'yes') throw new Error('Please confirm that the update contains public organization information only.');
-    const kind = choice(field(form, 'kind'), ['profile', 'event', 'claim', 'other']);
-    const orgId = field(form, 'org_id', 100);
-    if (orgId && !validIds.includes(orgId)) throw new Error('Choose an organization from the list.');
-    const name = field(form, 'sender_name', 120, true), email = field(form, 'sender_email', 254, true);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Please enter a valid email address.');
-    title = field(form, 'title', 180, true);
-    detail = JSON.stringify({ kind, orgId, name, email, details: field(form, 'details', 6000, true), source: safeURL(field(form, 'source_url', 2000)) }, null, 2);
-  }
-  if (!request.headers.get('CF-Connecting-IP')) throw new Error('Submission could not be verified. Please try again.');
-  const headers = new Headers(request.headers);
-  headers.delete('Content-Length');
-  headers.set('Content-Type', 'application/json');
-  const result = await legacy.fetch(new Request(new URL('/api/submissions', request.url), {
-    method: 'POST', headers, body: JSON.stringify({ title, body: detail })
-  }), env);
-  if (!result.ok) throw new Error((await result.json()).error || 'Your submission could not be saved.');
-  return redirect((speaker ? '/share' : '/for-organizations') + '?received=1');
-}
 
 const norcalWorker = {
   async fetch(request, env, ctx) {
@@ -80,16 +34,16 @@ const norcalWorker = {
       if (!['GET','HEAD'].includes(request.method) && !(request.method === 'POST' && ['/submit','/speaker-submissions'].includes(path))) return new Response('Method not allowed.', { status: 405 });
       const live = await norcalPublicData(env.DB);
       if (request.method === 'POST') {
-        try { return await saveSubmission(request, env, live); }
+        try { return await submitPublicForm(request, env, live.records, (input, environment) => legacy.fetch(input, environment)); }
         catch (error) {
           const message = /D1_|SQLITE|database/i.test(error.message) ? 'The submission desk is temporarily unavailable.' : error.message;
-          const html = path === '/speaker-submissions' ? speakerSubmissionPage(url, live.records, { error: message }) : submissionPage(url, { error: message, organizations: live.records });
+          const html = path === '/speaker-submissions' ? shareProgramPage(url, live.records, { error: message }) : submissionPage(url, { error: message, organizations: live.records });
           return localPage(html, 400, true);
         }
       }
       if (path === '/data.json') return Response.json({ ...dataset, last_verified_date: null, verification_note: 'Publication and verification are separate. See each record for its source references and recorded review date; confirm current details with the organization.', records: live.records, events: live.events, sources, memorial_services: memorialServices }, { headers: { ...securityHeaders, 'Cache-Control': 'public, max-age=30' } });
       if (path === '/events.ics') return new Response(head ? null : eventCalendar(url.searchParams.has('event') ? live.events.filter(event => event.id === url.searchParams.get('event')) : upcomingEvents(live.events)), { headers: { ...securityHeaders, 'Content-Type': 'text/calendar; charset=utf-8' } });
-      const page = publicExtension(url, live.events, live.records) || render(url, live.records, live.events);
+      const page = (path === '/share' ? {status: 200, html: shareProgramPage(url, live.records, {received: url.searchParams.has('received')})} : null) || publicExtension(url, live.events, live.records) || render(url, live.records, live.events);
       return localPage(head ? '' : page.html, page.status);
     } catch {
       console.error(JSON.stringify({event:'public_request_failed',request_id:crypto.randomUUID(),operation:'public_render'}));
@@ -125,8 +79,5 @@ function localPage(html, status = 200, privatePage = false) {
     .replaceAll('Organization editor →', 'Organization headquarters →')
     .replaceAll('Open the organization editor →', 'Open organization headquarters →')
     .replaceAll('Designated representatives can also use their organization editor.', 'Assigned administrators can maintain descriptions and contact details in the private headquarters.')
-    .replace('The organizations you selected can review it privately in their dashboards and contact you directly.', 'Your introduction is saved in the private review queue for coordination with the organizations you selected.')
-    .replace('Each selected organization sees the introduction in its signed-in dashboard.', 'The site team reviews your introduction privately and coordinates with the organizations you select.')
-    .replace('An organization can accept or decline, contact you directly and create a calendar draft after scheduling.', 'The site team can follow up using the contact details you provided. Nothing is published automatically.')
     .replace('after Aaron or Sterling approves their access', 'after the platform owner approves their access'), status, privatePage);
 }

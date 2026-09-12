@@ -1,3 +1,5 @@
+import {origin,escapeHtml,shell} from './shared/public-shell.mjs';
+export {origin,escapeHtml,shell};
 import {sanitizePublicRecord,isRosterURL} from './public-privacy.mjs';
 import {sanitizePublicOfficer} from './organization-officers.mjs';
 import {brandLogos} from './logos.mjs';
@@ -6,11 +8,8 @@ import {resourcesPageContent} from './resources.mjs';
 import {organizationLinks} from './organization-links.mjs';
 import {dataset,records,sources,places,checked} from './data.mjs';
 import {contentMetadata} from '../worker/legacy/validation.mjs';
-export const origin = 'https://www.norcalveterans.org';
-export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const h=escapeHtml;
 const availableTypes=list=>[...new Set([...contentMetadata.organizationTypes,...list.map(record=>record.organization_type).filter(Boolean)])];
-const mark='<img class="project-logo" src="/ysv-logo.png?v=logo-20260903-1" alt="Yolo Solano Veterans" width="1254" height="1254" decoding="async">';
 const external=(url,label,cls='')=>`<a class="${cls}" href="${h(url)}" target="_blank" rel="noopener noreferrer">${h(label)} <span aria-hidden="true">↗</span></a>`;
 const button=(url,label,cls='')=>`<a class="button ${cls}" href="${h(url)}">${h(label)} <span aria-hidden="true">→</span></a>`;
 export function filterRecords(params, list=records) {
@@ -18,13 +17,6 @@ export function filterRecords(params, list=records) {
  const county=places[place];
  return list.filter(r=>(!type||r.organization_type===type)&&(!county||r.location_county===county||r.service_area?.counties?.includes(county))&&(!q||[r.verified_name,r.city,r.location_county,r.member_information,...(Array.isArray(r.service_categories)?r.service_categories:[])].join(' ').toLowerCase().includes(q)))
  .sort((a,b)=>Number(b.city===place)-Number(a.city===place)||a.verified_name.localeCompare(b.verified_name));
-}
-function shellBase(title,description,content,{path='/',detail=false}={}) {
- return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${h(title)}</title><meta name="description" content="${h(description)}"><link rel="canonical" href="${origin}${h(path)}"><meta property="og:type" content="website"><meta property="og:title" content="${h(title)}"><meta property="og:description" content="${h(description)}"><meta property="og:url" content="${origin}${h(path)}">${detail?'':`<meta property="og:image" content="${origin}/ysv-logo.png?v=logo-20260903-1"><meta property="og:image:width" content="1254"><meta property="og:image:height" content="1254"><meta property="og:image:alt" content="Yolo Solano Veterans logo">`}<meta name="twitter:card" content="summary"><meta name="twitter:title" content="${h(title)}"><meta name="twitter:description" content="${h(description)}">${detail?'':`<meta name="twitter:image" content="${origin}/ysv-logo.png?v=logo-20260903-1"><meta name="twitter:image:alt" content="Yolo Solano Veterans logo">`}<meta name="theme-color" content="#123c74"><link rel="icon" href="/ysv-logo.png?v=logo-20260903-1" type="image/png"><link rel="stylesheet" href="/styles.css?v=officers-20260903-1"><script src="/app.js?v=officers-20260903-1" defer></script></head><body><a class="skip" href="#main">Skip to content</a><div class="topline"><div class="wrap">A growing local resource · Yolo &amp; Solano counties <a href="https://www.veteranscrisisline.net/">Crisis support: 988, then press 1 ↗</a></div></div><header class="header wrap"><a href="/" class="brand" aria-label="Yolo Solano Veterans">${mark}</a><nav aria-label="Main navigation"><a href="/" ${path==='/'?'aria-current="page"':''}>Find an organization</a><a href="/events" ${path==='/events'?'aria-current="page"':''}>Events</a><a href="/resources" ${path==='/resources'?'aria-current="page"':''}>Resources</a><a href="/about" ${path==='/about'?'aria-current="page"':''}>About the directory</a><a class="nav-workspace" href="/for-organizations">For organizations <span aria-hidden="true">↗</span></a><a class="nav-workspace" href="/hq">Organization sign-in</a></nav></header><main id="main">${content}</main><footer><div class="wrap footer-inner"><div><a class="footer-brand" href="/">Yolo Solano Veterans</a><p>Local connections. Shared purpose.</p></div><div class="footer-links"><a href="/resources">Veteran resources</a><a href="/about#sources">Our sources</a><a href="/data.json">Directory data</a><a href="/for-organizations">Share an update</a></div></div><div class="wrap fineprint">An independent community directory. Listings do not imply endorsement or partnership. Review dates and sources appear on individual listings; confirm current details with each organization.</div></footer></body></html>`;
-}
-export function shell(title,description,content,options={}){
- const path=options.path||'/',html=shellBase(title,description,content,options),share=`<a href="/share" ${path==='/share'?'aria-current="page"':''}>Share a program</a>`;
- return html.replace('<a href="/about"',share+'<a href="/about"').replace('<link rel="stylesheet" href="/styles.css?v=officers-20260903-1">','<link rel="stylesheet" href="/styles.css?v=mcl627-20260904-1">').replace('<script src="/app.js?v=officers-20260903-1" defer></script>','<script src="/app.js?v=mcl627-20260904-1" defer></script>').replace('<a href="/for-organizations">Share an update</a>','<a href="/share">Share a program</a><a href="/for-organizations">Share an update</a>');
 }
 function logoCard(r,place) {
  const logo=brandLogos[r.id]||brandLogos[r.organization_type],city=r.city||r.location_county+' County';
