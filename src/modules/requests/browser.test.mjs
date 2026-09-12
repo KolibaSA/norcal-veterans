@@ -19,6 +19,22 @@ test('request editing and queue authorization retain exact owner/run boundaries'
   assert.match(feature.notice({}, { status: 'queued' }, true), /authorizes the agent/);
 });
 
+test('request editor captures target and organization-family scope without changing envelope scope', () => {
+  const feature = createFeature();
+  assert.equal(feature.openNewOnLoad, true);
+  const fields = feature.fields({ kind: 'request', region_id: 'all', organization_id: null, status: 'queued',
+    payload: { target: 'website', organization_scope: { type: 'VFW' } } });
+  assert.equal(fields.requestTarget, 'website');
+  assert.equal(fields.org, 'family:VFW');
+  fields.requestTarget = 'headquarters';
+  fields.org = 'family:American Legion';
+  const payload = feature.payload(fields, { retained: true });
+  assert.equal(payload.target, 'headquarters');
+  assert.deepEqual(payload.organization_scope, { type: 'American Legion' });
+  assert.equal(payload.retained, true);
+  assert.equal(feature.organizationId(fields), null);
+});
+
 test('comments use the current activity revision and never rewrite instructions', async () => {
   const calls = [], activity = { version: 9, status: 'in_progress', entries: [{ kind: 'comment', body: '<img src=x onerror=alert(1)>', actor: '<owner>' }] };
   const context = requestContext(async (path, options) => { calls.push({ path, options }); return activity; });

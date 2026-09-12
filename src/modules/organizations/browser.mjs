@@ -58,5 +58,9 @@ export function createFeature() {
 }
 export async function loadScopeOptions(api, select) {
   const organizations = await api('records?kind=organization');
-  select.innerHTML = '<option value="">Region-wide</option>' + organizations.map(org => '<option value="' + esc(org.id) + '">' + esc(org.title) + '</option>').join('');
+  const options = organizations.map(org => ({ id: org.id, title: org.title }));
+  const families = [...new Set(organizations.map(org => org.payload?.organization_type).filter(Boolean))].sort();
+  select.dataset.organizationOptions = JSON.stringify(options);
+  select.dataset.organizationFamilies = JSON.stringify(families);
+  select.innerHTML = '<option value="">Region-wide</option>' + options.map(org => '<option value="' + esc(org.id) + '">' + esc(org.title) + '</option>').join('');
 }

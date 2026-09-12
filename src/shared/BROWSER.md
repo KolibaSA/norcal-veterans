@@ -8,8 +8,8 @@ The runtime owns startup, identity, navigation/URL and load sequencing, generic 
 
 Supported descriptor members:
 
-- Identity and presentation: `kind`, `title`, `editorLabel`, `heading`, `newLabel`, `statuses`, `editorSections`.
-- Rules and values: `fields(record)`, `payload(fields, previous)`, `canCreate(me)`, `canEdit(me, record)`, `statusesFor(me, record)`, `saveLabel(record)`, `savedMessage(record)`, `notice(me, record, editable)`.
+- Identity and presentation: `kind`, `title`, `editorLabel`, `heading`, `newLabel`, `openNewOnLoad`, `statuses`, `editorSections`.
+- Rules and values: `fields(record)`, `payload(fields, previous)`, `organizationId(fields, previous)`, `canCreate(me)`, `canEdit(me, record)`, `statusesFor(me, record)`, `saveLabel(record)`, `savedMessage(record)`, `notice(me, record, editable)`.
 - Editor setup: `configureEditor({ $, record, values })` runs before canonical values are assigned, including before restoring a conflict draft. Input types must be set before assigning dates.
 - Lifecycle: `connect(context)` returns a controller; `afterSave(context)` can refresh a supported shared lookup.
 

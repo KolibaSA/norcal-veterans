@@ -34,8 +34,6 @@
       <p class="lead">Requests, community information, and the work between meetings.</p>
       <div id="message" role="status" aria-live="polite" hidden></div>
       <!-- HQ_PARTIAL: src/modules/requests/health.html -->
-      <div id="content"><p class="notice">Checking secure access…</p></div>
-
       <section id="editor" class="panel" aria-labelledby="editorTitle" hidden>
         <div class="bar"><h2 id="editorTitle" tabindex="-1">New item</h2><a id="itemLink" hidden>Link to this item</a></div>
         <p id="editorNotice" class="notice" hidden></p>
@@ -52,8 +50,9 @@
             <legend class="sr-only">Item details</legend>
             <label for="recordTitle">Title</label><input id="recordTitle" required maxlength="200">
             <label for="recordBody">Description or instructions</label><textarea id="recordBody" maxlength="20000" rows="7"></textarea>
+            <!-- HQ_PARTIAL: src/modules/requests/editor.html -->
             <div class="grid">
-              <div><label for="region">Region</label><select id="region"><option value="yolo-solano">Yolo-Solano</option><option value="sacramento">Sacramento</option><option value="sierra-foothills">Sierra Foothills</option><option value="north-bay">North Bay</option><option value="east-bay">East Bay</option><option value="south-bay-peninsula">South Bay / Peninsula</option><option value="north-state">North State</option><option value="north-coast">North Coast</option><option value="northern-san-joaquin">Northern San Joaquin</option></select></div>
+              <div><label for="region">Region</label><select id="region"><option value="all">All regions</option><option value="yolo-solano">Yolo-Solano</option><option value="sacramento">Sacramento</option><option value="sierra-foothills">Sierra Foothills</option><option value="north-bay">North Bay</option><option value="east-bay">East Bay</option><option value="south-bay-peninsula">South Bay / Peninsula</option><option value="north-state">North State</option><option value="north-coast">North Coast</option><option value="northern-san-joaquin">Northern San Joaquin</option></select></div>
               <div><label for="org">Organization scope</label><select id="org"><option value="">Region-wide</option></select></div>
               <div><label for="recordStatus">Status</label><select id="recordStatus"></select></div>
             </div>
@@ -74,6 +73,7 @@
         <!-- HQ_PARTIAL: src/modules/history/revisions.html -->
         <!-- HQ_PARTIAL: src/modules/attachments/editor.html -->
       </section>
+      <div id="content"><p class="notice">Checking secure access…</p></div>
       <datalist id="countyOptions"></datalist><datalist id="typeOptions"></datalist>
       <footer>Keep this workspace to organization operations. Store veteran case details, discharge papers, and medical information with an appropriate service provider.</footer>
     </main>

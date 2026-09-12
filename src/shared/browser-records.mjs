@@ -7,6 +7,7 @@ export function createRecordFeature(definition) {
     heading: 'Keep your community information current.', newLabel: 'Add item', editorLabel: 'item',
     canCreate: () => true, canEdit: (me, record) => record.status !== 'published' || canPublish(me, record),
     editorSections: [], payload: (_fields, previous = {}) => structuredClone(previous),
+    organizationId: fields => fields.org,
     saveLabel: () => 'Save item', savedMessage: () => 'Saved.',
     notice: (_me, _record, editable) => editable ? '' : 'A publishing administrator must edit this published item.',
     ...definition,

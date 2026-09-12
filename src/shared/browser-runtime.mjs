@@ -57,7 +57,7 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
     const fields = readFields();
     return {
       kind: tab, title: fields.recordTitle, body: fields.recordBody, region_id: fields.region,
-      organization_id: fields.org, status: fields.recordStatus,
+      organization_id: currentFeature().organizationId ? currentFeature().organizationId(fields, editing?.payload ?? {}) : fields.org,
       payload: currentFeature().payload(fields, editing?.payload ?? {}), version: editing?.version
     };
   }
@@ -153,7 +153,8 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
       } else await featureControllers.get(tab).render?.({ isCurrent: () => sequence === loadSequence });
       if (sequence !== loadSequence) return;
       notify('sectionLoaded');
-      if (focus) $('title').focus();
+      if (!item && feature.openNewOnLoad && feature.canCreate(me) && sequence === loadSequence) await showEditor();
+      if (focus && !(feature.openNewOnLoad && !item)) $('title').focus();
       if (item && sequence === loadSequence) await openRecord(item, false);
     } catch (cause) {
       if (sequence === loadSequence) { $('content').textContent = 'This section could not be loaded.'; message(cause.message, true); }

@@ -4,7 +4,7 @@ export function controls() {
   const elements = new Map();
   const $ = id => {
     if (!elements.has(id)) elements.set(id, {
-      value: '', checked: false, hidden: false, disabled: false, innerHTML: '', textContent: '',
+      value: '', checked: false, hidden: false, disabled: false, innerHTML: '', textContent: '', dataset: {},
       options: [], files: [], querySelector: () => null, querySelectorAll: () => [],
       reset() { this.resets = (this.resets ?? 0) + 1; },
       insertAdjacentHTML(position, html) { this.innerHTML = position === 'afterbegin' ? html + this.innerHTML : this.innerHTML + html; },
