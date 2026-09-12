@@ -480,4 +480,44 @@ details[open]>summary{margin-bottom:10px}
 .mcl-site .org-site-contact aside{background:var(--mcl-ivory);box-shadow:0 18px 46px rgba(53,12,20,.22)}
 .mcl-site .org-site-sources{background:var(--mcl-ivory)}
 .mcl-site .org-site-sources summary{color:var(--mcl-red-deep)}
+.legion-site{--legion-navy:#071b32;--legion-blue:#0d477c;--legion-red:#b21e32;--legion-gold:#d4b26a;background:#f5f3ee;color:#243344}
+.legion-site a{color:var(--legion-blue)}
+.legion-site .org-site-nav{background:#fbfaf7;border-bottom:1px solid rgba(7,27,50,.16)}
+.legion-site .org-site-identity{color:var(--legion-navy)}
+.legion-site .org-site-identity small{color:#6c7480}
+.legion-site .org-site-nav>div a{color:var(--legion-navy)}
+.legion-site .org-site-nav>div a:hover{color:var(--legion-red);text-decoration-color:var(--legion-gold)}
+.legion-site .org-site-hero{background-color:var(--legion-navy);background-image:linear-gradient(105deg,rgba(4,17,32,.94) 0%,rgba(4,17,32,.75) 48%,rgba(4,17,32,.45) 100%),url('/american-legion-background.png');background-position:center;background-size:cover;border-top-color:var(--legion-red)}
+.legion-site .org-site-hero::before{background:linear-gradient(120deg,rgba(4,17,32,.18),rgba(4,17,32,.32)),linear-gradient(0deg,rgba(4,17,32,.2),transparent 55%)}
+.legion-site .org-site-hero h1 em{color:#f1d58c}
+.legion-site .org-site-hero .eyebrow,.legion-site .org-site-contact .eyebrow{color:#f1d58c}
+.legion-site-watermark{position:absolute;z-index:0;right:7%;top:50%;width:min(42vw,560px);transform:translateY(-50%) rotate(-5deg);opacity:.105;filter:grayscale(1) brightness(2.4);pointer-events:none}
+.legion-site-watermark img{display:block;width:100%;height:auto}
+.legion-site-post{position:absolute;z-index:0;right:5%;bottom:-12%;color:rgba(241,213,140,.1);font-size:min(42vw,620px);font-weight:900;letter-spacing:-.12em;line-height:1}
+.legion-site .org-site-hero-grid{z-index:1}
+.legion-site .button{background:var(--legion-blue);border-color:var(--legion-blue)}
+.legion-site .button:hover{background:#09365f;border-color:#09365f}
+.legion-site .button.light{background:#f1d58c;border-color:#f1d58c;color:#17263a}
+.legion-site .button.light:hover{background:#f7e5ad;border-color:#f7e5ad}
+.legion-site .button.hero-outline{background:rgba(255,255,255,.07);border-color:rgba(241,213,140,.78);color:#fff8e8}
+.legion-site .button.hero-outline:hover{background:#fbfaf7;border-color:#fbfaf7;color:var(--legion-navy)}
+.legion-site .org-site-intro{background:#fbfaf7}
+.legion-site .org-site-intro dl{border-top-color:var(--legion-red);box-shadow:0 14px 40px rgba(7,27,50,.1)}
+.legion-site .org-site-pillars{background:#e7ebee;border-block-color:#ccd5dc}
+.legion-site .org-site-heading>p,.legion-site .org-site-intro p{color:#5d6874}
+.legion-site .org-site-card-grid article{border-color:#d3dbe1;border-top:4px solid var(--legion-red);box-shadow:0 8px 28px rgba(7,27,50,.08)}
+.legion-site .org-site-card-grid article>span{color:var(--legion-red)}
+.legion-site .org-site-card-grid a{color:var(--legion-blue)}
+.legion-site .org-site-resources{background:var(--legion-navy);border-top-color:var(--legion-red)}
+.legion-site .org-site-resources .eyebrow{color:#f1d58c}
+.legion-site .org-site-resource-grid a{background:rgba(255,255,255,.08);border-color:rgba(241,213,140,.28);color:#fff8e8}
+.legion-site .org-site-resource-grid a:hover{background:rgba(241,213,140,.16)}
+.legion-site .org-site-resource-grid span{color:#cbd8e8}
+.legion-site .org-site-contact{background:var(--legion-red);border-top:4px solid var(--legion-gold)}
+.legion-site .org-site-contact p{color:#f9e8e9}
+.legion-site .org-site-contact .button.outline{border-color:#fff8e8;color:#fff8e8}
+.legion-site .org-site-contact aside{background:#fbfaf7;box-shadow:0 18px 46px rgba(7,27,50,.22)}
+.legion-site .org-site-sources{background:#fbfaf7}
+.legion-site .org-site-sources summary{color:var(--legion-navy)}
+@media(max-width:700px){.legion-site-watermark{right:-18%;width:92vw;opacity:.08}.legion-site-post{right:-3%;bottom:-8%;font-size:68vw}}
 

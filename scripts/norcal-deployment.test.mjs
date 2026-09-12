@@ -117,6 +117,12 @@ test('regional home images resolve to complete bundled images and health identif
     const imagePaths=[...new Set([...html.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map(match=>match[1]))];
     assert.ok(imagePaths.includes('/norcal-hero-table.png'));
     assert.ok(imagePaths.includes('/norcal-hero-seals.png'));
+    const legion=await worker.fetch(new Request('https://www.norcalveterans.org/organizations/legion-ca-208'),env);
+    assert.equal(legion.status,200);
+    const legionHtml=await legion.text();
+    assert.match(legionHtml,/class="org-site legion-site"/);
+    const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
+    assert.match(styles,/american-legion-background\.png/);
     for(const path of imagePaths){
       assert.ok(path.startsWith('/'),path);
       const image=await worker.fetch(new Request(new URL(path,'https://www.norcalveterans.org')),env);

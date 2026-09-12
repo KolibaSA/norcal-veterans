@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {records,sources,types} from '../src/data.mjs';
 import {filterRecords,render,escapeHtml} from '../src/site.mjs';
 import worker from '../dist/worker.mjs';
@@ -56,6 +57,19 @@ test('invalid, empty and injection input stays safe',()=>{
 test('each profile has its own metadata, source links and term caveat',()=>{
  for(const r of records){const p=render(new URL('https://test/organizations/'+r.id));assert.equal(p.status,200);assert.ok(p.html.includes(escapeHtml(r.verified_name)));assert.ok(p.html.includes('Sources for this profile'));assert.ok(!p.html.includes('property="og:image"'));if(r.officers.length)assert.ok(p.html.includes('current terms have not been confirmed'));}
 });
+test('American Legion profiles share a post-numbered family theme and official logo watermark',()=>{
+ const legion=records.filter(r=>r.organization_type==='American Legion');
+ const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
+ assert.ok(styles.includes("url('/american-legion-background.png')"));
+ assert.ok(legion.length>=5);
+ for(const r of legion){
+  const page=render(new URL('https://test/organizations/'+r.id));
+  assert.equal(page.status,200,r.id);
+  assert.ok(page.html.includes('class="org-site legion-site"'),r.id);
+  assert.ok(page.html.includes('class="legion-site-watermark"'),r.id);
+  assert.ok(page.html.includes('id="events"')&&page.html.includes('id="resources"')&&page.html.includes('id="contact"'),r.id);
+ }
+});
 test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
  for(const path of ['/','/yolo-solano']){
   const page=render(new URL('https://test'+path));
@@ -94,7 +108,7 @@ test('submission desk and unknown mutation routes stay separate',async()=>{
  assert.equal((await worker.fetch(new Request('https://test/missing'))).status,404);
 });
 test('all deliverable routes/assets respond with expected content and headers',async()=>{
- for(const url of ['/','/mcl-yolo','/about','/resources','/for-organizations','/data.json','/styles.css','/app.js','/og.png','/favicon.svg','/norcal-hero-table.png','/norcal-hero-seals.png','/health']){const r=await worker.fetch(new Request('https://test'+url));assert.equal(r.status,200,url);}
+ for(const url of ['/','/mcl-yolo','/about','/resources','/for-organizations','/data.json','/styles.css','/app.js','/og.png','/favicon.svg','/norcal-hero-table.png','/norcal-hero-seals.png','/american-legion-background.png','/health']){const r=await worker.fetch(new Request('https://test'+url));assert.equal(r.status,200,url);}
  const image=await worker.fetch(new Request('https://test/og.png'));const bytes=new Uint8Array(await image.arrayBuffer());assert.equal(bytes[0],137);assert.equal(bytes[1],80);
  const main=await worker.fetch(new Request('https://test/'));assert.ok(main.headers.get('Content-Security-Policy').includes("form-action 'self'"));
 });
