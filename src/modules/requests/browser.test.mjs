@@ -2,6 +2,98 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createFeature, connectRequests, healthDescription } from './browser.mjs';
 import { controls, submitEvent, deferred } from '../../shared/browser-test-support.mjs';
+import { recordInput } from '../../shared/browser-runtime.mjs';
+
+function scopeEditor(record = { kind: 'request', region_id: 'yolo-solano' }) {
+  const feature = createFeature(), context = controls(), fields = feature.fields(record);
+  feature.configureEditor({ ...context, record, values: fields });
+  for (const [id, value] of Object.entries(fields)) {
+    if (typeof value === 'boolean') context.$(id).checked = value;
+    else context.$(id).value = value;
+  }
+  const input = () => recordInput(Object.fromEntries(Object.entries(fields).map(([id, value]) =>
+    [id, typeof value === 'boolean' ? context.$(id).checked : context.$(id).value])), 'request', feature, record.id ? record : null);
+  return { ...context, feature, input };
+}
+
+test('switching a new website request to HQ clears both envelope and family scope before saving', () => {
+  const { $, input } = scopeEditor();
+  assert.equal($('region').value, 'all');
+  assert.equal($('regionField').hidden, true);
+  $('requestTarget').value = 'website'; $('requestTarget').onchange();
+  assert.equal($('regionField').hidden, false);
+  assert.equal($('requestScopeOption').hidden, true);
+  $('region').value = 'yolo-solano'; $('org').value = 'family:American Legion';
+  $('requestTarget').value = 'headquarters'; $('requestTarget').onchange();
+  assert.equal($('requestScopeSummary').textContent, 'Entire HQ');
+  assert.equal($('regionField').hidden, true);
+  assert.equal($('organizationScopeField').hidden, true);
+  assert.equal($('requestLimitScope').checked, false);
+  const saved = input();
+  assert.equal(saved.kind, 'request'); assert.equal(saved.status, 'queued');
+  assert.equal(saved.region_id, 'all'); assert.equal(saved.organization_id, null);
+  assert.deepEqual(saved.payload, { target: 'headquarters' });
+});
+
+test('HQ scope can be explicitly limited and removing the limit clears a specific organization', () => {
+  const { $, input, feature } = scopeEditor();
+  $('requestTarget').value = 'headquarters'; $('requestTarget').onchange();
+  $('requestLimitScope').checked = true; $('requestLimitScope').onchange();
+  assert.equal($('regionField').hidden, false);
+  assert.equal($('organizationScopeField').hidden, false);
+  $('region').value = 'yolo-solano'; $('org').value = 'synthetic-organization';
+  assert.equal(input().organization_id, 'synthetic-organization');
+  assert.equal(input().region_id, 'yolo-solano');
+  $('requestLimitScope').checked = false; $('requestLimitScope').onchange();
+  assert.equal(input().region_id, 'all'); assert.equal(input().organization_id, null);
+  assert.equal($('requestScopeSummary').hidden, false);
+  assert.deepEqual(feature.payload({ requestTarget: 'headquarters', requestLimitScope: false, org: 'family:VFW' },
+    { retained: true, organization_scope: { type: 'VFW' } }), { retained: true, target: 'headquarters' });
+});
+
+test('Let Chat decide has optional scope and Public website always shows scope fields', () => {
+  const { $, input } = scopeEditor();
+  assert.equal($('requestTarget').value, 'decide');
+  assert.equal($('requestScopeOption').hidden, false);
+  assert.equal($('requestLimitScope').checked, false);
+  $('requestLimitScope').checked = true; $('requestLimitScope').onchange();
+  $('region').value = 'sacramento'; $('org').value = 'family:VFW';
+  assert.deepEqual(input().payload, { target: 'decide', organization_scope: { type: 'VFW' } });
+  $('requestTarget').value = 'website'; $('requestTarget').onchange();
+  assert.equal($('regionField').hidden, false);
+  assert.equal($('requestScopeOption').hidden, true);
+  assert.equal(input().region_id, 'sacramento');
+  $('requestTarget').value = 'decide'; $('requestTarget').onchange();
+  assert.equal($('requestLimitScope').checked, true);
+  $('requestLimitScope').checked = false; $('requestLimitScope').onchange();
+  assert.deepEqual(input().payload, { target: 'decide' });
+  assert.equal(input().region_id, 'all');
+});
+
+test('reopening and retargeting an existing request preserves its saved scope and version', () => {
+  const record = { id: 'saved-request', kind: 'request', region_id: 'yolo-solano', organization_id: null,
+    status: 'needs_input', version: 4, payload: { target: 'website', organization_scope: { type: 'American Legion' } } };
+  const { $, input } = scopeEditor(record);
+  $('requestTarget').value = 'headquarters'; $('requestTarget').onchange();
+  assert.equal($('requestLimitScope').disabled, true);
+  assert.equal($('requestLimitScope').checked, true);
+  assert.equal($('regionField').hidden, false);
+  assert.equal(input().region_id, record.region_id);
+  assert.deepEqual(input().payload.organization_scope, record.payload.organization_scope);
+  assert.equal(input().version, 4);
+  const entireHQ = scopeEditor({ ...record, region_id: 'all', payload: { target: 'headquarters' } });
+  assert.equal(entireHQ.$('regionField').hidden, true);
+  assert.equal(entireHQ.input().region_id, 'all');
+});
+
+test('leaving Requests restores shared scope controls for other editors and preserves health lifecycle', () => {
+  const context = requestContext(async () => ({})), controller = connectRequests(context);
+  context.$('regionField').hidden = true; context.$('organizationScopeField').hidden = true;
+  context.tab = 'event'; controller.sectionChanged();
+  assert.equal(context.$('regionField').hidden, false);
+  assert.equal(context.$('organizationScopeField').hidden, false);
+  assert.equal(context.$('processor').hidden, true);
+});
 
 function requestContext(api) {
   return { ...controls(), api, me: { owner: true }, tab: 'request',

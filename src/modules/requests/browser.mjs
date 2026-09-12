@@ -17,37 +17,73 @@ function parseOptions(value, fallback = []) {
 function requestFields(record = {}) {
   const payload = record.payload ?? {};
   const family = payload.organization_scope?.type;
+  const hasSavedValues = !!(record.id || record.payload);
+  const region = hasSavedValues ? record.region_id ?? 'all' : 'all';
+  const org = hasSavedValues ? family ? FAMILY_SCOPE_PREFIX + family : record.organization_id ?? '' : '';
   return {
     requestTarget: TARGETS.includes(payload.target) ? payload.target : 'decide',
-    org: family ? FAMILY_SCOPE_PREFIX + family : record.organization_id ?? ''
+    requestLimitScope: region !== 'all' || !!org,
+    region, org
   };
 }
+
+const usesScope = fields => fields.requestTarget === 'website' || fields.requestLimitScope !== false;
 
 function requestPayload(fields, previous = {}) {
   const payload = structuredClone(previous);
   payload.target = TARGETS.includes(fields.requestTarget) ? fields.requestTarget : 'decide';
   delete payload.organization_scope;
-  if (String(fields.org).startsWith(FAMILY_SCOPE_PREFIX)) {
+  if (usesScope(fields) && String(fields.org).startsWith(FAMILY_SCOPE_PREFIX)) {
     payload.organization_scope = { type: String(fields.org).slice(FAMILY_SCOPE_PREFIX.length) };
   }
   return payload;
 }
 
 function requestOrganizationId(fields) {
-  return String(fields.org).startsWith(FAMILY_SCOPE_PREFIX) ? null : (fields.org || null);
+  return !usesScope(fields) || String(fields.org).startsWith(FAMILY_SCOPE_PREFIX) ? null : (fields.org || null);
 }
 
-function configureRequestScope($) {
+function configureRequestScope($, record, values) {
   const select = $('org');
   const organizations = parseOptions(select.dataset.organizationOptions);
   const families = parseOptions(select.dataset.organizationFamilies).filter(Boolean);
   const current = select.value;
-  select.innerHTML = '<option value="">Region-wide</option>' +
+  select.innerHTML = '<option value="">All organizations</option>' +
     (families.length ? '<optgroup label="Organization families">' + families.map(type =>
       '<option value="' + esc(FAMILY_SCOPE_PREFIX + type) + '">All ' + esc(type) + '</option>').join('') + '</optgroup>' : '') +
     (organizations.length ? '<optgroup label="Specific organizations">' + organizations.map(org =>
       '<option value="' + esc(org.id) + '">' + esc(org.title) + '</option>').join('') + '</optgroup>' : '');
   select.value = current;
+  const readScope = () => ({ requestTarget: $('requestTarget').value, requestLimitScope: $('requestLimitScope').checked });
+  const updateVisibility = fields => {
+    const website = fields.requestTarget === 'website';
+    const showScope = website || fields.requestLimitScope;
+    $('requestScopeOption').hidden = website;
+    $('requestScopeSummary').hidden = showScope;
+    $('requestScopeSummary').textContent = fields.requestTarget === 'headquarters' ? 'Entire HQ' : 'No region or organization restriction.';
+    $('regionField').hidden = !showScope;
+    $('organizationScopeField').hidden = !showScope;
+  };
+  const clearScope = () => {
+    $('region').value = 'all';
+    $('org').value = '';
+    $('requestLimitScope').checked = false;
+  };
+  // Existing record envelopes have fixed scope. Never silently rewrite it when
+  // reopening a saved request or changing its target.
+  $('requestLimitScope').disabled = !!record.id;
+  $('requestTarget').onchange = () => {
+    if (!record.id) {
+      if ($('requestTarget').value === 'headquarters') clearScope();
+      else $('requestLimitScope').checked = $('region').value !== 'all' || !!$('org').value;
+    }
+    updateVisibility(readScope());
+  };
+  $('requestLimitScope').onchange = () => {
+    if (!record.id && !$('requestLimitScope').checked) clearScope();
+    updateVisibility(readScope());
+  };
+  updateVisibility(values);
 }
 
 export function canEditRequest(me, record) { return !!me?.owner && record.status !== 'in_progress'; }
@@ -65,11 +101,19 @@ export function createFeature() {
       ? record.status === 'in_progress' ? 'The agent is processing these instructions. Add a comment below, or reconcile the run before changing the instructions.'
         : 'Executable requests are managed by the platform owner.'
       : 'Saving this request as queued authorizes the agent to process these instructions. Comments and results appear separately below.',
-    configureEditor({ $ }) { configureRequestScope($); },
+    configureEditor({ $, record, values }) { configureRequestScope($, record, values); },
     connect: connectRequests
   });
 }
 
 export function connectRequests(context) {
-  return { ...connectActivity(context), ...connectHealth(context) };
+  const health = connectHealth(context);
+  return { ...connectActivity(context), ...health,
+    sectionChanged() {
+      health.sectionChanged();
+      // These generic controls must remain visible for every other feature.
+      context.$('regionField').hidden = false;
+      context.$('organizationScopeField').hidden = false;
+    }
+  };
 }
