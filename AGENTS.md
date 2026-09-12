@@ -39,3 +39,8 @@
 - Deploy only `wrangler.jsonc` / `src/norcal-worker.mjs` to the existing `norcal-veterans` Worker.
 - Keep the legacy private HQ (`worker/legacy`) and existing D1 schema. Imported HQ modules and root migrations describe a different system and are not active in NorCal. Do not deploy `wrangler.hq.jsonc` here.
 - See `docs/norcal-deployment.md` for preview, backups and rollback.
+
+## September 12 project-specific headquarters
+- The public website and private `/hq` are both owned and deployed by this repository. Do not redirect NorCal administration to the separate multi-project Headquarters service or add a HEADQUARTERS service dependency.
+- This direction supersedes the September 10 shared-HQ migration proposal. Preserve that separate system and its data as recovery references unless the owner separately requests cleanup.
+- Build the active HQ template from `worker/legacy/hq.html`. Do not claim automated request processing or attachment uploads are connected without verifying those integrations.

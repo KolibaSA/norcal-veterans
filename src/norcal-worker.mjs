@@ -10,7 +10,7 @@ import { memorialServices } from './memorial-day.mjs';
 
 export async function norcalPublicData(db) {
   if (!db) throw new Error('Public storage is unavailable.');
-  const rows = (await db.prepare("SELECT id,kind,title,body,status,payload FROM records WHERE kind IN ('organization','event') AND status='published'").all()).results;
+  const rows = (await db.prepare("SELECT id,kind,title,body,status,organization_id,payload FROM records WHERE kind IN ('organization','event') AND status='published'").all()).results;
   return {
     records: rows.filter(row => row.kind === 'organization').map(row => {
       const payload = JSON.parse(row.payload);
@@ -18,7 +18,7 @@ export async function norcalPublicData(db) {
     }),
     events: rows.filter(row => row.kind === 'event').map(row => {
       const payload = JSON.parse(row.payload);
-      return { ...publicPayload(row), date_only: payload.date_only === true, source_kind: payload.source_kind, source_note: payload.source_note };
+      return { ...publicPayload(row), organization_id: row.organization_id || payload.organization_id || null, date_only: payload.date_only === true, source_kind: payload.source_kind, source_note: payload.source_note };
     })
   };
 }
@@ -74,7 +74,7 @@ export default {
       return new Response(asset.body, { status: asset.status, headers: { ...Object.fromEntries(asset.headers), ...securityHeaders, 'Cache-Control': 'public, max-age=300' } });
     }
     if (path === '/regions' && ['GET','HEAD'].includes(request.method)) return localPage(head ? '' : shell('Regions | NorCal Veterans', 'Explore the NorCal Veterans community.', '<section class="wrap"><h1>Explore our regions</h1><p><a class="button" href="/yolo-solano">Yolo-Solano: organizations, events and resources</a></p></section>', {path:'/regions'}));
-    if (path === '/health' && ['GET','HEAD'].includes(request.method)) return Response.json({ status: 'ok', project: 'NorCal Veterans', release: 'replacement-20260909' }, { headers: { 'Cache-Control': 'no-store' } });
+    if (path === '/health' && ['GET','HEAD'].includes(request.method)) return Response.json({ status: 'ok', project: 'NorCal Veterans', release: 'project-hq-20260912' }, { headers: { 'Cache-Control': 'no-store' } });
     try {
       if (!['GET','HEAD'].includes(request.method) && !(request.method === 'POST' && ['/submit','/speaker-submissions'].includes(path))) return new Response('Method not allowed.', { status: 405 });
       const live = await norcalPublicData(env.DB);
@@ -82,13 +82,13 @@ export default {
         try { return await saveSubmission(request, env, live); }
         catch (error) {
           const message = /D1_|SQLITE|database/i.test(error.message) ? 'The submission desk is temporarily unavailable.' : error.message;
-          const html = path === '/speaker-submissions' ? speakerSubmissionPage(url, live.records, { error: message }) : submissionPage(url, { error: message });
+          const html = path === '/speaker-submissions' ? speakerSubmissionPage(url, live.records, { error: message }) : submissionPage(url, { error: message, organizations: live.records });
           return localPage(html, 400, true);
         }
       }
       if (path === '/data.json') return Response.json({ ...dataset, records: live.records, events: live.events, sources, memorial_services: memorialServices }, { headers: { ...securityHeaders, 'Cache-Control': 'public, max-age=30' } });
       if (path === '/events.ics') return new Response(head ? null : eventCalendar(url.searchParams.has('event') ? live.events.filter(event => event.id === url.searchParams.get('event')) : upcomingEvents(live.events)), { headers: { ...securityHeaders, 'Content-Type': 'text/calendar; charset=utf-8' } });
-      const page = publicExtension(url, live.events) || render(url, live.records, live.events);
+      const page = publicExtension(url, live.events, live.records) || render(url, live.records, live.events);
       return localPage(head ? '' : page.html, page.status);
     } catch {
       return responseHTML(shell('Temporarily unavailable | NorCal Veterans', 'Please try again soon.', '<section class="wrap"><h1>Please try again in a few minutes.</h1></section>'), 503, true);
@@ -98,7 +98,20 @@ export default {
 
 function localPage(html, status = 200, privatePage = false) {
   return responseHTML(html
+    .replaceAll('src="/organization-photos/seed-photo-rememberavet"', 'src="/assets/community.jpg"')
+    .replaceAll('src="/organization-photos/seed-photo-little-reata-veterans" alt="Horses in a sunlit Northern California pasture"', 'src="/assets/community.jpg" alt="Veteran community volunteers among memorial headstones decorated with holiday boughs"')
     .replace(/https:\/\/yolo-county-veterans-hq\.smartzgraphics\.workers\.dev(?:\/(?:organization|photo-presence))?/g, '/hq')
+    .replace(/href="\/hq\?org=([^"#]+)#(?:photos|officers)"/g, 'href="/for-organizations?org=$1"')
+    .replace(/href="\/hq\?org=[^"]+"/g, 'href="/hq?tab=organization"')
+    .replaceAll('Add photos →', 'Ask about contributing photos →')
+    .replaceAll('Add or update officer profiles →', 'Suggest a profile update →')
+    .replaceAll('Authorized representatives can add photos, create albums and manage collaboration through their organization editor.', 'To discuss contributing photos, use the organization update form to contact the site team.')
+    .replaceAll('Authorized organization representatives may add a voluntary profile after the person agrees to public use of their name, title, bio and selected photo.', 'Voluntary profile contributions require the person’s permission and review by the site team. Use the update form to discuss a contribution.')
+    .replaceAll('Authorized representatives can add public photos, officer profiles and organization updates through the private editor.', 'Use the update form to suggest organization information or discuss photo and voluntary profile contributions with the site team.')
+    .replaceAll('Authorized representatives can update public contact details, meeting information, events, photos and officer profiles without managing a separate hosting account.', 'Assigned administrators can maintain organization descriptions, contact details and events in the private headquarters. Use the update form for other contributions.')
+    .replaceAll('Organization editor →', 'Organization headquarters →')
+    .replaceAll('Open the organization editor →', 'Open organization headquarters →')
+    .replaceAll('Designated representatives can also use their organization editor.', 'Assigned administrators can maintain descriptions and contact details in the private headquarters.')
     .replace('The organizations you selected can review it privately in their dashboards and contact you directly.', 'Your introduction is saved in the private review queue for coordination with the organizations you selected.')
     .replace('Each selected organization sees the introduction in its signed-in dashboard.', 'The site team reviews your introduction privately and coordinates with the organizations you select.')
     .replace('An organization can accept or decline, contact you directly and create a calendar draft after scheduling.', 'The site team can follow up using the contact details you provided. Nothing is published automatically.')

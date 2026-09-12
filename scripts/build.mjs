@@ -3,6 +3,9 @@ import path from 'node:path';
 import {dataset} from '../src/data.mjs';
 import {brandLogos} from '../src/logos.mjs';
 const root=path.resolve(import.meta.dirname,'..');
+// The embedded NorCal HQ is served as a module; keep it generated from its HTML source.
+const headquarters=await fs.readFile(path.join(root,'worker','legacy','hq.html'),'utf8');
+await fs.writeFile(path.join(root,'worker','legacy','hq-template.mjs'),'export default '+JSON.stringify(headquarters)+';\n');
 const assets={};
 for(const [name,type] of [['styles.css','text/css; charset=utf-8'],['app.js','application/javascript; charset=utf-8'],['hq.js','application/javascript; charset=utf-8'],['favicon.svg','image/svg+xml']]){
  const bytes=await fs.readFile(path.join(root,'public',name));assets['/'+name]={type,base64:bytes.toString('base64')};

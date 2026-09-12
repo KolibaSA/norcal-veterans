@@ -6,9 +6,12 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node --test scripts/*.test.mjs",
-    "dev": "node scripts/dev.mjs"
+    "dev": "wrangler dev"
   },
   "engines": {
     "node": ">=24"
+  },
+  "devDependencies": {
+    "wrangler": "4.92.0"
   }
 }

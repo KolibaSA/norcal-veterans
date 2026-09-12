@@ -12,3 +12,47 @@ test('JWT validation rejects absent, expired, wrong audience and forged identity
 test('Region/organization assignments do not cross scopes; editor cannot publish',()=>{const u={email:'editor@example.com'},r={region_id:'a',organization_id:'org-a'};assert.equal(permitted(u,[{email:u.email,role:'region_admin',region_id:'b'}],r,'write'),false);assert.equal(permitted(u,[{email:u.email,role:'organization_admin',organization_id:'org-b'}],r),false);assert.equal(permitted(u,[{email:u.email,role:'editor',region_id:'a'}],r,'publish'),false);assert.equal(permitted(u,[{email:u.email,role:'editor',region_id:'a'}],r,'write'),true)});
 test('Saved records persist, concurrent edits conflict, drafts stay private, scope revocation takes effect',async()=>{const env={...envBase,DB:db()};let r=await req(env,'/api/hq/records','owner@example.com','POST',{kind:'organization',title:'Example organization',body:'Original',region_id:'a',status:'draft',payload:{city:'Davis'}});assert.equal(r.status,201);const {id}=await r.json();r=await req(env,'/api/hq/records?kind=organization','owner@example.com');let [record]=await r.json();assert.equal(record.title,'Example organization');r=await worker.fetch(new Request('https://site.test/api/directory'),env);assert.equal((await r.json()).length,0);r=await req(env,'/api/hq/records/'+id,'owner@example.com','PUT',{...record,status:'published',body:'Updated'});assert.equal(r.status,200);r=await req(env,'/api/hq/records/'+id,'owner@example.com','PUT',{...record,body:'Stale'});assert.equal(r.status,409);r=await worker.fetch(new Request('https://site.test/api/directory'),env);assert.equal((await r.json())[0].payload.member_information,'Updated');r=await req(env,'/api/hq/access','owner@example.com','POST',{email:'regional@example.com',role:'region_admin',region_id:'b'});const grant=await r.json();r=await req(env,'/api/hq/records?kind=organization','regional@example.com');assert.deepEqual(await r.json(),[]);r=await req(env,'/api/hq/records/'+id,'regional@example.com','PUT',{...record,title:'Attack'});assert.equal(r.status,404);r=await req(env,'/api/hq/export','regional@example.com');assert.equal(r.status,403);r=await req(env,'/api/hq/access/'+grant.id,'owner@example.com','DELETE');assert.equal(r.status,200);r=await req(env,'/api/hq/me','regional@example.com');assert.equal(r.status,403);r=await req(env,'/api/hq/audit','owner@example.com');assert.equal((await r.json()).filter(a=>a.action==='update').length,1);r=await req(env,'/api/hq/records','owner@example.com','POST',{kind:'task'},'https://attacker.test');assert.equal(r.status,403)});
 test('Unconfigured headquarters is closed; submissions are reviewed and rate-limited',async()=>{let r=await worker.fetch(new Request('https://site.test/hq'),{});assert.equal(r.status,503);const env={DB:db()};for(let n=0;n<6;n++){r=await worker.fetch(new Request('https://site.test/api/submissions',{method:'POST',headers:{Origin:'https://site.test','Content-Type':'application/json','CF-Connecting-IP':'192.0.2.1'},body:JSON.stringify({title:'Community program',body:'Please review'})}),env);assert.equal(r.status,n<5?201:429)}r=await worker.fetch(new Request('https://site.test/api/directory'),env);assert.deepEqual(await r.json(),[])});
+
+test('organization creation checks its stored scope and retains legitimate scoped event creation',async()=>{
+  const env={...envBase,DB:db()};
+  const organization={kind:'organization',title:'Assigned organization',body:'Public organization',region_id:'a',status:'published',payload:{city:'Davis'}};
+  let response=await req(env,'/api/hq/records','owner@example.com','POST',organization);
+  assert.equal(response.status,201);
+  const {id}=await response.json();
+  for(const [email,role] of [['org-admin@example.com','organization_admin'],['org-editor@example.com','editor']]){
+    response=await req(env,'/api/hq/access','owner@example.com','POST',{email,role,organization_id:id});
+    assert.equal(response.status,201);
+    for(const status of ['draft','published']){
+      response=await req(env,'/api/hq/records',email,'POST',{...organization,title:'Outside assignment',organization_id:id,status});
+      assert.equal(response.status,403,role+' cannot create a new organization with an existing organization grant');
+    }
+  }
+  response=await req(env,'/api/hq/records','org-admin@example.com','POST',{kind:'event',title:'Assigned organization event',region_id:'a',organization_id:id,status:'published',payload:{start_at:'2026-10-04T10:00:00-07:00',venue:'Public hall'}});
+  assert.equal(response.status,201);
+  response=await req(env,'/api/hq/access','owner@example.com','POST',{email:'region-admin@example.com',role:'region_admin',region_id:'a'});
+  assert.equal(response.status,201);
+  response=await req(env,'/api/hq/records','region-admin@example.com','POST',{...organization,title:'New organization within assigned region'});
+  assert.equal(response.status,201);
+  const created=await response.json();
+  response=await req(env,'/api/hq/records?kind=organization','region-admin@example.com');
+  const organizations=await response.json();
+  assert.equal(organizations.length,2);
+  assert.equal(organizations.find(record=>record.id===created.id).organization_id,created.id);
+  response=await req(env,'/api/hq/records','region-admin@example.com','POST',{...organization,region_id:'b'});
+  assert.equal(response.status,403);
+});
+
+test('embedded HQ reports manual request processing and serves its current HTML source',async()=>{
+  const env={...envBase,DB:db()};
+  let response=await req(env,'/api/hq/me','owner@example.com');
+  const identity=await response.json();
+  assert.equal(identity.processorConnected,false);
+  response=await req(env,'/hq','owner@example.com');
+  assert.equal(response.status,200);
+  const html=await response.text();
+  assert.equal(html,readFileSync(new URL('../worker/legacy/hq.html',import.meta.url),'utf8'));
+  assert.match(html,/Requests are reviewed and updated manually/);
+  assert.doesNotMatch(html,/every 10 minutes|your Mac is awake/);
+  response=await req(env,'/api/hq/records','owner@example.com','POST',{kind:'request',title:'Website update',body:'Please review this change.',region_id:'yolo-solano',status:'queued',payload:{}});
+  assert.equal(response.status,201);
+});
