@@ -47,6 +47,8 @@ test('embedded HQ reports manual request processing and serves its current HTML 
   let response=await req(env,'/api/hq/me','owner@example.com');
   const identity=await response.json();
   assert.equal(identity.processorConnected,false);
+  const configured=await req({...env,HQ_REQUEST_AGENT_ENABLED:'true'},'/api/hq/me','owner@example.com');
+  assert.equal((await configured.json()).processorConnected,true);
   response=await req(env,'/hq','owner@example.com');
   assert.equal(response.status,200);
   const html=await response.text();

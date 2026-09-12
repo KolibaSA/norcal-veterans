@@ -33,7 +33,7 @@ export default {async fetch(req,env){const url=new URL(req.url),path=url.pathnam
  const grants=user.owner?[]:await list(env,'SELECT * FROM grants WHERE email=?',user.email);if(!user.owner&&!grants.length)return fail('Your account has no headquarters assignment.',403);
  if(path==='/hq'||path==='/hq/')return new Response(headquarters,{headers:{'Content-Type':'text/html;charset=utf-8','Cache-Control':'private, no-store','Content-Security-Policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",'X-Content-Type-Options':'nosniff'}});
  if(req.method!=='GET'&&req.headers.get('Origin')!==url.origin)return fail('Request origin rejected.',403);
- if(path==='/api/hq/me')return json({...user,grants,uploads:!!env.FILES,processorConnected:false});
+ if(path==='/api/hq/me')return json({...user,grants,uploads:!!env.FILES,processorConnected:env.HQ_REQUEST_AGENT_ENABLED==='true'});
  if(path==='/api/hq/records'&&req.method==='GET'){const kind=url.searchParams.get('kind');if(!KINDS.includes(kind))return fail('Unknown section.');const rows=await list(env,'SELECT * FROM records WHERE kind=? ORDER BY updated_at DESC LIMIT 500',kind);return json(rows.filter(r=>permitted(user,grants,r)).map(r=>({...r,payload:JSON.parse(r.payload)})))}
  if(path==='/api/hq/records'&&req.method==='POST'){
  const x=await body(req),kind=x.kind,title=clean(x.title,200),region=clean(x.region_id,80),org=clean(x.organization_id,120)||null;

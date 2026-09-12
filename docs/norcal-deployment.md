@@ -48,6 +48,6 @@ Reconcile or revert the corresponding GitHub change so the next build does not o
 
 ## Current operating limits
 
-HQ requests are stored for manual follow-up. No connected request processor is advertised. File uploads remain disabled because the NorCal Worker has no private R2 file binding. Public forms remain under review and do not automatically publish or grant access.
+The NorCal HQ request agent checks queued owner requests every five minutes through the existing authenticated Cloudflare connection. It runs locally with Codex, claims one request at a time, and records outcomes in HQ. See [request agent operations](hq-request-agent.md). File uploads remain disabled because the NorCal Worker has no private R2 file binding. Public forms remain under review and do not automatically publish or grant access.
 
 This corporate workstation blocks the production custom domain through its newly-registered-domain filter. Record Cloudflare deployment and preview evidence separately from a real signed-in production browser check; do not claim that check passed from this machine.
