@@ -1,5 +1,14 @@
 import { esc, label, dateLabel, filterRecords, recordPath } from './browser-ui.mjs';
 
+export function recordInput(fields, tab, feature, editing = null) {
+  return {
+    kind: tab, title: fields.recordTitle, body: fields.recordBody, status: fields.recordStatus,
+    region_id: fields.region,
+    organization_id: feature.organizationId ? feature.organizationId(fields, editing?.payload ?? {}) : fields.org,
+    payload: feature.payload(fields, editing?.payload ?? {}), version: editing?.version
+  };
+}
+
 // Generic lifecycle mechanics; feature behavior and state arrive through the registry.
 export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initializeOptions, extensions = [] }) {
   const $ = id => document.getElementById(id);
@@ -55,11 +64,7 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
   }
   function recordFromForm() {
     const fields = readFields();
-    return {
-      kind: tab, title: fields.recordTitle, body: fields.recordBody, region_id: fields.region,
-      organization_id: currentFeature().organizationId ? currentFeature().organizationId(fields, editing?.payload ?? {}) : fields.org,
-      payload: currentFeature().payload(fields, editing?.payload ?? {}), version: editing?.version
-    };
+    return recordInput(fields, tab, currentFeature(), editing);
   }
   function editorPermissions(record) {
     const feature = currentFeature(), editable = feature.canEdit(me, record);
