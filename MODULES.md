@@ -4,6 +4,8 @@ Start here for a feature change. Open the target module's `README.md` and `BROWS
 
 All paths below are relative to this repository. One website, Worker and D1 database serve these modules. The public site and HQ keep their existing behavior and routes.
 
+The 13-feature extraction was completed in `b5f19cc` on September 12, 2026. This map describes the implemented structure. See [README.md](README.md) for project background and subsequent fixes, and [AGENTS.md](AGENTS.md) for permanent rules. Routine feature work should need this small map plus the relevant module, rather than a fresh whole-application review.
+
 | Feature | Module under `src/modules/` | Owns |
 | --- | --- | --- |
 | Share a Program | [share-program](src/modules/share-program/README.md) | `/share` form, presenter/recipient validation, private program-introduction record contract |
@@ -37,6 +39,14 @@ Start with `src/modules/share-program/README.md`, then `public.mjs`, `domain.mjs
 
 **Preserved boundaries**
 
+The boundary is the feature's responsibility, not just its folder. Keep feature-specific fields, actions, validation and state with that feature. Use shared controls and documented interfaces where appropriate; changes to their contracts can require focused integration work across the affected callers.
+
 The current public directory/profile renderer remains in `src/site.mjs`; it is not needed for a Share a Program edit. Its common page shell was extracted to `src/shared/public-shell.mjs`. Imported application source and root migrations remain regression/recovery references; follow `wrangler.jsonc` to the active Worker and `migrations/legacy` to its schema.
+
+**Example: investigate a Requests save failure**
+
+Start with [Requests](src/modules/requests/README.md) and its browser contract. The request target (`website`, `headquarters`, or `decide`) is stored in `payload.target`; the API record kind remains `request`. The record save body must also include the selected `status`. The September 12 omission of that status was fixed in `c708f52` in `src/shared/browser-runtime.mjs`, with coverage in `src/shared/browser-runtime.test.mjs`.
+
+A save failure can justify following the shared editor into `src/app/hq-records.mjs` and `src/shared/server-records.mjs`. It does not require reading unrelated Organization, Event, or Access implementations. When changing form submission, verify the actual new-item and existing-item save flows, including the values sent to the server; a visible selected option alone does not prove the value was submitted.
 
 Module tests and contract checks support focused work; browser/staging acceptance and the full release gate still apply before publication. Never treat a green test run as evidence that untested production authentication was exercised. See `docs/norcal-deployment.md` for release operations and `scripts/README.md` for build/discovery details.

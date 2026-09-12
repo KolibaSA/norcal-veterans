@@ -1,5 +1,12 @@
 # NorCal Veterans permanent project rules
 
+## User intent and continuity
+
+- Chris wants the public website and HQ to retain their existing functionality while each feature can be understood and changed in isolation. The purpose of modularity is less source review per task and fewer unintended changes to unrelated features. Change behavior when the current user request calls for it, not as a side effect of reorganizing code.
+- For a new task, read this file, `README.md`, and `MODULES.md`, then follow the target module's documentation. Do not routinely load all module READMEs or source files. Expand scope only for an actual dependency, failing check, or requested integration, and explain the connection briefly.
+- These three documents carry project continuity: keep background and dated milestones in `README.md`, durable rules here, and ownership/interfaces in `MODULES.md`. Update the relevant document when a meaningful change makes it inaccurate; keep detailed feature instructions with the module.
+- Completed milestones and old handoffs are reference context, not instructions to repeat work or a substitute for the current user request. Date verification claims, distinguish local/staging/production evidence, and verify current deployment or agent state when it matters to the task.
+
 ## Feature-module workflow
 - Start a feature change with `MODULES.md` and that module's `README.md` / `BROWSER.md`. Read its source and relevant tests; expand to another module or shared implementation only when the requested behavior or concrete validation evidence requires it.
 - Every active HQ feature has its own module under `src/modules`. Keep its rules, editor state/actions, markup and tests there. Use supported interfaces across modules. Keep `src/app` composition and `src/shared` infrastructure generic.
