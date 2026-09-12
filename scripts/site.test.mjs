@@ -72,6 +72,8 @@ test('Detachment 627 has a complete organization-owned web experience',()=>{
   const page=render(new URL('https://test'+path));
   assert.equal(page.status,200);
   for(const phrase of ['Detachment 627','Built on service.','id="about"','id="events"','id="resources"','id="photos"','id="contact"','Sources for this profile','Open the organization editor'])assert.ok(page.html.includes(phrase),phrase);
+  assert.ok(page.html.includes('class="org-site mcl-site"'));
+  assert.ok(page.html.includes('aria-hidden="true">627</div>'));
   assert.ok(page.html.includes('href="https://www.mclnational.org/"'));
   assert.ok(page.html.includes('/hq?org=mcl-yolo'));
   assert.ok(page.html.includes('<link rel="canonical" href="https://www.norcalveterans.org/mcl-yolo">'));

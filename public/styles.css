@@ -442,3 +442,42 @@ details[open]>summary{margin-bottom:10px}
 @media(max-width:700px){.org-site-nav>div{gap:19px}.org-site-hero{min-height:670px}.org-site-hero-grid{grid-template-columns:1fr;padding-top:62px;padding-bottom:68px}.org-site-hero h1{font-size:clamp(49px,13vw,68px)}.org-site-emblem{display:none}.org-site-intro{grid-template-columns:1fr;gap:38px;padding-top:75px;padding-bottom:75px}.org-site-pillars,.org-site-resources{padding:72px 0}.org-site-card-grid article{min-height:270px}.org-site-calendar,.org-site-community{padding-top:76px;padding-bottom:76px}.org-site-resource-grid,.org-site-contact-grid{grid-template-columns:1fr}.org-site-contact{padding:72px 0}.org-site-sources{align-items:flex-start;flex-direction:column}.org-site-sources>a{white-space:normal}}
 @media(prefers-reduced-motion:reduce){.org-site-card-grid article,.org-site-resource-grid a{transition:none}.org-site-card-grid article:hover,.org-site-resource-grid a:hover{transform:none}}
 
+/* Marine Corps League pages use a restrained scarlet, gold and ivory palette. */
+.mcl-site{--mcl-red:#861f2d;--mcl-red-deep:#3b1019;--mcl-gold:#d3aa4b;--mcl-gold-soft:#f5ecd2;--mcl-ivory:#fffaf0;background:#fbf8f1;color:#33282a}
+.mcl-site a{color:var(--mcl-red)}
+.mcl-site .org-site-nav{background:var(--mcl-ivory);border-bottom:1px solid rgba(134,31,45,.18)}
+.mcl-site .org-site-identity{color:var(--mcl-red-deep)}
+.mcl-site .org-site-identity small{color:#765f4c}
+.mcl-site .org-site-nav>div a{color:var(--mcl-red-deep)}
+.mcl-site .org-site-nav>div a:hover{color:var(--mcl-red);text-decoration-color:var(--mcl-gold)}
+.mcl-site .org-site-hero{background:radial-gradient(circle at 84% 28%,#a64d4d 0,#651e2b 30%,var(--mcl-red-deep) 68%);border-top-color:var(--mcl-gold)}
+.mcl-site .org-site-hero::before{background:linear-gradient(120deg,rgba(37,7,14,.18),rgba(37,7,14,.7)),repeating-linear-gradient(120deg,transparent 0 80px,rgba(244,218,151,.045) 80px 81px)}
+.mcl-site .org-site-hero-mark{color:rgba(244,218,151,.095)}
+.mcl-site .org-site-hero .eyebrow,.mcl-site .org-site-contact .eyebrow{color:#f2d892}
+.mcl-site .org-site-hero h1 em{color:#f0cf72}
+.mcl-site .org-site-emblem{border:3px solid rgba(211,170,75,.82);box-shadow:0 30px 90px rgba(27,4,10,.34)}
+.mcl-site .button{background:var(--mcl-red);border-color:var(--mcl-red)}
+.mcl-site .button:hover{background:#6e1724;border-color:#6e1724}
+.mcl-site .button.light{background:var(--mcl-gold);border-color:var(--mcl-gold);color:#351119}
+.mcl-site .button.light:hover{background:#e4c66f;border-color:#e4c66f}
+.mcl-site .button.hero-outline{background:rgba(255,250,240,.08);border-color:rgba(244,218,151,.78);color:#fff8e7}
+.mcl-site .button.hero-outline:hover{background:var(--mcl-ivory);border-color:var(--mcl-ivory);color:var(--mcl-red-deep)}
+.mcl-site .org-site-intro{background:var(--mcl-ivory)}
+.mcl-site .org-site-intro dl{border-top-color:var(--mcl-gold);box-shadow:0 14px 40px rgba(86,47,25,.1)}
+.mcl-site .org-site-pillars{background:#f2e9d5;border-block-color:#e1c87e}
+.mcl-site .org-site-heading>p,.mcl-site .org-site-intro p{color:#685b55}
+.mcl-site .org-site-card-grid article{border-color:#e2d5bc;border-top:4px solid var(--mcl-gold);box-shadow:0 8px 28px rgba(86,47,25,.08)}
+.mcl-site .org-site-card-grid article>span{color:var(--mcl-red);}
+.mcl-site .org-site-card-grid a{color:var(--mcl-red);}
+.mcl-site .org-site-resources{background:var(--mcl-red-deep);border-top-color:var(--mcl-gold)}
+.mcl-site .org-site-resources .eyebrow{color:#f2d892}
+.mcl-site .org-site-resource-grid a{background:rgba(255,250,240,.08);border-color:rgba(244,218,151,.28);color:#fff8e7}
+.mcl-site .org-site-resource-grid a:hover{background:rgba(244,218,151,.17)}
+.mcl-site .org-site-resource-grid span{color:#eadfc9}
+.mcl-site .org-site-contact{background:var(--mcl-red);border-top:4px solid var(--mcl-gold)}
+.mcl-site .org-site-contact p{color:#f8e9dc}
+.mcl-site .org-site-contact .button.outline{border-color:#fff8e7;color:#fff8e7}
+.mcl-site .org-site-contact aside{background:var(--mcl-ivory);box-shadow:0 18px 46px rgba(53,12,20,.22)}
+.mcl-site .org-site-sources{background:var(--mcl-ivory)}
+.mcl-site .org-site-sources summary{color:var(--mcl-red-deep)}
+
