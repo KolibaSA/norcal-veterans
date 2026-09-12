@@ -115,7 +115,8 @@ test('regional home images resolve to complete bundled images and health identif
     const html=await response.text();
     assert.doesNotMatch(html,/seed-photo-rememberavet|seed-photo-little-reata-veterans|Horses in a sunlit/);
     const imagePaths=[...new Set([...html.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map(match=>match[1]))];
-    assert.ok(imagePaths.includes('/assets/community.jpg'));
+    assert.ok(imagePaths.includes('/norcal-hero-table.png'));
+    assert.ok(imagePaths.includes('/norcal-hero-seals.png'));
     for(const path of imagePaths){
       assert.ok(path.startsWith('/'),path);
       const image=await worker.fetch(new Request(new URL(path,'https://www.norcalveterans.org')),env);
