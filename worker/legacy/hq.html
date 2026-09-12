@@ -1,24 +1,156 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Headquarters | NorCal Veterans</title><style>
-:root{font:16px/1.55 Arial,sans-serif;color:#172a40;background:#f0f4f8}*{box-sizing:border-box}body{margin:0}a{color:inherit;text-underline-offset:3px}button,input,textarea,select{font:inherit}button,a,input,textarea,select{outline-offset:4px}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #b6303f}header{background:#10273f;color:#fff;padding:22px 4%;display:flex;justify-content:space-between;gap:20px;align-items:center}header strong{font-size:21px;letter-spacing:2px}header small{display:block;color:#c7d5e4}header a{margin-left:20px}.layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 95px)}nav{background:#fff;padding:28px 18px;border-right:1px solid #d5dee8}nav a{display:block;text-decoration:none;padding:12px 16px;border-radius:5px;margin-bottom:5px}nav a[aria-current=page]{background:#142d48;color:white;border-left:4px solid #c44751}nav .label{font-size:12px;letter-spacing:1.8px;color:#63758a;padding:15px}main{padding:40px 5%;max-width:1500px;width:100%;margin:0 auto}.eyebrow{font-size:12px;font-weight:bold;letter-spacing:2px;color:#a22c3a}h1{font-size:38px;line-height:1.15;margin:10px 0}h2{font-size:23px;line-height:1.25;margin:5px 0 20px}h3{font-size:19px;margin:0 0 10px}.lead{color:#596d82;margin-bottom:28px}.panel{padding:28px;background:white;border:1px solid #d4dfe9;border-radius:8px;margin:20px 0}.bar{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.stat{padding:20px;border-top:3px solid #b22e3d;background:#fff}.stat b{display:block;font-size:36px}.muted{color:#596d82}.notice{padding:15px 20px;background:#e6edf5;border-left:3px solid #536e8c;margin:20px 0}.error{background:#fff0f0;border-color:#a52e3b}label{display:block;font-weight:600;margin:15px 0 5px}input,textarea,select{width:100%;padding:11px 13px;border:1px solid #bac8d6;border-radius:4px;background:white;color:#15283e}textarea{min-height:110px;resize:vertical}button,.button{cursor:pointer;padding:11px 19px;background:#a72d3a;color:#fff;border:1px solid #a72d3a;border-radius:4px;text-decoration:none;display:inline-block;font-weight:600}button.secondary{background:white;color:#203c58;border-color:#b8c8d7}button:disabled{opacity:.5;cursor:wait}.record{display:grid;grid-template-columns:1fr auto;gap:15px;padding:24px;border-bottom:1px solid #dce4ed}.record:last-child{border-bottom:0}.record p{white-space:pre-wrap;overflow-wrap:anywhere}.pill{display:inline-block;font-size:13px;border:1px solid #c3d0de;border-radius:20px;padding:3px 11px;color:#415972}.small{font-size:14px}.empty{padding:40px;text-align:center;color:#536b82}.actions{display:flex;gap:12px;margin-top:25px;flex-wrap:wrap}.hide,[hidden]{display:none!important}.skip{position:absolute;top:-100px;left:10px;background:white;padding:12px}.skip:focus{top:5px}.audit{overflow:auto}.audit td,.audit th{padding:12px;text-align:left;border-bottom:1px solid #d7e1eb;overflow-wrap:anywhere}.audit table{width:100%;border-collapse:collapse}.scope{font-size:14px;color:#596d82}#message{position:sticky;top:10px;z-index:4}footer{color:#53687e;font-size:14px;padding:25px 0}.filelist a{display:block;margin:8px 0}.readonly{background:#f7f9fc}@media(max-width:850px){.layout{grid-template-columns:1fr}nav{display:flex;flex-wrap:wrap;padding:12px}nav a{padding:8px 12px;font-size:14px;margin:0}.label{display:none}main{padding:25px 5%}header{align-items:flex-start}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.record{grid-template-columns:1fr}header strong{font-size:16px}header a{font-size:14px;display:block;margin:0}.panel{padding:20px}}
-</style></head><body><a href="#main" class="skip">Skip to content</a><header><div><strong>NORCAL VETERANS</strong><small>Headquarters · Local connections. Shared purpose.</small></div><div><span id="identity">Checking sign-in…</span><a href="/">Public website ↗</a><a href="/cdn-cgi/access/logout">Sign out</a></div></header><div class="layout"><nav aria-label="Headquarters"><div class="label">YOUR WORKSPACE</div><a href="?tab=request" data-tab="request">Requests</a><a href="?tab=overview" data-tab="overview">Overview</a><a href="?tab=task" data-tab="task">Project work</a><a href="?tab=submission" data-tab="submission">Public submissions</a><a href="?tab=event" data-tab="event">Events</a><a href="?tab=organization" data-tab="organization">Organization profiles</a><a href="?tab=coordination" data-tab="coordination">Coordination</a><a href="?tab=library" data-tab="library">Ready-to-use copy</a><div class="label">PLATFORM MANAGEMENT</div><a href="?tab=access" data-tab="access" class="owner">Organization & region access</a><a href="?tab=audit" data-tab="audit" class="owner">Change history</a><a href="/api/hq/export" class="owner" download="norcal-headquarters-backup.json">Download backup</a></nav><main id="main"><p class="eyebrow">SHARED PURPOSE · ONE PLACE TO KEEP THINGS MOVING</p><h1 id="title">Your headquarters</h1><p class="lead" id="intro">Requests, community information, and the work between meetings.</p><div id="message" role="status" aria-live="polite"></div><div id="processor" class="notice" hidden>Save requests here to keep the project work in one place. Requests are reviewed and updated manually; automatic processing is not connected. Open an item to read or add an update, then refresh the page to see its latest status.</div><div id="content"><p class="notice">Checking secure access…</p></div><section id="editor" class="panel" hidden><h2 id="editorTitle">New item</h2><form id="recordForm"><label for="recordTitle">Title</label><input id="recordTitle" required maxlength="200"><label for="recordBody">Description or update</label><textarea id="recordBody" maxlength="20000"></textarea><div class="grid"><div><label for="region">Region</label><select id="region"><option value="yolo-solano">Yolo-Solano</option value="sacramento">Sacramento</option><option value="sierra-foothills">Sierra Foothills</option><option value="north-bay">North Bay</option><option value="east-bay">East Bay</option><option value="south-bay-peninsula">South Bay / Peninsula</option><option value="north-state">North State</option><option value="north-coast">North Coast</option><option value="northern-san-joaquin">Northern San Joaquin</option></select></div><div><label for="org">Organization scope</label><select id="org"><option value="">Region-wide</option></select></div><div><label for="recordStatus">Status</label><select id="recordStatus"></select></div></div><div id="organizationFields" hidden class="grid"><div><label for="city">City</label><input id="city"></div><div><label for="type">Organization type</label><input id="type"></div><div><label for="website">Public website</label><input id="website" type="url"></div><div><label for="phone">Public phone</label><input id="phone"></div></div><div id="eventFields" hidden class="grid"><div><label for="start">Starts (Pacific local time)</label><input id="start" type="datetime-local"><label for="offset">Pacific UTC offset</label><select id="offset"><option value="-07:00">Daylight time (UTC−07:00)</option><option value="-08:00">Standard time (UTC−08:00)</option></select></div><div><label for="venue">Venue</label><input id="venue"><label for="source">Event source URL</label><input id="source" type="url"></div></div><div class="actions"><button type="submit" id="save">Save item</button><button type="button" class="secondary" id="cancel">Cancel</button></div></form><section id="attachmentSection" hidden><h3>Attachments</h3><div id="files" class="filelist"></div><form id="fileForm"><label for="file">Attach a file (up to 10 MB)</label><input type="file" id="file" required><button type="submit">Upload attachment</button></form><p id="storageNote" class="small muted" hidden>Attachment storage has not been connected yet.</p></section></section><footer>Keep this workspace to organization operations. Store veteran case details, discharge papers, and medical information with an appropriate service provider.</footer></main></div>
-<script>
-const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const titles={request:'Requests',overview:'Your headquarters',task:'Project work',submission:'Public submissions',event:'Events',organization:'Organization profiles',coordination:'Coordination',library:'Ready-to-use copy',access:'Organization & region access',audit:'Change history'};
-const statuses={request:['queued','in_progress','needs_input','completed','closed'],task:['open','in_progress','completed','closed'],organization:['draft','published','archived'],event:['draft','published','archived'],coordination:['draft','active','archived'],library:['draft','ready','archived'],submission:['pending','reviewed','rejected']};
-let tab=new URLSearchParams(location.search).get('tab')||'request';if(!titles[tab])tab='request';let me,rows=[],editing=null,organizations=[];
-async function api(path,options={}){const r=await fetch('/api/hq/'+path,{...options,headers:options.body instanceof FormData?{}:{'Content-Type':'application/json'}});const d=await r.json();if(!r.ok)throw Error(d.error||'Unable to complete this request.');return d}
-function message(s,error=false){$('message').className='notice'+(error?' error':'');$('message').textContent=s}
-function scope(r){return (r.region_id||'')+(r.organization_id?' · '+r.organization_id:'')}
-function showEditor(r=null){editing=r;$('editor').hidden=false;$('editorTitle').textContent=r?'Edit '+titles[tab].toLowerCase():'New '+(tab==='request'?'request':'item');$('recordTitle').value=r?.title||'';$('recordBody').value=r?.body||'';$('region').value=r?.region_id||me.grants?.find(g=>g.region_id)?.region_id||'yolo-solano';$('org').value=r?.organization_id||me.grants?.find(g=>g.organization_id)?.organization_id||'';$('region').disabled=!!r;$('org').disabled=!!r;$('recordStatus').innerHTML=statuses[tab].map(s=>'<option value="'+s+'">'+s.replaceAll('_',' ')+'</option>').join('');$('recordStatus').value=r?.status||statuses[tab][0];$('organizationFields').hidden=tab!=='organization';$('eventFields').hidden=tab!=='event';const p=r?.payload||{};$('city').value=p.city||'';$('type').value=p.organization_type||'';$('website').value=p.public_contacts?.website||'';$('phone').value=p.public_contacts?.phone||'';$('start').value=p.start_at?.slice(0,16)||'';$('offset').value=p.start_at?.slice(-6)||'-07:00';$('venue').value=p.venue||'';$('source').value=p.source_url||'';$('start').required=tab==='event';$('venue').required=tab==='event';$('attachmentSection').hidden=!r;$('fileForm').hidden=!me.uploads;$('storageNote').hidden=me.uploads;if(r)loadFiles(r.id);$('editor').scrollIntoView({behavior:'smooth'});$('recordTitle').focus()}
-async function loadFiles(id){try{const a=await api('attachments?record_id='+encodeURIComponent(id));$('files').innerHTML=a.map(f=>'<a href="/api/hq/attachments/'+encodeURIComponent(f.id)+'">'+esc(f.filename)+' · '+Math.ceil(f.size/1024)+' KB</a>').join('')||'<p class="small muted">No attachments.</p>'}catch(e){message(e.message,true)}}
-function renderRows(filter=''){let visible=rows.filter(r=>(r.title+' '+r.body+' '+r.status).toLowerCase().includes(filter.toLowerCase()));$('list').innerHTML=visible.map(r=>'<article class="record"><div><span class="pill">'+esc(r.status.replaceAll('_',' '))+'</span><h3>'+esc(r.title)+'</h3><p>'+esc(r.body.slice(0,450))+'</p><p class="scope">'+esc(scope(r))+' · Updated '+esc(new Date(r.updated_at).toLocaleString())+'</p></div><div><button class="secondary" data-edit="'+esc(r.id)+'">Open item</button></div></article>').join('')||'<p class="empty">No items here yet.</p>';document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>showEditor(rows.find(r=>r.id===b.dataset.edit)))}
-async function load(){try{$('editor').hidden=true;$('title').textContent=titles[tab];document.querySelectorAll('[data-tab]').forEach(a=>a.setAttribute('aria-current',a.dataset.tab===tab?'page':'false'));$('processor').hidden=tab!=='request';if(me.processorConnected)$('processor').textContent='A Codex agent checks queued owner requests every five minutes while its computer is awake and Codex is running. Save your request as queued. Open the item to read its result; refresh for status updates. If it needs input, add your answer and set it back to queued.';if(statuses[tab]){rows=await api('records?kind='+tab);$('content').innerHTML='<div class="bar"><h2>'+ (tab==='request'?'What would you like to work on?':'Keep your community information current.')+'</h2><button id="new">'+(tab==='request'?'New request':'Add item')+'</button></div><label for="search">Search this section</label><input type="search" id="search" placeholder="Title, description, or status"><div class="panel" id="list"></div>';$('new').onclick=()=>showEditor();$('search').oninput=e=>renderRows(e.target.value);renderRows()}
-else if(tab==='overview'){const [r,t,o]=await Promise.all(['request','task','organization'].map(k=>api('records?kind='+k)));$('content').innerHTML='<div class="stats"><div class="stat"><b>'+r.filter(x=>!['completed','closed'].includes(x.status)).length+'</b>Open requests</div><div class="stat"><b>'+t.filter(x=>!['completed','closed'].includes(x.status)).length+'</b>Project items</div><div class="stat"><b>'+o.length+'</b>Organization profiles</div></div><div class="panel"><h2>A shared home for the work between meetings.</h2><p>Use Requests to record changes, research, or ideas. Track the work, maintain profiles and events, and review public submissions before using their information.</p><a class="button" href="?tab=request">Start a request</a></div><div class="notice">Yolo-Solano is the first region. Region and organization assignments are managed by the platform owner. Open Requests to see processing instructions and the current workflow.</div>'}
-else if(tab==='access'){if(!me.owner)throw Error('Only the platform owner manages access.');const g=await api('access');$('content').innerHTML='<div class="notice">Assignments grant access inside this headquarters. People must also be allowed through Cloudflare Access. Revocation here takes effect on their next request.</div><form id="grant" class="panel"><h2>Assign an administrator or editor</h2><label for="email">Email</label><input id="email" type="email" required><label for="role">Role</label><select id="role"><option value="region_admin">Region administrator</option><option value="organization_admin">Organization administrator</option><option value="editor">Editor</option></select><label for="scopeType">Scope</label><select id="scopeType"><option value="region">Region</option><option value="organization">Organization</option></select><label for="scopeValue">Region slug or organization ID</label><input id="scopeValue" required value="yolo-solano"><p class="small muted">Organization IDs appear below each organization profile item.</p><button type="submit">Save assignment</button></form><div class="panel">'+g.map(x=>'<div class="record"><div><b>'+esc(x.email)+'</b><p>'+esc(x.role)+' · '+esc(x.region_id||x.organization_id)+'</p></div><button class="secondary" data-revoke="'+esc(x.id)+'">Revoke</button></div>').join('')+'</div>';$('grant').onsubmit=async e=>{e.preventDefault();try{const v={email:$('email').value,role:$('role').value};v[$('scopeType').value==='region'?'region_id':'organization_id']=$('scopeValue').value;await api('access',{method:'POST',body:JSON.stringify(v)});message('Assignment saved.');await load()}catch(e){message(e.message,true)}};document.querySelectorAll('[data-revoke]').forEach(b=>b.onclick=async()=>{if(!confirm('Revoke this assignment? The person will lose this scope on their next request.'))return;try{await api('access/'+b.dataset.revoke,{method:'DELETE'});message('Assignment revoked.');await load()}catch(e){message(e.message,true)}})}
-else if(tab==='audit'){const a=await api('audit');$('content').innerHTML='<div class="panel audit"><table><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Item</th></tr></thead><tbody>'+a.map(x=>'<tr><td>'+esc(x.created_at)+'</td><td>'+esc(x.actor)+'</td><td>'+esc(x.action)+'</td><td>'+esc(x.record_id)+'</td></tr>').join('')+'</tbody></table></div>'}
-}catch(e){message(e.message,true)}}
-$('cancel').onclick=()=>$('editor').hidden=true;
-$('recordForm').onsubmit=async e=>{e.preventDefault();$('save').disabled=true;try{const payload=structuredClone(editing?.payload||{});if(tab==='organization'){payload.verified_name=$('recordTitle').value;payload.member_information=$('recordBody').value;payload.city=$('city').value;payload.organization_type=$('type').value;payload.public_contacts={...payload.public_contacts,website:$('website').value,phone:$('phone').value}}if(tab==='event'){payload.title=$('recordTitle').value;payload.description=$('recordBody').value;payload.start_at=$('start').value+$('offset').value;payload.venue=$('venue').value;payload.source_url=$('source').value}const x={kind:tab,title:$('recordTitle').value,body:$('recordBody').value,region_id:$('region').value,organization_id:$('org').value,status:$('recordStatus').value,payload,version:editing?.version};await api('records'+(editing?'/'+editing.id:''),{method:editing?'PUT':'POST',body:JSON.stringify(x)});message('Saved.');await load()}catch(e){message(e.message,true)}finally{$('save').disabled=false}};
-$('fileForm').onsubmit=async e=>{e.preventDefault();const f=$('file').files[0];if(!f||f.size>10*1024*1024)return message('Choose a file smaller than 10 MB.',true);try{const data=new FormData();data.append('record_id',editing.id);data.append('file',f);await api('attachments',{method:'POST',body:data});message('Attachment uploaded.');$('file').value='';await loadFiles(editing.id)}catch(e){message(e.message,true)}};
-(async()=>{try{me=await api('me');$('identity').textContent=me.email;document.querySelectorAll('.owner').forEach(e=>e.hidden=!me.owner);organizations=await api('records?kind=organization');$('org').innerHTML='<option value="">Region-wide</option>'+organizations.map(o=>'<option value="'+esc(o.id)+'">'+esc(o.title)+'</option>').join('');await load()}catch(e){$('identity').textContent='Sign-in required';$('content').innerHTML='<div class="notice error">'+esc(e.message)+'</div>';message('Headquarters is locked until secure sign-in and storage are configured.',true)}})();
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Headquarters | NorCal Veterans</title>
+  <!-- HQ_STYLES -->
+</head>
+<body>
+  <a href="#main" class="skip">Skip to content</a>
+  <header>
+    <div><strong>NORCAL VETERANS</strong><small>Headquarters · Local connections. Shared purpose.</small></div>
+    <div class="header-actions"><span id="identity">Checking sign-in…</span><a href="/">Public website ↗</a><a href="/cdn-cgi/access/logout">Sign out</a></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Headquarters">
+      <div class="label">YOUR WORKSPACE</div>
+      <a href="?tab=request" data-tab="request">Requests</a>
+      <a href="?tab=overview" data-tab="overview">Overview</a>
+      <a href="?tab=task" data-tab="task">Project work</a>
+      <a href="?tab=submission" data-tab="submission">Public submissions</a>
+      <a href="?tab=event" data-tab="event">Events</a>
+      <a href="?tab=organization" data-tab="organization">Organization profiles</a>
+      <a href="?tab=coordination" data-tab="coordination">Coordination</a>
+      <a href="?tab=library" data-tab="library">Ready-to-use copy</a>
+      <div class="label owner">PLATFORM MANAGEMENT</div>
+      <a href="?tab=access" data-tab="access" class="owner">Organization &amp; region access</a>
+      <a href="?tab=audit" data-tab="audit" class="owner">Change history</a>
+      <a href="/api/hq/export" class="owner" download="norcal-headquarters-backup.json">Download backup</a>
+    </nav>
+    <main id="main">
+      <p class="eyebrow">SHARED PURPOSE · ONE PLACE TO KEEP THINGS MOVING</p>
+      <h1 id="title" tabindex="-1">Your headquarters</h1>
+      <p class="lead">Requests, community information, and the work between meetings.</p>
+      <div id="message" role="status" aria-live="polite" hidden></div>
+      <section id="processor" class="notice" aria-label="Request processing" hidden></section>
+      <div id="content"><p class="notice">Checking secure access…</p></div>
+
+      <section id="editor" class="panel" aria-labelledby="editorTitle" hidden>
+        <div class="bar"><h2 id="editorTitle" tabindex="-1">New item</h2><a id="itemLink" hidden>Link to this item</a></div>
+        <p id="editorNotice" class="notice" hidden></p>
+        <section id="submissionSource" class="notice" hidden aria-label="Original public submission"></section>
+        <section id="conflict" class="notice error" hidden aria-labelledby="conflictTitle">
+          <h3 id="conflictTitle">This item changed while you were editing</h3>
+          <p>Your unsaved draft is still in this tab. Compare it with the latest saved item before choosing which values to keep.</p>
+          <div id="comparison" class="grid"></div>
+          <div class="actions"><button id="useLatest" type="button" class="secondary">Load latest saved item</button><button id="useDraft" type="button">Use my draft after comparison</button></div>
+          <p class="small">Your draft is held only in this tab. It is lost if the tab is closed or reloaded.</p>
+        </section>
+        <form id="recordForm">
+          <fieldset id="recordInputs">
+            <legend class="sr-only">Item details</legend>
+            <label for="recordTitle">Title</label><input id="recordTitle" required maxlength="200">
+            <label for="recordBody">Description or instructions</label><textarea id="recordBody" maxlength="20000" rows="7"></textarea>
+            <div class="grid">
+              <div><label for="region">Region</label><select id="region"><option value="yolo-solano">Yolo-Solano</option><option value="sacramento">Sacramento</option><option value="sierra-foothills">Sierra Foothills</option><option value="north-bay">North Bay</option><option value="east-bay">East Bay</option><option value="south-bay-peninsula">South Bay / Peninsula</option><option value="north-state">North State</option><option value="north-coast">North Coast</option><option value="northern-san-joaquin">Northern San Joaquin</option></select></div>
+              <div><label for="org">Organization scope</label><select id="org"><option value="">Region-wide</option></select></div>
+              <div><label for="recordStatus">Status</label><select id="recordStatus"></select></div>
+            </div>
+
+            <section id="organizationFields" hidden aria-labelledby="organizationHeading">
+              <h3 id="organizationHeading">Public organization information</h3>
+              <div class="grid">
+                <div><label for="city">City</label><input id="city" maxlength="120"></div>
+                <div><label for="county">Location county</label><input id="county" list="countyOptions" maxlength="120"></div>
+                <div><label for="type">Organization type</label><input id="type" list="typeOptions" maxlength="120"></div>
+                <div><label for="website">Public website</label><input id="website" type="url" maxlength="2000" placeholder="https://"></div>
+                <div><label for="phone">Public phone</label><input id="phone" type="tel" maxlength="80"></div>
+                <div><label for="publicEmail">Public email</label><input id="publicEmail" type="email" maxlength="250"></div>
+                <div><label for="address">Public address</label><textarea id="address" rows="2" maxlength="1000"></textarea></div>
+                <div><label for="addressType">Address use</label><select id="addressType"><option value="">Not recorded</option></select><label class="check"><input id="mapEligible" type="checkbox"> Visitors can use this address for directions</label></div>
+                <div><label for="serviceCounties">Counties served</label><input id="serviceCounties" maxlength="1000" aria-describedby="listHelp"></div>
+                <div><label for="serviceCities">Cities served</label><input id="serviceCities" maxlength="1000"></div>
+                <div><label for="serviceCategories">Services or activities</label><input id="serviceCategories" maxlength="1000"></div>
+                <div><label for="serviceNotes">Service area notes</label><textarea id="serviceNotes" maxlength="2000"></textarea></div>
+              </div>
+              <p id="listHelp" class="small muted">Separate multiple counties, cities, or activities with commas. Use only confirmed service areas.</p>
+              <label for="referralNotes">Information to confirm before visiting</label><textarea id="referralNotes" maxlength="3000"></textarea>
+              <h3>Sources and review</h3>
+              <p class="small muted">Recording a review date is a claim that you checked a source. Leave it blank until that review is complete.</p>
+              <div class="grid">
+                <div><label for="sourceIds">Imported source references</label><input id="sourceIds" maxlength="3000" aria-describedby="sourceIdsHelp"><p id="sourceIdsHelp" class="small muted">Existing source IDs, separated by commas. Keep the references that support this listing.</p></div>
+                <div><label for="reviewSource">Source reviewed</label><input id="reviewSource" type="url" maxlength="2000" placeholder="https://"></div>
+                <div><label for="verifiedDate">Source review date</label><input id="verifiedDate" type="date"></div>
+                <div><label for="confirmationDate">Organization confirmation date</label><input id="confirmationDate" type="date"></div>
+                <div><label for="confirmationSource">Evidence of organization confirmation</label><input id="confirmationSource" type="url" maxlength="2000" placeholder="https://"></div>
+              </div>
+            </section>
+
+            <section id="eventFields" hidden aria-labelledby="eventHeading">
+              <h3 id="eventHeading">Event details</h3>
+              <label class="check"><input id="dateOnly" type="checkbox"> Date only; a time has not been announced</label>
+              <p class="small muted">Enter local Pacific time. Daylight saving time is applied automatically. If a time falls in the repeated or missing hour when clocks change, choose a clear time or add a note.</p>
+              <div class="grid">
+                <div><label for="start">Starts (Pacific time)</label><input id="start" type="datetime-local"></div>
+                <div><label for="end">Ends (Pacific time, optional)</label><input id="end" type="datetime-local"></div>
+                <div><label for="venue">Venue</label><input id="venue" maxlength="500"></div>
+                <div><label for="eventCity">City</label><input id="eventCity" maxlength="120"></div>
+                <div><label for="eventCounty">County</label><input id="eventCounty" list="countyOptions" maxlength="120"></div>
+                <div><label for="eventKind">Event type</label><input id="eventKind" maxlength="120" placeholder="Community event"></div>
+                <div><label for="organizer">Organizer</label><input id="organizer" maxlength="200"></div>
+                <div><label for="audience">Who can attend</label><input id="audience" maxlength="1000"></div>
+                <div><label for="source">Original event information</label><input id="source" type="url" maxlength="2000" placeholder="https://"></div>
+                <div><label for="sourceChecked">Date source was checked</label><input id="sourceChecked" type="date"></div>
+                <div><label for="sourceKind">Source type</label><select id="sourceKind"><option value="">Not recorded</option><option value="public_source">Public source</option><option value="project_team">Project team</option></select></div>
+                <div><label for="sourceNote">Source and verification notes</label><textarea id="sourceNote" maxlength="2000"></textarea></div>
+              </div>
+              <label for="timeNote">Attendance and timing notes</label><textarea id="timeNote" maxlength="2000"></textarea>
+              <p class="small muted">A source-check date requires a source URL. Leave the date blank for an unverified draft.</p>
+            </section>
+            <section id="reviewFields" hidden>
+              <label for="reviewNotes">Private review notes</label><textarea id="reviewNotes" maxlength="5000"></textarea>
+              <p class="small muted">Use these notes for source questions and review work. They are excluded from the public listing.</p>
+            </section>
+          </fieldset>
+          <div class="actions"><button type="submit" id="save">Save item</button><button type="button" class="secondary" id="cancel">Close item</button></div>
+        </form>
+
+        <section id="requestActivity" hidden aria-labelledby="activityTitle">
+          <div class="bar"><h3 id="activityTitle">Results and comments</h3><button type="button" id="refreshActivity" class="secondary">Refresh activity</button></div>
+          <div id="activity"></div>
+          <form id="commentForm">
+            <label for="commentBody">Add a comment or clarification</label><textarea id="commentBody" maxlength="12000" required></textarea>
+            <p class="small muted">Comments do not change instructions that are already being processed. To change the work, reconcile the current run first.</p>
+            <button type="submit">Add comment</button>
+          </form>
+          <details id="recovery" class="notice">
+            <summary>Reconcile interrupted or finished work</summary>
+            <p>First check what the agent actually changed. Record the outcome here to release a stuck request without repeating its work.</p>
+            <form id="reconcileForm">
+              <label for="reconcileStatus">Verified outcome</label><select id="reconcileStatus"><option value="needs_input">Needs input or more investigation</option><option value="completed">Work is verified complete</option><option value="cancelled">Cancel further work</option></select>
+              <label for="reconcileNote">What happened, and what was checked?</label><textarea id="reconcileNote" required maxlength="12000"></textarea>
+              <label class="check"><input id="reconcileConfirmed" type="checkbox" required> I checked the current work and understand it must not be repeated automatically.</label>
+              <button type="submit">Record outcome and release request</button>
+            </form>
+          </details>
+        </section>
+        <section id="submissionActions" hidden class="notice">
+          <h3>Review this public submission</h3>
+          <p>Use the submission as a lead. Check its source, then prepare a draft with the information suitable for the public website. Creating a draft does not publish or approve the submission.</p>
+          <div class="actions"><button id="draftEvent" type="button" class="secondary">Prepare event draft</button><button id="draftOrganization" type="button" class="secondary">Prepare organization draft</button></div>
+        </section>
+        <details id="revisionSection" hidden><summary>Saved revision history</summary><div id="revisions"></div></details>
+        <section id="attachmentSection" hidden>
+          <h3>Attachments</h3><div id="files" class="filelist"></div>
+          <form id="fileForm"><label for="file">Attach a file (up to 10 MB)</label><input type="file" id="file" required><button type="submit">Upload attachment</button></form>
+          <p id="storageNote" class="small muted" hidden>Attachment storage has not been connected yet.</p>
+        </section>
+      </section>
+      <datalist id="countyOptions"></datalist><datalist id="typeOptions"></datalist>
+      <footer>Keep this workspace to organization operations. Store veteran case details, discharge papers, and medical information with an appropriate service provider.</footer>
+    </main>
+  </div>
+  <!-- HQ_SCRIPT -->
+</body>
+</html>

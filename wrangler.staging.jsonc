@@ -1,5 +1,5 @@
 {
-  "name": "norcal-veterans",
+  "name": "norcal-veterans-staging",
   "main": "src/norcal-worker.mjs",
   "compatibility_date": "2026-09-07",
   "account_id": "7a3b9bb1a94bac5dea646e821afa9aa6",
@@ -12,7 +12,8 @@
     "OWNER_EMAIL": "sterling.koliba@gmail.com",
     "ACCESS_TEAM_DOMAIN": "frosty-lake-fcde.cloudflareaccess.com",
     "ACCESS_AUD": "ccb0ed2e0d61574737f9f0a8203496497a77238cb13e8101d602b0ca36b750ce",
-    "HQ_REQUEST_AGENT_ENABLED": "true"
+    "HQ_REQUEST_AGENT_ENABLED": "false",
+    "STAGING": "true"
   },
   "observability": {
     "enabled": true,
@@ -21,20 +22,11 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "norcal-veterans",
-      "database_id": "3133f3c9-0e2b-4012-9069-024c00e31d00",
+      "database_name": "norcal-veterans-staging",
+      "database_id": "38307f5d-1e83-4e0e-8fc6-b0a5e69d8c9f",
       "migrations_dir": "migrations/legacy"
     }
   ],
-  "routes": [
-    {
-      "pattern": "norcalveterans.org/*",
-      "zone_name": "norcalveterans.org"
-    },
-    {
-      "pattern": "www.norcalveterans.org/*",
-      "zone_name": "norcalveterans.org"
-    }
-  ],
+  "routes": [],
   "workers_dev": true
 }

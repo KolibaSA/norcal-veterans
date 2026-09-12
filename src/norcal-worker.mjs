@@ -1,25 +1,21 @@
 import legacy from '../worker/legacy/index.mjs';
 import { publicPayload } from '../worker/legacy/public.mjs';
-import { dataset, records, sources } from './data.mjs';
+import { dataset, sources } from './data.mjs';
 import { render, shell } from './site.mjs';
 import { publicExtension, eventCalendar, submissionPage, upcomingEvents } from './public-tools.mjs';
 import { speakerSubmissionPage } from './speaker-submissions.mjs';
 import { securityHeaders, responseHTML, formData, field, choice, safeURL, redirect } from './storage.mjs';
-import { sanitizePublicRecord } from './public-privacy.mjs';
 import { memorialServices } from './memorial-day.mjs';
 
 export async function norcalPublicData(db) {
   if (!db) throw new Error('Public storage is unavailable.');
   const rows = (await db.prepare("SELECT id,kind,title,body,status,organization_id,payload FROM records WHERE kind IN ('organization','event') AND status='published'").all()).results;
+  const serialized = rows.map(row => ({ kind: row.kind, payload: publicPayload(row) }));
+  const invalidCount = serialized.filter(row => !row.payload).length;
+  if (invalidCount) console.warn(JSON.stringify({ event: 'public_content_rows_excluded', count: invalidCount }));
   return {
-    records: rows.filter(row => row.kind === 'organization').map(row => {
-      const payload = JSON.parse(row.payload);
-      return sanitizePublicRecord({ missing_data_flags: [], source_ids: [], service_categories: [], ...records.find(record => record.id === row.id), ...payload, id: row.id, verified_name: row.title, member_information: row.body });
-    }),
-    events: rows.filter(row => row.kind === 'event').map(row => {
-      const payload = JSON.parse(row.payload);
-      return { ...publicPayload(row), organization_id: row.organization_id || payload.organization_id || null, date_only: payload.date_only === true, source_kind: payload.source_kind, source_note: payload.source_note };
-    })
+    records: serialized.filter(row => row.kind === 'organization' && row.payload).map(row => row.payload),
+    events: serialized.filter(row => row.kind === 'event' && row.payload).map(row => row.payload)
   };
 }
 
@@ -60,7 +56,7 @@ async function saveSubmission(request, env, live) {
   return redirect((speaker ? '/share' : '/for-organizations') + '?received=1');
 }
 
-export default {
+const norcalWorker = {
   async fetch(request, env, ctx) {
     const url = new URL(request.url), path = url.pathname, head = request.method === 'HEAD';
     if (path === '/hq' || path.startsWith('/hq/') || path.startsWith('/api/')) return legacy.fetch(request, env, ctx);
@@ -74,7 +70,12 @@ export default {
       return new Response(asset.body, { status: asset.status, headers: { ...Object.fromEntries(asset.headers), ...securityHeaders, 'Cache-Control': 'public, max-age=300' } });
     }
     if (path === '/regions' && ['GET','HEAD'].includes(request.method)) return localPage(head ? '' : shell('Regions | NorCal Veterans', 'Explore the NorCal Veterans community.', '<section class="wrap"><h1>Explore our regions</h1><p><a class="button" href="/yolo-solano">Yolo-Solano: organizations, events and resources</a></p></section>', {path:'/regions'}));
-    if (path === '/health' && ['GET','HEAD'].includes(request.method)) return Response.json({ status: 'ok', project: 'NorCal Veterans', release: 'project-hq-20260912' }, { headers: { 'Cache-Control': 'no-store' } });
+    if (path === '/health' && ['GET','HEAD'].includes(request.method)) {
+      try {
+        if (!env.DB || !(await env.DB.prepare('SELECT 1 AS ready').first())?.ready) throw new Error('Unavailable');
+        return Response.json({ status: 'ok', project: 'NorCal Veterans', release: 'hq-hardening-20260912' }, { headers: { 'Cache-Control': 'no-store' } });
+      } catch { return Response.json({ status: 'unavailable' }, { status: 503, headers: { 'Cache-Control': 'no-store' } }); }
+    }
     try {
       if (!['GET','HEAD'].includes(request.method) && !(request.method === 'POST' && ['/submit','/speaker-submissions'].includes(path))) return new Response('Method not allowed.', { status: 405 });
       const live = await norcalPublicData(env.DB);
@@ -86,13 +87,25 @@ export default {
           return localPage(html, 400, true);
         }
       }
-      if (path === '/data.json') return Response.json({ ...dataset, records: live.records, events: live.events, sources, memorial_services: memorialServices }, { headers: { ...securityHeaders, 'Cache-Control': 'public, max-age=30' } });
+      if (path === '/data.json') return Response.json({ ...dataset, last_verified_date: null, verification_note: 'Publication and verification are separate. See each record for its source references and recorded review date; confirm current details with the organization.', records: live.records, events: live.events, sources, memorial_services: memorialServices }, { headers: { ...securityHeaders, 'Cache-Control': 'public, max-age=30' } });
       if (path === '/events.ics') return new Response(head ? null : eventCalendar(url.searchParams.has('event') ? live.events.filter(event => event.id === url.searchParams.get('event')) : upcomingEvents(live.events)), { headers: { ...securityHeaders, 'Content-Type': 'text/calendar; charset=utf-8' } });
       const page = publicExtension(url, live.events, live.records) || render(url, live.records, live.events);
       return localPage(head ? '' : page.html, page.status);
     } catch {
+      console.error(JSON.stringify({event:'public_request_failed',request_id:crypto.randomUUID(),operation:'public_render'}));
       return responseHTML(shell('Temporarily unavailable | NorCal Veterans', 'Please try again soon.', '<section class="wrap"><h1>Please try again in a few minutes.</h1></section>'), 503, true);
     }
+  }
+};
+
+export default {
+  async fetch(request, env, ctx) {
+    const response = await norcalWorker.fetch(request, env, ctx);
+    if (env.STAGING !== 'true') return response;
+    const headers = new Headers(response.headers);
+    headers.set('X-Robots-Tag', 'noindex, noarchive');
+    headers.set('X-NorCal-Environment', 'staging');
+    return new Response(response.body, { status: response.status, headers });
   }
 };
 

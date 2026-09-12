@@ -1,3 +1,186 @@
+const {contentMetadata,canonicalDate,canonicalInstant,pacificLocal,pacificToInstant,validateRecordPayload}=(()=>{// The active HQ and its public serializers share these content rules.
+const contentMetadata = Object.freeze({
+  timeZone: 'America/Los_Angeles',
+  organizationTypes: ['VFW', 'American Legion', 'Marine Corps League', 'Veterans Beer Club', 'Toys for Tots', 'DAV', 'County Veterans Office', 'Equine program provider', 'Veteran remembrance program', 'Veterans nonprofit', 'Other veteran organization'],
+  counties: ['Yolo', 'Solano'],
+  addressTypes: ['meeting_venue', 'service_office', 'program_venue', 'mailing']
+});
+
+const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const present = value => value !== undefined && value !== null && value !== '';
+const invalid = message => { throw new Error(message); };
+function text(value, name, max = 2000) {
+  if (!present(value)) return;
+  if (typeof value !== 'string' || value.length > max) invalid(`${name} must be text of at most ${max} characters.`);
+}
+function strings(value, name, maxItems = 50, maxLength = 200) {
+  if (!present(value)) return;
+  if (!Array.isArray(value) || value.length > maxItems) invalid(`${name} must be a list with at most ${maxItems} entries.`);
+  for (const item of value) { if (typeof item !== 'string' || !item.trim() || item.length > maxLength) invalid(`${name} contains an invalid entry.`); }
+}
+function shape(value, name) { if (present(value) && !object(value)) invalid(`${name} must be an object.`); }
+function canonicalDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) invalid('Use a calendar date in YYYY-MM-DD format.');
+  const date = new Date(value + 'T00:00:00Z');
+  if (!Number.isFinite(date.valueOf()) || date.toISOString().slice(0, 10) !== value) invalid('That calendar date does not exist.');
+  return value;
+}
+function canonicalInstant(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d{1,3})?)?(?:Z|[+-](?:0\d|1[0-4]):[0-5]\d)$/.test(value)) invalid('Use an ISO date and time with an explicit timezone offset.');
+  canonicalDate(value.slice(0, 10));
+  if (/[+-]14:(?!00)/.test(value)) invalid('Invalid timezone offset.');
+  const date = new Date(value);
+  if (!Number.isFinite(date.valueOf())) invalid('Invalid event date or time.');
+  return date.toISOString();
+}
+const pacificFormatter = new Intl.DateTimeFormat('en-CA', { timeZone: contentMetadata.timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+function pacificLocal(value) {
+  const parts = Object.fromEntries(pacificFormatter.formatToParts(new Date(value)).map(part => [part.type, part.value]));
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}`;
+}
+// Reject the missing hour in spring and repeated hour in autumn. An existing
+// exact ISO instant may disambiguate an unchanged event; new ambiguous times
+// require an explicit ISO offset so the application never guesses.
+function pacificToInstant(value, { dateOnly = false, previousInstant = null } = {}) {
+  if (typeof value !== 'string') invalid('Enter the event date and Pacific time.');
+  let local = value;
+  if (dateOnly) local = canonicalDate(value) + 'T00:00:00';
+  else {
+    if (!/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(local)) invalid('Enter a valid Pacific date and time.');
+    canonicalDate(local.slice(0, 10));
+    if (local.length === 16) local += ':00';
+  }
+  const candidates = ['-07:00', '-08:00'].map(offset => canonicalInstant(local + offset)).filter(instant => pacificLocal(instant) === local);
+  if (candidates.length === 1) return candidates[0];
+  if (!candidates.length) invalid('That Pacific time does not exist because daylight saving time starts then. Choose another time.');
+  if (previousInstant && candidates.includes(canonicalInstant(previousInstant))) return canonicalInstant(previousInstant);
+  invalid('That Pacific time occurs twice when daylight saving time ends. Choose an unambiguous time or save an ISO time with the intended offset.');
+}
+function publicURL(value, name) {
+  text(value, name, 2000);
+  if (!present(value)) return;
+  try { const url = new URL(value); if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) throw Error(); }
+  catch { invalid(`${name} must be a public http or https URL without embedded credentials.`); }
+  let decoded = value; try { decoded = decodeURIComponent(value); } catch {}
+  if (/(?:roster|post[-_]?officers|\/officers(?:[/?#.]|$)|post-detail)/i.test(decoded)) invalid(`${name} cannot link to a personal roster or officer directory.`);
+}
+function boundedJSON(value, depth = 0) {
+  if (depth > 6) invalid('Content has too many nested levels.');
+  if (value === null || typeof value === 'boolean') return;
+  if (typeof value === 'string') { if (value.length > 20000) invalid('A content field exceeds 20,000 characters.'); return; }
+  if (typeof value === 'number' && Number.isFinite(value)) return;
+  if (Array.isArray(value)) { if (value.length > 100) invalid('A content list exceeds 100 entries.'); value.forEach(item => boundedJSON(item, depth + 1)); return; }
+  if (!object(value) || Object.keys(value).length > 100) invalid('Invalid content object.');
+  for (const [key, item] of Object.entries(value)) { if (['__proto__', 'prototype', 'constructor'].includes(key) || key.length > 120) invalid('Invalid content field name.'); boundedJSON(item, depth + 1); }
+}
+function reviewDate(value, name) { if (present(value)) { canonicalDate(value); if (value > new Date().toISOString().slice(0, 10)) invalid(`${name} cannot be in the future.`); } }
+function provenance(p, previous) {
+  for (const name of ['source_checked', 'last_verified_date']) reviewDate(p[name], name);
+  for (const name of ['source_url', 'review_source_url', 'confirmation_source_url']) publicURL(p[name], name);
+  for (const name of ['reviewed_by', 'review_recorded_at']) {
+    text(p[name], name, 254);
+    if (present(p[name]) && p[name] !== previous?.[name]) invalid('The source reviewer is recorded by the server.');
+  }
+  if (present(p.source_kind) && !['public_source', 'project_team'].includes(p.source_kind)) invalid('Choose public source or project team provenance.');
+  if (present(p.source_checked) && !p.source_url && !(p.source_checked === previous?.source_checked && !previous?.source_url)) invalid('A source review date requires the event source URL.');
+  // Existing imported source dates are retained, including sources withheld for
+  // privacy. A new or changed claim requires evidence; no global date is added.
+  if (present(p.last_verified_date) && !(p.review_source_url || p.source_ids?.length) && p.last_verified_date !== previous?.last_verified_date) invalid('Add a review source URL or source references before recording an organization review date.');
+  if (present(p.organization_confirmed_at)) {
+    canonicalInstant(p.organization_confirmed_at);
+    if (Date.parse(p.organization_confirmed_at) > Date.now()) invalid('Organization confirmation cannot be in the future.');
+    if (!p.confirmation_source_url && p.organization_confirmed_at !== previous?.organization_confirmed_at) invalid('Organization confirmation requires a public confirmation source.');
+  }
+  if (present(p.reviewed_update)) {
+    shape(p.reviewed_update, 'Reviewed update');
+    canonicalInstant(p.reviewed_update.reviewed_at);
+    publicURL(p.reviewed_update.source_url, 'Correction source');
+    if (!p.reviewed_update.source_url) invalid('A reviewed correction requires its source.');
+    if (Date.parse(p.reviewed_update.reviewed_at) > Date.now()) invalid('A correction review date cannot be in the future.');
+    if (present(p.reviewed_update.reviewed_by) && p.reviewed_update.reviewed_by !== previous?.reviewed_update?.reviewed_by) invalid('The correction reviewer is recorded by the server.');
+  }
+  if (present(p.display_name_update)) {
+    shape(p.display_name_update, 'Display name update');
+    reviewDate(p.display_name_update.date, 'Display name review date');
+    text(p.display_name_update.method, 'Display name update method', 100);
+    text(p.display_name_update.scope, 'Display name review scope', 2000);
+  }
+}
+
+function validateRecordPayload(kind, input, { status = 'draft', previousPayload = null, isNew = false, actorEmail = '' } = {}) {
+  if (!object(input)) invalid('Record content must be an object.');
+  boundedJSON(input);
+  if (JSON.stringify(input).length > 60000) invalid('Record content exceeds 60,000 characters.');
+  const p = structuredClone(input), previous = previousPayload;
+  if (kind === 'organization' || kind === 'event') {
+    for (const name of ['id', 'organization_id', 'region_id']) text(p[name], name, 120);
+    for (const name of ['city', 'county', 'location_county', 'organization_type', 'kind', 'entity_kind']) text(p[name], name, 120);
+    for (const name of ['title', 'verified_name', 'organizer']) text(p[name], name, 200);
+    for (const name of ['description', 'member_information']) text(p[name], name, 20000);
+    for (const name of ['audience', 'eligibility', 'hours', 'meeting_schedule', 'referral_notes', 'partnership_notes', 'time_note', 'source_note']) text(p[name], name, 4000);
+    provenance(p, previous);
+  }
+  if (kind === 'organization') {
+    for (const name of ['service_categories', 'source_ids', 'missing_data_flags']) strings(p[name], name);
+    if (p.source_ids?.some(id => !sources.some(source => source.id === id)) && JSON.stringify(p.source_ids) !== JSON.stringify(previous?.source_ids)) invalid('Choose existing source references or add a public review source URL.');
+    shape(p.service_area, 'Service area');
+    if (p.service_area) { strings(p.service_area.counties, 'Service counties'); strings(p.service_area.cities, 'Service cities'); text(p.service_area.notes, 'Service area notes', 4000); }
+    shape(p.address, 'Address');
+    if (p.address) {
+      text(p.address.text, 'Public address', 1000);
+      if (!contentMetadata.addressTypes.includes(p.address.type) && JSON.stringify(p.address) !== JSON.stringify(previous?.address)) invalid('Choose a public venue, service office or mailing address. Residential and personal addresses cannot be published.');
+      if (p.address.map_eligible !== undefined && typeof p.address.map_eligible !== 'boolean') invalid('Address map eligibility must be true or false.');
+    }
+    shape(p.public_contacts, 'Public contacts');
+    if (p.public_contacts) {
+      publicURL(p.public_contacts.website, 'Organization website');
+      text(p.public_contacts.phone, 'Organization phone', 80);
+      text(p.public_contacts.email, 'Organization email', 254);
+      if (present(p.public_contacts.email) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.public_contacts.email)) invalid('Enter a valid public organization email.');
+    }
+    shape(p.event_information, 'Event information');
+    if (p.event_information) { text(p.event_information.text, 'Event information', 4000); text(p.event_information.status, 'Event information status', 80); text(p.event_information.source_id, 'Event information source', 200); }
+    for (const name of ['timezone', 'confidence', 'verification_method', 'officers_status']) text(p[name], name, 120);
+    for (const name of ['photos', 'officers', 'officer_profiles']) if (present(p[name])) {
+      if (!Array.isArray(p[name]) || p[name].length > 50 || p[name].some(item => !object(item))) invalid(`${name} must be a list of at most 50 objects.`);
+    }
+    for (const photo of p.photos || []) {
+      for (const key of ['id', 'src', 'image_url', 'source_url', 'license_url', 'caption', 'alt_text', 'credit', 'license']) text(photo[key], 'Photo ' + key, 2000);
+      shape(photo.album, 'Photo album');
+      if (photo.album) for (const key of ['id', 'name', 'description']) text(photo.album[key], 'Photo album ' + key, 2000);
+      if (present(photo.present_organizations) && (!Array.isArray(photo.present_organizations) || photo.present_organizations.length > 12 || photo.present_organizations.some(item => !object(item) || typeof item.id !== 'string' || typeof item.name !== 'string'))) invalid('Photo organizations must contain at most 12 organization IDs and names.');
+    }
+    if (status === 'published' && (isNew || previous?.organization_type || previous?.location_county)) {
+      if (!p.organization_type?.trim() || !p.location_county?.trim()) invalid('Choose an organization type and county before publication.');
+    }
+  } else if (kind === 'event') {
+    if (p.date_only !== undefined && typeof p.date_only !== 'boolean') invalid('Date only must be true or false.');
+    p.date_only = p.date_only === true;
+    if (Object.hasOwn(p, 'starts_local')) p.start_at = pacificToInstant(p.starts_local, { dateOnly: p.date_only, previousInstant: previous?.start_at });
+    p.start_at = canonicalInstant(p.start_at);
+    if (Object.hasOwn(p, 'ends_local')) p.end_at = p.ends_local ? pacificToInstant(p.ends_local, { previousInstant: previous?.end_at }) : null;
+    if (p.date_only) {
+      if (!pacificLocal(p.start_at).endsWith('T00:00:00')) invalid('A date-only event must start at Pacific midnight. Use the event date field.');
+      p.end_at = null;
+    }
+    else if (present(p.end_at)) { p.end_at = canonicalInstant(p.end_at); if (Date.parse(p.end_at) < Date.parse(p.start_at)) invalid('The event end must be on or after its start.'); }
+    else p.end_at = null;
+    delete p.starts_local; delete p.ends_local;
+    text(p.venue, 'Public event venue', 1000);
+    if (!p.venue?.trim()) invalid('Enter the public event venue.');
+  } else if (['request', 'task', 'coordination', 'library', 'submission'].includes(kind)) {
+    for (const name of ['priority', 'category', 'assignee', 'assigned_to', 'due_at', 'url', 'source_url']) text(p[name], name, 2000);
+    for (const name of ['tags', 'organization_ids']) strings(p[name], name);
+    if (present(p.due_at)) canonicalInstant(p.due_at);
+  } else invalid('Unknown record type.');
+  const reviewKeys = ['source_checked', 'last_verified_date', 'source_url', 'review_source_url', 'organization_confirmed_at', 'confirmation_source_url'];
+  if (actorEmail && reviewKeys.some(key => p[key] !== previous?.[key]) && (p.source_checked || p.last_verified_date || p.organization_confirmed_at)) {
+    p.reviewed_by = actorEmail; p.review_recorded_at = new Date().toISOString();
+  }
+  return p;
+}
+
+return {contentMetadata,canonicalDate,canonicalInstant,pacificLocal,pacificToInstant,validateRecordPayload};})();
 // Only organization information belongs in public output. A public web source
 // does not establish consent to republish a person's contact details.
 function isRosterURL(value){
@@ -23,17 +206,53 @@ function sanitizePublicPhoto(photo){
  return {id:String(photo.id),src,caption:String(photo.caption||'').slice(0,500),alt_text:String(photo.alt_text||photo.caption||'Organization photo').slice(0,300),credit:String(photo.credit||'').slice(0,200),source_url:sourceURL,license:String(photo.license||'').slice(0,160),license_url:publicURL(photo.license_url),album,present_organizations};
 }
 function sanitizePublicRecord(record){
- const keys=['id','verified_name','organization_type','entity_kind','city','location_county','service_area','hours','meeting_schedule','timezone','service_categories','audience','eligibility','event_information','referral_notes','partnership_notes','member_information','source_ids','last_verified_date','verification_method','organization_confirmed_at','confidence','missing_data_flags','display_name_update','reviewed_update'];
- const out=Object.fromEntries(keys.filter(k=>Object.hasOwn(record,k)).map(k=>[k,record[k]]));
- const address=record.address;
- out.address=address&&['meeting_venue','service_office','program_venue','mailing'].includes(address.type)?{text:address.text,type:address.type,map_eligible:address.map_eligible===true}:null;
- const contacts=record.public_contacts||{};
- out.public_contacts={phone:contacts.phone||null,email:contacts.email||null,website:isRosterURL(contacts.website)?null:contacts.website||null};
+ const out={};
+ for(const name of ['id','verified_name','organization_type','entity_kind','city','location_county','hours','meeting_schedule','timezone','audience','eligibility','referral_notes','partnership_notes','member_information','verification_method','confidence'])out[name]=publicText(record?.[name],name==='member_information'?20000:4000);
+ out.organization_type ||= 'Other veteran organization';
+ for(const name of ['service_categories','source_ids','missing_data_flags'])out[name]=publicStrings(record?.[name]);
+ const area=record?.service_area;
+ out.service_area=isObject(area)?{counties:publicStrings(area.counties),cities:publicStrings(area.cities),notes:publicText(area.notes,4000)}:null;
+ const address=record?.address;
+ out.address=isObject(address)&&contentMetadata.addressTypes.includes(address.type)&&typeof address.text==='string'?{text:publicText(address.text,1000),type:address.type,map_eligible:address.map_eligible===true&&address.type!=='mailing'}:null;
+ const contacts=isObject(record?.public_contacts)?record.public_contacts:{};
+ out.public_contacts={phone:publicText(contacts.phone,80)||null,email:publicText(contacts.email,254)||null,website:publicURL(contacts.website)||null};
+ const info=record?.event_information;
+ out.event_information=isObject(info)?{text:publicText(info.text,4000),status:publicText(info.status,80),source_id:publicText(info.source_id,200)}:null;
+ out.last_verified_date=privacyReviewDate(record?.last_verified_date);
+ out.organization_confirmed_at=publicInstant(record?.organization_confirmed_at);
+ out.review_source_url=publicURL(record?.review_source_url);
+ out.confirmation_source_url=publicURL(record?.confirmation_source_url);
+ const correction=record?.reviewed_update;
+ out.reviewed_update=isObject(correction)&&publicInstant(correction.reviewed_at)&&publicURL(correction.source_url)?{reviewed_at:publicInstant(correction.reviewed_at),source_url:publicURL(correction.source_url)}:null;
+ const update=record?.display_name_update;
+ out.display_name_update=isObject(update)&&privacyReviewDate(update.date)?{date:privacyReviewDate(update.date),method:publicText(update.method,100),scope:publicText(update.scope,2000)}:null;
  out.officers=[];out.officers_status='not_published_for_privacy';
- if(Array.isArray(record.photos))out.photos=record.photos.slice(0,12).map(sanitizePublicPhoto).filter(Boolean);
+ if(Array.isArray(record?.photos))out.photos=record.photos.slice(0,12).map(sanitizePublicPhoto).filter(Boolean);
  return out;
 }
 
+const isObject=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+const publicText=(value,max=2000)=>typeof value==='string'?value.slice(0,max):'';
+const publicStrings=value=>Array.isArray(value)?value.filter(item=>typeof item==='string').slice(0,50).map(item=>item.slice(0,200)):[];
+function publicURL(value){try{if(typeof value!=='string'||value.length>2000||isRosterURL(value))return '';const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password?u.href:'';}catch{return '';}}
+const privacyReviewDate=value=>{try{const date=canonicalDate(value);return date<=new Date().toISOString().slice(0,10)?date:null;}catch{return null;}};
+const publicInstant=value=>{try{return canonicalInstant(value);}catch{return null;}};
+
+// Every anonymous event representation uses this whitelist. Broken stored dates
+// are excluded individually so a corrupt row cannot disable the calendar.
+function sanitizePublicEvent(record){
+ const start=publicInstant(record?.start_at),end=record?.end_at?publicInstant(record.end_at):null;
+ if(!start||(record?.end_at&&!end)||(end&&Date.parse(end)<Date.parse(start)))return null;
+ const out={};
+ for(const name of ['id','title','description','city','county','venue','organizer','audience','time_note','kind','organization_id','source_note'])out[name]=publicText(record?.[name],name==='description'?20000:4000);
+ if(!out.id||!out.title||!out.venue)return null;
+ out.kind ||= 'Community event';
+ out.start_at=start;out.date_only=record.date_only===true;out.end_at=out.date_only?null:end;
+ out.source_url=publicURL(record.source_url);out.source_checked=out.source_url?privacyReviewDate(record.source_checked):null;
+ out.source_kind=['public_source','project_team'].includes(record.source_kind)?record.source_kind:'public_source';
+ out.status=['published','draft','archived'].includes(record.status)?record.status:'draft';
+ return out;
+}
 
 // Dates and both table locations were supplied in an authenticated HQ request
 // by Sterling on September 2, 2026. Public web sources do not establish hours.
@@ -902,17 +1121,18 @@ function resourcesPageContent(){
 const origin = 'https://www.norcalveterans.org';
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const h=escapeHtml;
+const availableTypes=list=>[...new Set([...contentMetadata.organizationTypes,...list.map(record=>record.organization_type).filter(Boolean)])];
 const mark='<img class="project-logo" src="/ysv-logo.png?v=logo-20260903-1" alt="Yolo Solano Veterans" width="1254" height="1254" decoding="async">';
 const external=(url,label,cls='')=>`<a class="${cls}" href="${h(url)}" target="_blank" rel="noopener noreferrer">${h(label)} <span aria-hidden="true">↗</span></a>`;
 const button=(url,label,cls='')=>`<a class="button ${cls}" href="${h(url)}">${h(label)} <span aria-hidden="true">→</span></a>`;
 function filterRecords(params, list=records) {
  const type=params.get('type')||'',place=params.get('place')||'All locations',q=(params.get('q')||'').trim().toLowerCase().slice(0,200);
  const county=places[place];
- return list.filter(r=>(!type||r.organization_type===type)&&(!county||r.location_county===county||r.service_area?.counties.includes(county))&&(!q||[r.verified_name,r.city,r.location_county,r.member_information,...r.service_categories].join(' ').toLowerCase().includes(q)))
+ return list.filter(r=>(!type||r.organization_type===type)&&(!county||r.location_county===county||r.service_area?.counties?.includes(county))&&(!q||[r.verified_name,r.city,r.location_county,r.member_information,...(Array.isArray(r.service_categories)?r.service_categories:[])].join(' ').toLowerCase().includes(q)))
  .sort((a,b)=>Number(b.city===place)-Number(a.city===place)||a.verified_name.localeCompare(b.verified_name));
 }
 function shellBase(title,description,content,{path='/',detail=false}={}) {
- return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${h(title)}</title><meta name="description" content="${h(description)}"><link rel="canonical" href="${origin}${h(path)}"><meta property="og:type" content="website"><meta property="og:title" content="${h(title)}"><meta property="og:description" content="${h(description)}"><meta property="og:url" content="${origin}${h(path)}">${detail?'':`<meta property="og:image" content="${origin}/ysv-logo.png?v=logo-20260903-1"><meta property="og:image:width" content="1254"><meta property="og:image:height" content="1254"><meta property="og:image:alt" content="Yolo Solano Veterans logo">`}<meta name="twitter:card" content="summary"><meta name="twitter:title" content="${h(title)}"><meta name="twitter:description" content="${h(description)}">${detail?'':`<meta name="twitter:image" content="${origin}/ysv-logo.png?v=logo-20260903-1"><meta name="twitter:image:alt" content="Yolo Solano Veterans logo">`}<meta name="theme-color" content="#123c74"><link rel="icon" href="/ysv-logo.png?v=logo-20260903-1" type="image/png"><link rel="stylesheet" href="/styles.css?v=officers-20260903-1"><script src="/app.js?v=officers-20260903-1" defer></script></head><body><a class="skip" href="#main">Skip to content</a><div class="topline"><div class="wrap">A growing local resource · Yolo &amp; Solano counties <a href="https://www.veteranscrisisline.net/">Crisis support: 988, then press 1 ↗</a></div></div><header class="header wrap"><a href="/" class="brand" aria-label="Yolo Solano Veterans">${mark}</a><nav aria-label="Main navigation"><a href="/" ${path==='/'?'aria-current="page"':''}>Find an organization</a><a href="/events" ${path==='/events'?'aria-current="page"':''}>Events</a><a href="/resources" ${path==='/resources'?'aria-current="page"':''}>Resources</a><a href="/about" ${path==='/about'?'aria-current="page"':''}>About the directory</a><a class="nav-workspace" href="/for-organizations">For organizations <span aria-hidden="true">↗</span></a><a class="nav-workspace" href="/hq">Organization sign-in</a></nav></header><main id="main">${content}</main><footer><div class="wrap footer-inner"><div><a class="footer-brand" href="/">Yolo Solano Veterans</a><p>Local connections. Shared purpose.</p></div><div class="footer-links"><a href="/resources">Veteran resources</a><a href="/about#sources">Our sources</a><a href="/data.json">Directory data</a><a href="/for-organizations">Share an update</a></div></div><div class="wrap fineprint">An independent community directory. Listings do not imply endorsement or partnership. Public sources checked September 2, 2026; confirm details with each organization.</div></footer></body></html>`;
+ return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${h(title)}</title><meta name="description" content="${h(description)}"><link rel="canonical" href="${origin}${h(path)}"><meta property="og:type" content="website"><meta property="og:title" content="${h(title)}"><meta property="og:description" content="${h(description)}"><meta property="og:url" content="${origin}${h(path)}">${detail?'':`<meta property="og:image" content="${origin}/ysv-logo.png?v=logo-20260903-1"><meta property="og:image:width" content="1254"><meta property="og:image:height" content="1254"><meta property="og:image:alt" content="Yolo Solano Veterans logo">`}<meta name="twitter:card" content="summary"><meta name="twitter:title" content="${h(title)}"><meta name="twitter:description" content="${h(description)}">${detail?'':`<meta name="twitter:image" content="${origin}/ysv-logo.png?v=logo-20260903-1"><meta name="twitter:image:alt" content="Yolo Solano Veterans logo">`}<meta name="theme-color" content="#123c74"><link rel="icon" href="/ysv-logo.png?v=logo-20260903-1" type="image/png"><link rel="stylesheet" href="/styles.css?v=officers-20260903-1"><script src="/app.js?v=officers-20260903-1" defer></script></head><body><a class="skip" href="#main">Skip to content</a><div class="topline"><div class="wrap">A growing local resource · Yolo &amp; Solano counties <a href="https://www.veteranscrisisline.net/">Crisis support: 988, then press 1 ↗</a></div></div><header class="header wrap"><a href="/" class="brand" aria-label="Yolo Solano Veterans">${mark}</a><nav aria-label="Main navigation"><a href="/" ${path==='/'?'aria-current="page"':''}>Find an organization</a><a href="/events" ${path==='/events'?'aria-current="page"':''}>Events</a><a href="/resources" ${path==='/resources'?'aria-current="page"':''}>Resources</a><a href="/about" ${path==='/about'?'aria-current="page"':''}>About the directory</a><a class="nav-workspace" href="/for-organizations">For organizations <span aria-hidden="true">↗</span></a><a class="nav-workspace" href="/hq">Organization sign-in</a></nav></header><main id="main">${content}</main><footer><div class="wrap footer-inner"><div><a class="footer-brand" href="/">Yolo Solano Veterans</a><p>Local connections. Shared purpose.</p></div><div class="footer-links"><a href="/resources">Veteran resources</a><a href="/about#sources">Our sources</a><a href="/data.json">Directory data</a><a href="/for-organizations">Share an update</a></div></div><div class="wrap fineprint">An independent community directory. Listings do not imply endorsement or partnership. Review dates and sources appear on individual listings; confirm current details with each organization.</div></footer></body></html>`;
 }
 function shell(title,description,content,options={}){
  const path=options.path||'/',html=shellBase(title,description,content,options),share=`<a href="/share" ${path==='/share'?'aria-current="page"':''}>Share a program</a>`;
@@ -926,6 +1146,9 @@ function logoCard(r,place) {
 }
 function logoGallery(found,place){
  const groups=[{id:'veteran-organizations',title:'Veteran Organizations',types:[['VFW','VFW'],['American Legion','American Legion'],['Marine Corps League','Marine Corps League'],['DAV','DAV'],['Veterans Beer Club','Veterans Beer Club']]},{id:'veteran-nonprofits',title:'Veteran Non-Profits & Programs',types:[['Toys for Tots','Toys for Tots'],['Equine program provider','Veterans Equine Therapy'],['Veteran remembrance program','RememberAVet']]},{id:'veteran-services',title:'County Veterans Services',types:[['County Veterans Office','Benefits & local support']]}];
+ const groupedTypes=new Set(groups.flatMap(group=>group.types.map(([type])=>type)));
+ const otherTypes=[...new Set(found.map(record=>record.organization_type).filter(type=>!groupedTypes.has(type)))];
+ if(otherTypes.length)groups.push({id:'other-veteran-connections',title:'More Veteran Organizations & Programs',types:otherTypes.map(type=>[type,type])});
  return groups.map(group=>{
   const sections=group.types.map(([type,label])=>{
    const items=found.filter(r=>r.organization_type===type).sort((a,b)=>Number(b.city===place)-Number(a.city===place)||a.city?.localeCompare(b.city||'')||a.verified_name.localeCompare(b.verified_name));
@@ -935,12 +1158,19 @@ function logoGallery(found,place){
  }).join('');
 }
 function directory(url,list=records) {
+ const types=availableTypes(list);
  const params=url.searchParams,selectedType=types.includes(params.get('type'))?params.get('type'):'',selectedPlace=Object.hasOwn(places,params.get('place'))?params.get('place'):'All locations';
  const canonicalParams=new URLSearchParams(params);canonicalParams.set('type',selectedType);canonicalParams.set('place',selectedPlace);
  const found=filterRecords(canonicalParams,list),q=(params.get('q')||'').slice(0,200),filtered=!!(selectedType||q||selectedPlace!=='All locations');
  return shell('Yolo Solano Veterans | Find your local veteran community','Explore veteran organizations and community programs in Yolo and Solano counties. Choose a logo to find a local post, city and public details.',`<section class="hero logo-hero wrap"><div><span class="eyebrow overline">YOLO &amp; SOLANO · CONNECTED BY SERVICE</span><h1>Find your people.<br><em>Close to home.</em></h1></div><div class="logo-hero-note"><p>Familiar emblems.<br>Local connections.</p><span>Choose a logo to explore its organization.</span></div></section><section class="directory-section logo-directory wrap" aria-labelledby="directory-title"><div class="logo-directory-tools"><h2 id="directory-title" class="sr-only">Find a local veteran organization</h2><nav class="logo-jump-links" aria-label="Browse organization groups"><a href="/#veteran-organizations">Veteran Organizations</a><a href="/#veteran-nonprofits">Non-Profits &amp; Programs</a><a href="/#veteran-services">County Services</a></nav><span class="result-count" role="status">${found.length} local connections</span></div><details class="logo-search" ${filtered?'open':''}><summary>Find a specific post, organization or city <span aria-hidden="true">＋</span></summary><form class="search-panel" method="get" action="/" role="search"><div class="field"><label for="type">Organization type</label><select id="type" name="type"><option value="">All organizations</option>${types.map(t=>`<option value="${h(t)}" ${selectedType===t?'selected':''}>${h(t)}</option>`).join('')}</select></div><div class="field"><label for="place">Location</label><select id="place" name="place">${Object.keys(places).map(p=>`<option ${selectedPlace===p?'selected':''}>${h(p)}</option>`).join('')}</select></div><div class="field query-field"><label for="q">Name or keyword</label><input id="q" name="q" type="search" value="${h(q)}" maxlength="200" placeholder="Post number, city, volunteering…"></div><button class="button" type="submit">Find organizations <span aria-hidden="true">→</span></button></form>${filtered?'<a class="logo-clear" href="/">Show all organizations →</a>':''}</details>${filtered?`<p class="logo-filter-note">${h(selectedPlace)}${selectedType?' · '+h(selectedType):''}${q?' · “'+h(q)+'”':''}. ${selectedPlace!=='All locations'&&!selectedPlace.includes('County')?'Your city appears first within each group.':''}</p>`:''}${found.length?logoGallery(found,selectedPlace):`<div class="empty-state"><h3>No matching records in this starter directory.</h3><p>Try another location or organization type.</p>${button('/','Clear filters')}</div>`}<div class="directory-footnote"><span>◌ A living directory</span><p>Open any profile for contacts, meeting details and sources. Organization names and emblems identify the listed groups; listings do not imply endorsement.</p><a href="/for-organizations">Share an update →</a></div></section>`);
 }
 function sourceList(ids) {return ids.map(id=>sources.find(s=>s.id===id)).filter(s=>s&&!isRosterURL(s.url)).map(s=>{return `<li>${external(s.url,s.title)}<span>${h(s.publisher)}${s.published_date?' · published '+h(s.published_date):' · publication date not shown'}</span></li>`;}).join('');}
+function organizationReview(r) {
+ const evidence=r.review_source_url||r.source_ids.some(id=>sources.some(source=>source.id===id&&!isRosterURL(source.url)));
+ const reviewed=!!(r.last_verified_date&&evidence);
+ const confirmation=r.organization_confirmed_at&&r.confirmation_source_url;
+ return `<span class="label">${reviewed?'Public-source review':'Verification pending'}</span><h2>Know what’s verified.</h2><p>${reviewed?'Public sources reviewed <strong>'+h(r.last_verified_date)+'</strong>.':'This profile has not yet been verified against an available public source.'} ${confirmation?'Organization confirmation recorded '+h(r.organization_confirmed_at.slice(0,10))+'.':'The organization has not directly confirmed this profile.'}</p>${r.review_source_url?'<p>'+external(r.review_source_url,'Recorded review source')+'</p>':''}${confirmation?'<p>'+external(r.confirmation_source_url,'Organization confirmation source')+'</p>':''}`;
+}
 function organizationPhotoGallery(r){
  const photos=r.photos||[],editor='/hq?org='+encodeURIComponent(r.id)+'#photos';
  const albums=new Map;for(const photo of photos){const key=photo.album?.id||'',group=albums.get(key)||{album:photo.album,photos:[]};group.photos.push(photo);albums.set(key,group);}
@@ -949,6 +1179,7 @@ function organizationPhotoGallery(r){
  return `<section class="panel organization-photos" id="photos" aria-labelledby="photos-title"><div class="photo-heading"><div><span class="eyebrow">OUR PLACES · OUR COMMUNITY</span><h2 id="photos-title">Photos</h2></div><a class="button outline" href="${h(editor)}">Add photos →</a></div>${photos.length?groups:'<div class="photo-empty"><p>Share the places, events and people that bring your organization together.</p></div>'}<p class="small-note">Authorized representatives can add photos, create albums and manage collaboration through their organization editor.</p></section>`;
 }
 function regionalHome(url,list=records,events=[]) {
+ const types=availableTypes(list);
  const params=url.searchParams,selectedType=types.includes(params.get('type'))?params.get('type'):'',selectedPlace=Object.hasOwn(places,params.get('place'))?params.get('place'):'All locations';
  const canonicalParams=new URLSearchParams(params);canonicalParams.set('type',selectedType);canonicalParams.set('place',selectedPlace);
  const found=filterRecords(canonicalParams,list),q=(params.get('q')||'').slice(0,200),filtered=!!(selectedType||q||selectedPlace!=='All locations');
@@ -986,7 +1217,7 @@ function mclYoloSite(r,events,url){
   <section class="org-site-resources" id="resources"><div class="wrap"><div class="org-site-heading" data-reveal><span class="eyebrow">USEFUL STARTING POINTS</span><h2>Local connection. Wider support.</h2></div><div class="org-site-resource-grid"><a href="https://www.mclnational.org/" target="_blank" rel="noopener noreferrer"><strong>Marine Corps League National Headquarters</strong><span>National programs, news and League information ↗</span></a><a href="/organizations/vso-yolo"><strong>Yolo County Veterans Services</strong><span>Local benefits and claims support →</span></a><a href="/resources"><strong>Veteran resource guide</strong><span>Benefits, education, employment, housing and wellness →</span></a><a href="/events"><strong>Yolo-Solano community calendar</strong><span>Events across the region →</span></a></div></div></section>
   <section class="wrap org-site-community"><div class="org-site-heading" data-reveal><span class="eyebrow">THE DETACHMENT IN ACTION</span><h2>Photos and people.</h2><p>This space grows with the organization. Authorized representatives choose the public photos and voluntary profiles that tell Detachment 627's story.</p></div>${organizationPhotoGallery(r)}${organizationOfficerDirectory(r)}</section>
   <section class="org-site-contact" id="contact"><div class="wrap org-site-contact-grid" data-reveal><div><span class="eyebrow">CONTACT DETACHMENT 627</span><h2>Ready to connect?</h2><p>${publicLinks?'Use the detachment’s public contact options below.':'A current public phone, email and organization website have not yet been verified. The detachment can publish them through its private editor.'}</p><div class="org-site-actions">${publicLinks}<a class="button ${publicLinks?'outline':'light'}" href="/for-organizations?org=${r.id}">Submit a public update</a></div></div><aside><strong>Manage this organization site</strong><p>Authorized representatives can update public contact details, meeting information, events, photos and officer profiles without managing a separate hosting account.</p><a href="${h(editor)}">Open the organization editor →</a></aside></div></section>
-  <section class="wrap org-site-sources"><details><summary>Sources for this profile</summary>${sourceNotice}<p class="small-note">Public information checked ${h(r.last_verified_date)}. This page is part of NorCal Veterans and does not claim organization confirmation where it has not been received.</p></details><a href="/yolo-solano">Explore the Yolo-Solano region →</a></section>
+  <section class="wrap org-site-sources"><details><summary>Sources for this profile</summary>${sourceNotice}${organizationReview(r)}</details><a href="/yolo-solano">Explore the Yolo-Solano region →</a></section>
  </div>`,{path:'/mcl-yolo',detail:true});
 }
 function profile(r,events,url) {
@@ -994,9 +1225,9 @@ function profile(r,events,url) {
  const contact=r.public_contacts;
  const related=organizationLinks(r),linkList=items=>items.map(item=>`<li>${external(item.url,item.label)}</li>`).join('');
  const connections=`<section class="panel"><h2>Social media &amp; parent organizations</h2><h3>Official social pages</h3>${related.social.length?`<ul>${linkList(related.social)}</ul>`:'<p>No official local social page has been verified for this listing yet.</p>'}<h3>Parent organization links</h3>${related.parent.length?`<ul>${linkList(related.parent)}</ul>`:'<p>This listing does not have a parent organization link.</p>'}</section>`;
- return shell(`${r.verified_name} | Yolo Solano Veterans`,description,`<div class="wrap detail-page"><a class="back" href="/?place=${encodeURIComponent(r.location_county+' County')}">← Back to ${h(r.location_county)} County directory</a><div class="profile-heading"><span class="eyebrow">${h(r.organization_type)} · ${h(r.location_county)} COUNTY</span><h1>${h(r.verified_name)}</h1><p>${h(r.member_information)}</p><div class="profile-actions">${contact.website?external(contact.website,'Visit organization website','button'):''}${contact.phone?`<a class="button outline" href="tel:${h(contact.phone)}">Call ${h(contact.phone)}</a>`:''}${contact.email?`<a class="button outline" href="mailto:${h(contact.email)}">Email organization</a>`:''}<a class="button outline" href="#officers">View officers</a></div></div>${organizationOfficerDirectory(r)}${organizationPhotoGallery(r)}${publicMonthCalendar(url,events,{organizationId:r.id,path:'/organizations/'+r.id,includeMilestones:false,title:r.verified_name+' events'})}<div class="profile-grid"><div><section class="panel"><h2>Plan your visit</h2>${r.reviewed_update?`<p class="small-note">A public correction was reviewed ${h(r.reviewed_update.reviewed_at.slice(0,10))}. ${external(r.reviewed_update.source_url,'Correction source')}</p>`:''}<dl><div><dt>${r.hours?'Published office hours':'Published meeting schedule'}</dt><dd>${h(r.hours||r.meeting_schedule||'Not yet verified. Contact the organization for current details.')}</dd></div><div><dt>${r.address?.type==='mailing'?'Mailing address (not a visitor office)':r.address?.type==='service_office'?'Service office':r.address?.type==='program_venue'?'Published venue':'Meeting location'}</dt><dd>${h(r.address?.text||'No current public service location verified.')}${r.address?.map_eligible?'<br>'+external('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(r.address.text),'Open address in Maps'):''}</dd></div><div><dt>Who can participate?</dt><dd>${h(r.audience||r.eligibility||'Local membership and visitor requirements have not been verified.')}</dd></div><div><dt>Service area</dt><dd>${h(r.service_area?.notes||'A local location is listed; the organization’s service boundary has not been confirmed.')}</dd></div></dl><p class="small-note">Meeting times are in Pacific time. Published schedules may change; check with the organizer before attending. A meeting venue does not establish walk-in service availability.</p></section><section class="panel"><h2>Activities &amp; member information</h2><p><a href="/events">Explore the shared event calendar →</a></p><p>${h(r.event_information?.text||'Consult the organization for activities and visit the shared event calendar for researched upcoming events.')}</p>${r.event_information?.status==='past'?'<span class="label amber">Historical event — not an upcoming listing</span>':''}${r.partnership_notes?`<h3>Published coordination notes</h3><p>${h(r.partnership_notes)}</p>`:''}<p>${h(r.referral_notes)}</p></section>${connections}</div><aside><section class="panel trust-panel"><span class="label">Public-source review</span><h2>Know what’s verified.</h2><p>Sources checked <strong>September 2, 2026</strong>. This profile has not been claimed or directly confirmed by the organization.</p><dl><div><dt>Research confidence</dt><dd>${h(r.confidence)} · supporting facts only</dd></div><div><dt>Still to confirm</dt><dd>${r.missing_data_flags.map(f=>h(f.replaceAll('_',' '))).join('<br>')}</dd></div></dl></section><section class="panel source-panel"><h2>Sources for this profile</h2>${r.source_ids.length?`<ul>${sourceList(r.source_ids)}</ul>`:'<p>A supporting directory link is withheld because it contains personal information. A suitable public organization source is still being confirmed.</p>'}</section><section class="panel"><h2>Represent this organization?</h2><p>Suggest an organization profile or meeting update for review. Designated representatives can also use their organization editor.</p><a href="/for-organizations?org=${r.id}">Submit an update →</a></section></aside></div></div>`,{path:'/organizations/'+r.id,detail:true});
+ return shell(`${r.verified_name} | Yolo Solano Veterans`,description,`<div class="wrap detail-page"><a class="back" href="/?place=${encodeURIComponent(r.location_county+' County')}">← Back to ${h(r.location_county)} County directory</a><div class="profile-heading"><span class="eyebrow">${h(r.organization_type)} · ${h(r.location_county)} COUNTY</span><h1>${h(r.verified_name)}</h1><p>${h(r.member_information)}</p><div class="profile-actions">${contact.website?external(contact.website,'Visit organization website','button'):''}${contact.phone?`<a class="button outline" href="tel:${h(contact.phone)}">Call ${h(contact.phone)}</a>`:''}${contact.email?`<a class="button outline" href="mailto:${h(contact.email)}">Email organization</a>`:''}<a class="button outline" href="#officers">View officers</a></div></div>${organizationOfficerDirectory(r)}${organizationPhotoGallery(r)}${publicMonthCalendar(url,events,{organizationId:r.id,path:'/organizations/'+r.id,includeMilestones:false,title:r.verified_name+' events'})}<div class="profile-grid"><div><section class="panel"><h2>Plan your visit</h2>${r.reviewed_update?`<p class="small-note">A public correction was reviewed ${h(r.reviewed_update.reviewed_at.slice(0,10))}. ${external(r.reviewed_update.source_url,'Correction source')}</p>`:''}<dl><div><dt>${r.hours?'Published office hours':'Published meeting schedule'}</dt><dd>${h(r.hours||r.meeting_schedule||'Not yet verified. Contact the organization for current details.')}</dd></div><div><dt>${r.address?.type==='mailing'?'Mailing address (not a visitor office)':r.address?.type==='service_office'?'Service office':r.address?.type==='program_venue'?'Published venue':'Meeting location'}</dt><dd>${h(r.address?.text||'No current public service location verified.')}${r.address?.map_eligible?'<br>'+external('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(r.address.text),'Open address in Maps'):''}</dd></div><div><dt>Who can participate?</dt><dd>${h(r.audience||r.eligibility||'Local membership and visitor requirements have not been verified.')}</dd></div><div><dt>Service area</dt><dd>${h(r.service_area?.notes||'A local location is listed; the organization’s service boundary has not been confirmed.')}</dd></div></dl><p class="small-note">Meeting times are in Pacific time. Published schedules may change; check with the organizer before attending. A meeting venue does not establish walk-in service availability.</p></section><section class="panel"><h2>Activities &amp; member information</h2><p><a href="/events">Explore the shared event calendar →</a></p><p>${h(r.event_information?.text||'Consult the organization for activities and visit the shared event calendar for researched upcoming events.')}</p>${r.event_information?.status==='past'?'<span class="label amber">Historical event — not an upcoming listing</span>':''}${r.partnership_notes?`<h3>Published coordination notes</h3><p>${h(r.partnership_notes)}</p>`:''}<p>${h(r.referral_notes)}</p></section>${connections}</div><aside><section class="panel trust-panel">${organizationReview(r)}<dl><div><dt>Research confidence</dt><dd>${h(r.confidence)} · supporting facts only</dd></div><div><dt>Still to confirm</dt><dd>${r.missing_data_flags.map(f=>h(f.replaceAll('_',' '))).join('<br>')}</dd></div></dl></section><section class="panel source-panel"><h2>Sources for this profile</h2>${r.source_ids.length?`<ul>${sourceList(r.source_ids)}</ul>`:'<p>No suitable public supporting source is recorded. Some legacy sources are withheld for privacy; confirmation is pending.</p>'}</section><section class="panel"><h2>Represent this organization?</h2><p>Suggest an organization profile or meeting update for review. Designated representatives can also use their organization editor.</p><a href="/for-organizations?org=${r.id}">Submit an update →</a></section></aside></div></div>`,{path:'/organizations/'+r.id,detail:true});
 }
-function about(){return shell('About & sources | Yolo Solano Veterans','How the directory is researched, how to read its records, and what is planned next.',`<section class="wrap about-page"><span class="eyebrow">BUILT ON LOCAL KNOWLEDGE</span><h1>A useful starting point.<br><em>A community effort.</em></h1><p class="intro">Yolo Solano Veterans connects people with local veteran organizations. This first collection includes Yolo and Solano counties and will grow with community input.</p><div class="three-up"><article><h2>For veterans &amp; families</h2><p>Find a post, explore a meeting or reach a county service office without creating an account.</p></article><article><h2>For organizations</h2><p>Make public information easier to find and lay the foundation for shared events and coordination.</p></article><article><h2>For a stronger network</h2><p>Keep sources visible, maintain useful contacts and give each organization a clear stewardship role.</p></article></div><section class="panel" id="sources"><h2>How to read the directory</h2><p><strong>“Source checked” means public information was reviewed on September 2, 2026.</strong> It does not mean an organization approved a profile, that a current officer term was confirmed, or that a service is available today.</p><p>We favor organization websites, official national/state directories and county sources. We keep meeting schedules separate from office hours, locations separate from service areas, and historical campaigns separate from upcoming events. Conflicting contacts and unverified details are flagged.</p><p>This initial collection contains ${records.length} records and is not exhaustive. A missing organization or an empty search is a research gap, not evidence that services do not exist. Some official directory pages were available through search extracts but could not be opened directly; their source notes retain that limitation.</p><h3>Privacy in this release</h3><p>We publish organization contact channels and public office or meeting venues. We do not publish member or officer rosters, personal addresses, personal phone numbers, or personal email addresses collected from online directories. Online availability is not permission to republish someone’s personal information.</p><p>The public submission desk stores proposed organization information plus a private reply name and email for review. Approved public details may be published; reply contacts stay private. Do not submit veteran case details, discharge papers or medical information. Searches are not saved by this application. A short-lived hashed network identifier limits form spam and is removed on later submissions after expiry; hosting providers process ordinary request information. External links follow their own privacy practices.</p><h3>Corrections and future stewardship</h3><p>Confirm important details with the organization before a visit. Use the organization submission desk to request a correction or removal, propose an event, or request stewardship. The owner reviews submissions; requesting stewardship does not grant account access. Aaron and Sterling can designate representatives to manage only their assigned organization pages after sign-in activation.</p><a href="/data.json">Download the structured records and source details →</a></section><section class="panel source-panel"><h2>Research sources</h2><ul class="all-sources">${sourceList(sources.map(s=>s.id))}</ul></section></section>`,{path:'/about'});}
+function about(){return shell('About & sources | Yolo Solano Veterans','How the directory is researched, how to read its records, and what is planned next.',`<section class="wrap about-page"><span class="eyebrow">BUILT ON LOCAL KNOWLEDGE</span><h1>A useful starting point.<br><em>A community effort.</em></h1><p class="intro">Yolo Solano Veterans connects people with local veteran organizations. This first collection includes Yolo and Solano counties and will grow with community input.</p><div class="three-up"><article><h2>For veterans &amp; families</h2><p>Find a post, explore a meeting or reach a county service office without creating an account.</p></article><article><h2>For organizations</h2><p>Make public information easier to find and lay the foundation for shared events and coordination.</p></article><article><h2>For a stronger network</h2><p>Keep sources visible, maintain useful contacts and give each organization a clear stewardship role.</p></article></div><section class="panel" id="sources"><h2>How to read the directory</h2><p><strong>“Source checked” means public information was reviewed on the date recorded for that listing. Published listings without supporting review evidence are marked as verification pending.</strong> It does not mean an organization approved a profile, that a current officer term was confirmed, or that a service is available today.</p><p>We favor organization websites, official national/state directories and county sources. We keep meeting schedules separate from office hours, locations separate from service areas, and historical campaigns separate from upcoming events. Conflicting contacts and unverified details are flagged.</p><p>This initial collection contains ${records.length} records and is not exhaustive. A missing organization or an empty search is a research gap, not evidence that services do not exist. Some official directory pages were available through search extracts but could not be opened directly; their source notes retain that limitation.</p><h3>Privacy in this release</h3><p>We publish organization contact channels and public office or meeting venues. We do not publish member or officer rosters, personal addresses, personal phone numbers, or personal email addresses collected from online directories. Online availability is not permission to republish someone’s personal information.</p><p>The public submission desk stores proposed organization information plus a private reply name and email for review. Approved public details may be published; reply contacts stay private. Do not submit veteran case details, discharge papers or medical information. Searches are not saved by this application. A short-lived hashed network identifier limits form spam and is removed on later submissions after expiry; hosting providers process ordinary request information. External links follow their own privacy practices.</p><h3>Corrections and future stewardship</h3><p>Confirm important details with the organization before a visit. Use the organization submission desk to request a correction or removal, propose an event, or request stewardship. The owner reviews submissions; requesting stewardship does not grant account access. Aaron and Sterling can designate representatives to manage only their assigned organization pages after sign-in activation.</p><a href="/data.json">Download the structured records and source details →</a></section><section class="panel source-panel"><h2>Research sources</h2><ul class="all-sources">${sourceList(sources.map(s=>s.id))}</ul></section></section>`,{path:'/about'});}
 function render(url,list=records,events=[]){
  list=list.map(record=>{const officer_profiles=Array.isArray(record.officer_profiles)?record.officer_profiles.map(sanitizePublicOfficer).filter(Boolean):[];return {...sanitizePublicRecord(record),officer_profiles};});
  if(url.pathname==='/'||url.pathname==='/yolo-solano')return {status:200,html:regionalHome(url,list,events)};

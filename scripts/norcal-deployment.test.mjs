@@ -127,7 +127,7 @@ test('regional home images resolve to complete bundled images and health identif
       assert.ok(bytes.subarray(0,3).equals(Buffer.from([0xff,0xd8,0xff]))||bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))||(bytes.subarray(0,4).toString()==='RIFF'&&bytes.subarray(8,12).toString()==='WEBP')||/<svg\b/.test(bytes.toString('utf8')),path+' must contain image bytes');
     }
     const health=await worker.fetch(new Request('https://www.norcalveterans.org/health'),env);
-    assert.equal((await health.json()).release,'project-hq-20260912');
+    assert.equal((await health.json()).release,'hq-hardening-20260912');
   } finally {env.sqlite.close();}
 });
 

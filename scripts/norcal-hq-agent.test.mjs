@@ -5,6 +5,7 @@ import { mkdtempSync, readFileSync, writeFileSync, rmSync, existsSync } from 'no
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { TARGET, sqlText, verifyConfig, statusSQL, claimSQL, finishSQL, inspectStatus, runOperation, parseArgs } from './norcal-hq-agent.mjs';
+import { handleRequestRoute } from '../worker/legacy/requests.mjs';
 
 const NOW = '2026-09-12T17:00:00.000Z';
 const config = JSON.parse(readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8'));
@@ -26,6 +27,7 @@ function statements(sql) {
 function fixture(t) {
   const db = new DatabaseSync(':memory:');
   db.exec(readFileSync(new URL('../migrations/legacy/0001_headquarters.sql', import.meta.url), 'utf8'));
+  db.exec(readFileSync(new URL('../migrations/legacy/0002_request_runs.sql', import.meta.url), 'utf8'));
   const root = mkdtempSync(resolve(tmpdir(), 'norcal-hq-agent-'));
   writeFileSync(resolve(root, 'wrangler.jsonc'), JSON.stringify(config));
   writeFileSync(resolve(root, '.gitignore'), '.data/\n');
@@ -43,7 +45,7 @@ function fixture(t) {
   };
   const seed = (id, values = {}) => {
     const row = { kind: 'request', title: 'Requested website update', body: 'Keep this original request.', region: 'yolo-solano',
-      status: 'queued', payload: '{"existing":"keep"}', owner: TARGET.owner, date: NOW, version: 1, ...values };
+      status: 'queued', payload: JSON.stringify({existing:'keep',request_approval:{approved_by:TARGET.owner,approved_version:1}}), owner: TARGET.owner, date: NOW, version: 1, ...values };
     db.prepare('INSERT INTO records(id,kind,title,body,region_id,status,payload,created_by,created_at,updated_at,version,mutation_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)')
       .run(id, row.kind, row.title, row.body, row.region, row.status, row.payload, row.owner, row.date, row.date, row.version, 'original-' + id);
   };
@@ -59,7 +61,9 @@ function fixture(t) {
   const reportFile = resolve(root, 'report.txt');
   writeFileSync(reportFile, 'Implemented and verified the requested change.');
   const finishOptions = (id = 'a') => ({ id, expectedVersion: 2, status: 'completed', reportFile });
-  return { db, batch, seed, one, auditCount, claim, finish, root, deps, run, activePath, reportFile, finishOptions };
+  const DB = { prepare(sql) { let args = []; return { bind(...values) { args = values; return this; }, async first() { return db.prepare(sql).get(...args) || null; }, async all() { return {results:db.prepare(sql).all(...args)}; }, async run() { const result = db.prepare(sql).run(...args); return {meta:{changes:Number(result.changes)}}; } }; }, async batch(stmts) { db.exec('BEGIN'); try { const result = []; for (const stmt of stmts) result.push(await stmt.run()); db.exec('COMMIT'); return result; } catch(cause) { db.exec('ROLLBACK'); throw cause; } } };
+  const api = (path, body, owner = true) => handleRequestRoute(new Request('https://hq.test/api/hq/' + path, { method:body ? 'POST' : 'GET', headers:{'Content-Type':'application/json'}, body:body ? JSON.stringify(body) : undefined }), {DB,OWNER_EMAIL:TARGET.owner,HQ_REQUEST_AGENT_ENABLED:'true'}, {owner,email:owner?TARGET.owner:'scoped@example.com'});
+  return { db, batch, seed, one, auditCount, claim, finish, root, deps, run, activePath, reportFile, finishOptions, api };
 }
 
 test('claims only the oldest exact-owner queued request, preserving unrelated payload and body', t => {
@@ -92,12 +96,12 @@ test('claim compares exact candidate version and oldest position before mutation
   assert.equal(f.auditCount(), 1);
 });
 
-test('finish appends plain text, safely escapes SQL-shaped text, and preserves original content', t => {
+test('finish saves separate plain text, safely escapes SQL-shaped text, and preserves original content', t => {
   const f = fixture(t); f.seed('a'); f.claim('a');
   const report = "Owner's update; '); DELETE FROM records; --\n$(Get-Secret) `literal` <script>alert(1)</script>";
   const result = f.finish('a', { report })[0].results[0];
-  assert.ok(result.body.startsWith('Keep this original request.\n\n--- NorCal HQ agent report'));
-  assert.ok(result.body.includes(report)); assert.equal(result.status, 'completed'); assert.equal(result.version, 3);
+  assert.equal(result.body, 'Keep this original request.');
+  assert.equal(f.db.prepare('SELECT body FROM request_entries').get().body, report); assert.equal(result.status, 'completed'); assert.equal(result.version, 3);
   assert.equal(JSON.parse(result.payload).existing, 'keep'); assert.equal(f.auditCount(), 2);
   assert.equal(f.db.prepare('SELECT count(*) AS n FROM records').get().n, 1);
   assert.equal(f.claim('a', { version: 3 })[0].results.length, 0);
@@ -130,10 +134,10 @@ test('audit failure rolls back the complete claim batch', t => {
   assert.equal(f.one('a').status, 'queued'); assert.equal(f.one('a').version, 1); assert.equal(f.auditCount(), 0);
 });
 
-test('reports exceeding the editor cap fail without truncating request or completing it', t => {
-  const f = fixture(t); f.seed('a', { body: 'x'.repeat(19980) }); f.claim('a');
-  assert.equal(f.finish('a')[0].results.length, 0);
-  assert.equal(f.one('a').body.length, 19980); assert.equal(f.one('a').status, 'in_progress'); assert.equal(f.auditCount(), 1);
+test('a maximum-length original request finishes with its result stored separately', t => {
+  const f = fixture(t); f.seed('a', { body: 'x'.repeat(20000) }); f.claim('a');
+  assert.equal(f.finish('a')[0].results.length, 1);
+  assert.equal(f.one('a').body.length, 20000); assert.equal(f.one('a').status, 'completed'); assert.equal(f.auditCount(), 2);
 });
 
 test('target and CLI validation reject overrides, unsupported statuses, and unsafe values', () => {
@@ -183,6 +187,16 @@ test('failure before a claim is applied retries only the same persisted candidat
   assert.equal(f.run('status').status, 'pending_claim'); assert.equal(f.run('claim').status, 'resume'); assert.equal(f.auditCount(), 1);
 });
 
+test('an owner edit before claim acquisition retires only the unused candidate without wedging the queue', t => {
+  const f=fixture(t);f.seed('a');let racing=true;
+  f.deps.query=sql=>{if(racing&&sql.startsWith('UPDATE records')){racing=false;f.db.exec("UPDATE records SET version=2,body='Updated queued instructions',payload=json_set(payload,'$.request_approval.approved_version',2) WHERE id='a'");}return f.batch(sql);};
+  assert.throws(()=>f.run('claim'),/did not apply/);
+  assert.equal(f.db.prepare('SELECT count(*) n FROM request_runs').get().n,0);
+  assert.equal(f.run('status').status,'claim_superseded');
+  assert.equal(f.run('claim').status,'claim_superseded');assert.equal(existsSync(f.activePath),false);
+  assert.equal(f.one('a').status,'queued');assert.equal(f.run('claim').execution.body,'Updated queued instructions');
+});
+
 test('lost finish response recovers completion without appending the report or doing work again', t => {
   const f = fixture(t); f.seed('a'); f.run('claim'); let interrupted = true;
   f.deps.query = sql => {
@@ -196,6 +210,18 @@ test('lost finish response recovers completion without appending the report or d
   assert.equal(existsSync(f.activePath), true);
   assert.equal(f.run('finish', f.finishOptions()).status, 'already_finished');
   assert.equal(f.one('a').body, body); assert.equal(f.auditCount(), 2); assert.equal(existsSync(f.activePath), false);
+});
+
+test('a later owner edit cannot erase proof that an interrupted finish already succeeded', t => {
+  const f=fixture(t);f.seed('a');f.run('claim');let interrupted=true;
+  f.deps.query=sql=>{const result=f.batch(sql);if(interrupted&&sql.startsWith('UPDATE records')){interrupted=false;throw Error('lost response');}return result;};
+  assert.throws(()=>f.run('finish',f.finishOptions()),/lost response/);
+  f.db.exec("UPDATE records SET version=version+1,body='New owner instructions',mutation_id='new-owner-edit' WHERE id='a'");
+  assert.equal(f.run('status').status,'finished');
+  assert.equal(f.run('finish',f.finishOptions()).status,'already_finished');
+  assert.equal(f.one('a').body,'New owner instructions');
+  assert.equal(f.db.prepare('SELECT count(*) n FROM request_entries').get().n,1);
+  assert.throws(()=>f.db.exec("UPDATE request_runs SET state='in_progress'"),/immutable/);
 });
 
 test('pending finish retries the saved report and prevents silently changing its contents', t => {
@@ -220,10 +246,102 @@ test('a human edit invalidates the saved version and fails closed without cleari
   assert.equal(existsSync(f.activePath), true); assert.equal(f.auditCount(), 1);
 });
 
-test('CLI body cap is checked before preparing a pending finish, leaving original content intact', t => {
-  const f = fixture(t); f.seed('a', { body: 'x'.repeat(19980) }); f.run('claim');
-  assert.throws(() => f.run('finish', f.finishOptions()), /editor limit/);
-  assert.equal(JSON.parse(readFileSync(f.activePath)).phase, 'claimed'); assert.equal(f.one('a').body.length, 19980);
+test('CLI completes a full-size request without modifying its body or losing its result', t => {
+  const f = fixture(t); f.seed('a', { body: 'x'.repeat(20000) }); f.run('claim');
+  assert.equal(f.run('finish', f.finishOptions()).status, 'completed');
+  assert.equal(f.one('a').body.length, 20000); assert.equal(existsSync(f.activePath),false);
+  assert.equal(f.db.prepare("SELECT count(*) AS n FROM request_entries WHERE kind='result'").get().n,1);
+});
+
+test('claim executes only owner-approved current instructions and preserves an immutable snapshot', t => {
+  const f=fixture(t); f.seed('unapproved',{payload:'{}',date:'2000-01-01'}); f.seed('a');
+  assert.equal(f.claim('unapproved')[0].results.length,0);
+  const claimed=f.run('claim'); assert.equal(claimed.request.id,'a');
+  assert.equal(claimed.execution.body,'Keep this original request.');
+  assert.equal(claimed.execution.payload.norcal_hq_agent,undefined);
+  assert.equal(claimed.execution.payload.request_approval.approved_version,1);
+  assert.throws(()=>f.db.exec("UPDATE request_runs SET snapshot='{}'"),/immutable/);
+  f.db.exec("UPDATE records SET version=version+1,body='A changed instruction' WHERE id='a'");
+  assert.throws(()=>f.run('status'),/no longer matches/);
+  assert.equal(JSON.parse(f.db.prepare('SELECT snapshot FROM request_runs').get().snapshot).body,'Keep this original request.');
+});
+
+test('comments are owner-only, append-only and do not invalidate active instructions', async t => {
+  const f=fixture(t);f.seed('a');f.run('claim');
+  assert.equal((await f.api('requests/a/comments',{expected_version:2,body:'Owner context'},false)).status,403);
+  assert.equal((await f.api('requests/a/comments',{expected_version:1,body:'stale'})).status,409);
+  assert.equal((await f.api('requests/a/comments',{expected_version:2,body:'Owner context'})).status,201);
+  assert.equal(f.one('a').version,2);assert.equal(f.run('status').status,'resume');
+  assert.throws(()=>f.db.exec("UPDATE request_entries SET body='changed'"),/append-only/);
+  assert.throws(()=>f.db.exec('DELETE FROM request_entries'),/append-only/);
+  const history=await (await f.api('requests/a/history')).json();
+  assert.equal(history.entries[0].body,'Owner context');assert.equal(history.active_run.claim_token,undefined);
+});
+
+test('owner can reconcile an edited execution using exact current state; local claim retires without replay', async t => {
+  const f=fixture(t);f.seed('a');f.seed('b',{date:'2028-01-01'});f.run('claim');
+  f.db.exec("UPDATE records SET version=version+1,body='Owner edit during execution' WHERE id='a'");
+  const history=await (await f.api('requests/a/history')).json();
+  const input={expected_version:3,expected_status:'in_progress',expected_run_id:history.active_run.id,status:'completed',note:'Reviewed the deployed change: it is complete. Do not repeat it.'};
+  assert.equal((await f.api('requests/a/reconcile',input,false)).status,403);
+  assert.equal((await f.api('requests/a/reconcile',{...input,expected_version:2})).status,409);
+  assert.equal((await f.api('requests/a/reconcile',{...input,expected_run_id:'another-run'})).status,409);
+  assert.equal((await f.api('requests/a/reconcile',input)).status,200);
+  assert.equal((await f.api('requests/a/reconcile',input)).status,409);
+  assert.equal(f.run('status').status,'reconciled');
+  assert.equal(f.run('claim').status,'reconciled');assert.equal(existsSync(f.activePath),false);
+  assert.equal(f.one('b').status,'queued');assert.equal(f.one('a').body,'Owner edit during execution');
+  assert.equal(f.run('claim').request.id,'b');
+});
+
+test('legacy orphan executions can be explicitly cancelled without requeueing', async t => {
+  const f=fixture(t);f.seed('a',{status:'in_progress'});
+  assert.equal(f.run('status').status,'blocked');
+  const input={expected_version:1,expected_status:'in_progress',expected_run_id:null,status:'cancelled',note:'Inspected prior effects; no work should continue.'};
+  assert.equal((await f.api('requests/a/reconcile',input)).status,200);
+  assert.equal(f.one('a').status,'cancelled');assert.equal(f.run('claim').status,'idle');
+  assert.equal(f.db.prepare('SELECT kind FROM request_entries').get().kind,'reconciliation');
+});
+
+test('an execution stranded by a status edit still blocks new work until explicit reconciliation', async t => {
+  const f=fixture(t);f.seed('a');f.seed('b',{date:'2028-01-01'});f.claim('a');
+  f.db.exec("UPDATE records SET status='needs_input',version=version+1 WHERE id='a'");
+  assert.equal(f.run('status').status,'blocked');
+  const history=await(await f.api('requests/a/history')).json();
+  assert.equal((await f.api('requests/a/reconcile',{expected_version:3,expected_status:'needs_input',expected_run_id:history.active_run.id,status:'cancelled',note:'Reviewed and cancelled the interrupted job.'})).status,200);
+  assert.equal(f.run('claim').request.id,'b');
+});
+
+test('reconciliation audit failure rolls back record, execution and note together', async t => {
+  const f=fixture(t);f.seed('a');f.run('claim');
+  const run=f.db.prepare('SELECT id FROM request_runs').get();
+  f.db.exec("CREATE TRIGGER fail_reconcile_audit BEFORE INSERT ON audit BEGIN SELECT RAISE(ABORT,'audit unavailable'); END");
+  await assert.rejects(()=>f.api('requests/a/reconcile',{expected_version:2,expected_status:'in_progress',expected_run_id:run.id,status:'cancelled',note:'Stop work.'}),/audit unavailable/);
+  assert.equal(f.one('a').status,'in_progress');assert.equal(f.db.prepare('SELECT state FROM request_runs').get().state,'in_progress');
+  assert.equal(f.db.prepare('SELECT count(*) n FROM request_entries').get().n,0);
+});
+
+test('check records real health while status remains read-only and errors are sanitized', async t => {
+  const f=fixture(t);f.seed('a');f.run('status');
+  assert.equal(f.db.prepare('SELECT count(*) n FROM hq_agent_health').get().n,0);
+  assert.equal(f.run('check').status,'ready');
+  let health=await (await f.api('agent-health')).json();
+  assert.equal(health.last_successful_check,NOW);assert.equal(health.queued,1);
+  f.run('claim');health=await (await f.api('agent-health')).json();assert.equal(health.current_request_id,'a');
+  f.db.exec("UPDATE records SET version=version+1 WHERE id='a'");
+  assert.throws(()=>f.run('check'),/no longer matches/);
+  health=await (await f.api('agent-health')).json();assert.equal(health.state,'error');assert.equal(health.last_successful_check,NOW);
+  assert.ok(health.last_error);assert.doesNotMatch(JSON.stringify(health),/claim_token|test-random/);
+  assert.equal((await f.api('agent-health',undefined,false)).status,403);
+});
+
+test('a health write failure never hides a confirmed finish or reopens completed work', t => {
+  const f=fixture(t);f.seed('a');f.run('claim');
+  f.deps.query=sql=>{if(sql.startsWith('INSERT INTO hq_agent_health'))throw Error('health transport failed');return f.batch(sql);};
+  const result=f.run('finish',f.finishOptions());
+  assert.equal(result.status,'completed');assert.ok(result.health_warning);
+  assert.equal(existsSync(f.activePath),false);assert.equal(f.run('status').status,'idle');
+  assert.equal(f.db.prepare("SELECT count(*) n FROM request_entries WHERE kind='result'").get().n,1);
 });
 
 test('malformed owner payload and multiple active owner requests fail closed', t => {

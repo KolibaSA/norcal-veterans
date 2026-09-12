@@ -1,11 +1,16 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {dataset} from '../src/data.mjs';
 import {brandLogos} from '../src/logos.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 // The embedded NorCal HQ is served as a module; keep it generated from its HTML source.
-const headquarters=await fs.readFile(path.join(root,'worker','legacy','hq.html'),'utf8');
-await fs.writeFile(path.join(root,'worker','legacy','hq-template.mjs'),'export default '+JSON.stringify(headquarters)+';\n');
+const [hqMarkup,hqStyles,hqScript]=await Promise.all(['hq.html','hq.css','hq-client.mjs'].map(name=>fs.readFile(path.join(root,'worker','legacy',name),'utf8')));
+if(!hqMarkup.includes('<!-- HQ_STYLES -->')||!hqMarkup.includes('<!-- HQ_SCRIPT -->'))throw new Error('HQ asset placeholders are missing.');
+if(/<\/script/i.test(hqScript))throw new Error('HQ client contains a closing script tag.');
+const headquarters=hqMarkup.replace('<!-- HQ_STYLES -->',()=>'<style>'+hqStyles+'</style>').replace('<!-- HQ_SCRIPT -->',()=>'<script type="module">'+hqScript+'</script>');
+const scriptHash='sha256-'+createHash('sha256').update(hqScript).digest('base64');
+await fs.writeFile(path.join(root,'worker','legacy','hq-template.mjs'),'export default '+JSON.stringify(headquarters)+';\nexport const scriptHash='+JSON.stringify(scriptHash)+';\n');
 const assets={};
 for(const [name,type] of [['styles.css','text/css; charset=utf-8'],['app.js','application/javascript; charset=utf-8'],['hq.js','application/javascript; charset=utf-8'],['favicon.svg','image/svg+xml']]){
  const bytes=await fs.readFile(path.join(root,'public',name));assets['/'+name]={type,base64:bytes.toString('base64')};
@@ -20,7 +25,12 @@ for(const name of await fs.readdir(path.join(root,'public','logos'))){
  const bytes=(await fs.readFile(path.join(root,'public','logos',name)));assets['/logos/'+name]={type,base64:bytes.toString('base64')};
 }
 async function source(name){return (await fs.readFile(path.join(root,'src',name),'utf8')).replace(/^import .*;\r?\n/gm,'').replace(/^export \{dataset\};?\r?\n?/gm,'').replace(/^export /gm,'');}
-const shared=(await Promise.all(['public-privacy.mjs','buddy-poppy-events.mjs','research-additions.mjs','data.mjs','logos.mjs','organization-links.mjs','public-calendar.mjs','resources.mjs','site.mjs','storage.mjs','published-request-assets.mjs','speaker-submissions.mjs','organization-meetings.mjs','event-collaboration.mjs','organization-photos.mjs','organization-officers.mjs'].map(source))).join('\n');
+// The imported bundle remains a regression fixture. Scope the active validation
+// module so its internal helper names cannot collide in the older flat bundle.
+const validationSource=(await fs.readFile(path.join(root,'worker/legacy/validation.mjs'),'utf8')).replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'');
+const validationNames=['contentMetadata','canonicalDate','canonicalInstant','pacificLocal','pacificToInstant','validateRecordPayload'];
+const validationFixture='const {'+validationNames.join(',')+'}=(()=>{'+validationSource+'\nreturn {'+validationNames.join(',')+'};})();\n';
+const shared=validationFixture+(await Promise.all(['public-privacy.mjs','buddy-poppy-events.mjs','research-additions.mjs','data.mjs','logos.mjs','organization-links.mjs','public-calendar.mjs','resources.mjs','site.mjs','storage.mjs','published-request-assets.mjs','speaker-submissions.mjs','organization-meetings.mjs','event-collaboration.mjs','organization-photos.mjs','organization-officers.mjs'].map(source))).join('\n');
 const publicRuntime=`
 const assets=${JSON.stringify(assets)};
 export default {async fetch(request,env={}){

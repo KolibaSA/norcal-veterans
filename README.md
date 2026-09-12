@@ -19,12 +19,12 @@ Requires Node 24 or newer. Install the locked dependencies with pnpm.
 
 ```sh
 npm run build
-npm test
-npx wrangler dev
+npm run test:active
+npx wrangler dev --config wrangler.staging.jsonc
 ```
 
-Cloudflare builds GitHub `main` with `npm run build`, then deploys with `npx wrangler deploy`. Both website and HQ publish together. See [deployment and recovery](docs/norcal-deployment.md) for preview verification, backups, and rollback.
+Cloudflare builds GitHub `main` with `npm run build`, which generates artifacts and must pass all tests, then deploys with `npx wrangler deploy`. Both website and HQ publish together. Use `wrangler.staging.jsonc` for isolated write testing. See [deployment and recovery](docs/norcal-deployment.md) for migrations, verification and rollback.
 
-The imported `src/hq.mjs`, `dist/hq-worker.mjs`, `wrangler.hq.jsonc`, and non-legacy migrations describe the original Yolo source application and a different database schema. They are retained for reference and regression coverage. Do not deploy that HQ configuration or apply those migrations to the NorCal database. The active HQ template is generated from `worker/legacy/hq.html` by the build.
+The imported `src/hq.mjs`, `dist/hq-worker.mjs`, `fixtures/imported/wrangler.hq.jsonc.txt`, and non-legacy migrations describe the original Yolo source application and a different database schema. They are retained for reference and regression coverage. Do not deploy that HQ configuration or apply those migrations to the NorCal database. The active HQ template is generated from readable HTML, CSS and a client module under `worker/legacy`.
 
 Never commit credentials, private database exports, or veteran case information. Backups belong in ignored private storage, never in `public/` or Git.

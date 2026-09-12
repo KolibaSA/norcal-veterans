@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "test": "node --test scripts/*.test.mjs",
+    "build": "node scripts/build.mjs && node scripts/run-tests.mjs",
+    "test": "node scripts/run-tests.mjs",
+    "test:active": "node scripts/run-tests.mjs --active",
     "dev": "wrangler dev"
   },
   "engines": {

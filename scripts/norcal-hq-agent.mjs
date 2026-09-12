@@ -14,9 +14,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ACTOR = 'Codex NorCal HQ agent';
 const KEY = '$.norcal_hq_agent';
 const owned = `kind='request' AND created_by=${sqlText(TARGET.owner)}`;
+const approved = `json_extract(payload,'$.request_approval.approved_by')=${sqlText(TARGET.owner)} AND json_extract(payload,'$.request_approval.approved_version')=version`;
 const tokenAt = `json_extract(payload,'${KEY}.claim_token')`;
 const hash = text => createHash('sha256').update(text).digest('hex');
-const reportAppendix = (now, status, report) => `\n\n--- NorCal HQ agent report | ${now} | ${status} ---\n${report}\n--- End NorCal HQ agent report ---`;
 const error = message => { throw new Error(message); };
 const textValue = (value, name, limit = 200) => {
   if (typeof value !== 'string' || !value.trim() || value.includes('\0') || value.length > limit) error(`Invalid ${name}.`);
@@ -52,11 +52,13 @@ export function statusSQL(localId) {
       count(CASE WHEN created_by=${sqlText(TARGET.owner)} AND status='in_progress' THEN 1 END) AS in_progress,
       count(CASE WHEN created_by=${sqlText(TARGET.owner)} AND status='needs_input' THEN 1 END) AS needs_input,
       count(CASE WHEN created_by=${sqlText(TARGET.owner)} AND status='completed' THEN 1 END) AS completed,
+      count(CASE WHEN created_by=${sqlText(TARGET.owner)} AND status='queued' AND NOT COALESCE((${approved}),0) THEN 1 END) AS awaiting_approval,
       count(CASE WHEN created_by<>${sqlText(TARGET.owner)} AND status IN ('queued','in_progress') THEN 1 END) AS ignored_other_authors
       FROM records WHERE kind='request'`,
-    `SELECT id,title,created_at,version FROM records WHERE ${owned} AND status='queued' ORDER BY created_at,id LIMIT 1`,
-    `SELECT * FROM records WHERE ${owned} AND status='in_progress' ORDER BY created_at,id`,
-    localId ? `SELECT * FROM records WHERE ${owned} AND id=${sqlText(textValue(localId, 'claim id'))}` : 'SELECT * FROM records WHERE 0'
+    `SELECT id,title,created_at,version FROM records WHERE ${owned} AND status='queued' AND ${approved} ORDER BY created_at,id LIMIT 1`,
+    `SELECT * FROM records WHERE ${owned} AND (status='in_progress' OR EXISTS(SELECT 1 FROM request_runs WHERE request_id=records.id AND state='in_progress')) ORDER BY created_at,id`,
+    localId ? `SELECT *,EXISTS(SELECT 1 FROM request_entries WHERE request_id=records.id AND kind='reconciliation' AND mutation_id=records.mutation_id) AS owner_reconciled FROM records WHERE ${owned} AND id=${sqlText(textValue(localId, 'claim id'))}` : 'SELECT * FROM records WHERE 0',
+    localId ? `SELECT * FROM request_runs WHERE request_id=${sqlText(localId)} ORDER BY claimed_at,id` : 'SELECT * FROM request_runs WHERE 0'
   ];
 }
 const auditSQL = (id, mutation, action, now) => `INSERT INTO audit(id,actor,action,record_id,created_at)
@@ -68,14 +70,23 @@ const transitionResult = (id, mutation) => `SELECT * FROM records WHERE ${owned}
 export function claimSQL(input) {
   const id = textValue(input.id, 'id'), version = versionValue(input.version);
   const token = textValue(input.token, 'claim token'), now = iso(input.now);
-  const metadata = JSON.stringify({ claim_token: token, claimed_at: now, claimed_version: version + 1, state: 'in_progress' });
+  const runId = textValue(input.runId ?? hash(token), 'execution id');
+  const metadata = JSON.stringify({ claim_token: token, run_id: runId, claimed_at: now, claimed_version: version + 1, state: 'in_progress' });
   return [
     `UPDATE records SET status='in_progress',version=version+1,updated_at=${sqlText(now)},mutation_id=${sqlText(token)},
       payload=json_set(payload,'${KEY}',json(${sqlText(metadata)}))
       WHERE ${owned} AND id=${sqlText(id)} AND version=${version} AND status='queued'
       AND json_valid(payload) AND json_type(payload)='object'
-      AND id=(SELECT id FROM records WHERE ${owned} AND status='queued' ORDER BY created_at,id LIMIT 1)
-      AND NOT EXISTS(SELECT 1 FROM records WHERE ${owned} AND status='in_progress') RETURNING *`,
+      AND ${approved}
+      AND id=(SELECT id FROM records WHERE ${owned} AND status='queued' AND ${approved} ORDER BY created_at,id LIMIT 1)
+      AND NOT EXISTS(SELECT 1 FROM records WHERE ${owned} AND status='in_progress')
+      AND NOT EXISTS(SELECT 1 FROM request_runs WHERE state='in_progress') RETURNING *`,
+    `INSERT INTO request_runs(id,request_id,claim_token,request_version,claimed_version,snapshot,state,claimed_at)
+      SELECT ${sqlText(runId)},id,${sqlText(token)},${version},${version + 1},
+        json_object('id',id,'title',title,'body',body,'region_id',region_id,'organization_id',organization_id,
+          'created_by',created_by,'version',${version},'payload',json_remove(payload,'${KEY}')),'in_progress',${sqlText(now)}
+      FROM records WHERE ${owned} AND id=${sqlText(id)} AND mutation_id=${sqlText(token)}
+      AND NOT EXISTS(SELECT 1 FROM request_runs WHERE id=${sqlText(runId)})`,
     auditSQL(id, token, 'norcal_agent_claimed', now), transitionResult(id, token)
   ];
 }
@@ -84,15 +95,22 @@ export function finishSQL(input) {
   const token = textValue(input.token, 'claim token'), mutation = textValue(input.mutation, 'mutation id');
   const now = iso(input.now), report = textValue(input.report, 'plain-text report (1–12000 characters)', 12000);
   if (!['completed', 'needs_input'].includes(input.status)) error('Finish status must be completed or needs_input.');
-  const appendix = reportAppendix(now, input.status, report);
   return [
-    `UPDATE records SET status=${sqlText(input.status)},body=body||${sqlText(appendix)},version=version+1,
+    `UPDATE records SET status=${sqlText(input.status)},version=version+1,
       updated_at=${sqlText(now)},mutation_id=${sqlText(mutation)},
       payload=json_set(payload,'${KEY}.state',${sqlText(input.status)},'${KEY}.finished_at',${sqlText(now)},
         '${KEY}.report_sha256',${sqlText(hash(report))})
       WHERE ${owned} AND id=${sqlText(id)} AND version=${version} AND status='in_progress'
       AND json_valid(payload) AND ${tokenAt}=${sqlText(token)}
-      AND length(body)+${appendix.length}<=20000 RETURNING *`,
+      AND EXISTS(SELECT 1 FROM request_runs WHERE request_id=${sqlText(id)} AND claim_token=${sqlText(token)}
+        AND claimed_version=${version} AND state='in_progress') RETURNING *`,
+    `UPDATE request_runs SET state=${sqlText(input.status)},finished_at=${sqlText(now)},finish_mutation=${sqlText(mutation)},report_sha256=${sqlText(hash(report))}
+      WHERE request_id=${sqlText(id)} AND claim_token=${sqlText(token)} AND claimed_version=${version} AND state='in_progress'
+      AND EXISTS(SELECT 1 FROM records WHERE id=${sqlText(id)} AND mutation_id=${sqlText(mutation)})`,
+    `INSERT INTO request_entries(id,request_id,run_id,kind,body,actor,status,created_at,mutation_id)
+      SELECT ${sqlText(mutation)},request_id,id,'result',${sqlText(report)},${sqlText(ACTOR)},${sqlText(input.status)},${sqlText(now)},${sqlText(mutation)}
+      FROM request_runs WHERE request_id=${sqlText(id)} AND finish_mutation=${sqlText(mutation)}
+      AND NOT EXISTS(SELECT 1 FROM request_entries WHERE mutation_id=${sqlText(mutation)})`,
     auditSQL(id, mutation, `norcal_agent_${input.status}`, now), transitionResult(id, mutation)
   ];
 }
@@ -122,26 +140,51 @@ function visibleRow(row) {
   return result;
 }
 export function inspectStatus(results, claim) {
-  if (!Array.isArray(results) || results.length !== 4 || results.some(r => !Array.isArray(r.results))) error('Unexpected queue response.');
-  const [stats, queued, working, selected] = results.map(r => r.results);
+  if (!Array.isArray(results) || results.length !== 5 || results.some(r => !Array.isArray(r.results))) error('Unexpected queue response.');
+  const [stats, queued, working, selected, runs] = results.map(r => r.results);
   const output = { target: TARGET.worker, counts: stats[0], next: queued[0] ?? null };
   if (working.length > 1) error('Multiple owner requests are in progress. Stop and reconcile HQ before processing.');
   if (!claim) return { ...output, status: working.length ? 'blocked' : queued.length ? 'ready' : 'idle',
     ...(working.length ? { reason: 'An owner request is already in progress without this local claim. Never reclaim it automatically.', blocked_id: working[0].id } : {}) };
   const row = parseRow(selected[0]), metadata = row?.payload.norcal_hq_agent;
   const same = metadata?.claim_token === claim.token;
+  const run = runs.find(value => value.claim_token === claim.token);
+  if ((run?.reconciled_by && run.state !== 'in_progress') || (!run && same && row.owner_reconciled && metadata.reconciled_by)) {
+    return { ...output, status: 'reconciled', active_claim: publicClaim(claim),
+      reconciliation: { run_id: run?.id ?? null, status: run?.state ?? row.status, actor: run?.reconciled_by ?? metadata.reconciled_by, finished_at: run?.finished_at ?? metadata.finished_at },
+      reason: 'The owner explicitly reconciled this execution. Retire the local claim without doing or repeating its work.' };
+  }
   if (claim.phase === 'claiming' && row?.status === 'queued' && row.version === claim.base_version && !working.length) {
     return { ...output, status: 'pending_claim', active_claim: publicClaim(claim), reason: 'Run claim to retry the same guarded claim; no request work has started.' };
   }
-  if (same && row.status === 'in_progress' && row.version === claim.version && working[0]?.id === claim.id) {
-    return { ...output, status: claim.phase === 'finishing' ? 'pending_finish' : 'resume',
-      active_claim: publicClaim(claim), request: visibleRow(selected[0]) };
+  if (claim.phase === 'claiming' && !run && !same) {
+    return { ...output, status: 'claim_superseded', active_claim: publicClaim(claim),
+      reason: 'The candidate changed before this claim acquired an execution. No execution exists for its token. Retire the unused local claim without doing work.' };
   }
-  if (claim.phase === 'finishing' && same && row?.status === claim.finish.status && row.version === claim.version + 1 &&
-      row.mutation_id === claim.finish.mutation && metadata.report_sha256 === claim.finish.report_sha256) {
+  if (same && run?.state === 'in_progress' && row.status === 'in_progress' && row.version === claim.version && working[0]?.id === claim.id) {
+    return { ...output, status: claim.phase === 'finishing' ? 'pending_finish' : 'resume',
+      active_claim: publicClaim(claim), request: visibleRow(selected[0]), execution: JSON.parse(run.snapshot), run_id: run.id };
+  }
+  // The immutable execution outcome survives later owner edits/requeueing. Its
+  // exact mutation and report digest prove the interrupted finish succeeded.
+  if (claim.phase === 'finishing' && run?.state === claim.finish.status &&
+      run.finish_mutation === claim.finish.mutation && run.report_sha256 === claim.finish.report_sha256 && !run.reconciled_by) {
     return { ...output, status: 'finished', active_claim: publicClaim(claim), request: visibleRow(selected[0]) };
   }
-  error('Local claim no longer matches the HQ request ID, version, status or token. Stop; do not repeat work or clear the claim automatically.');
+  error('Local claim no longer matches the HQ request ID, version, status, token or execution snapshot. Stop; use the owner reconciliation action in HQ after reviewing prior work.');
+}
+
+export function healthSQL(state, now, failed = false) {
+  const timestamp = sqlText(iso(now));
+  const allowed = ['ready','idle','blocked','resume','pending_claim','pending_finish','finished','reconciled','claim_superseded','completed','needs_input','already_finished'];
+  const status = failed ? 'error' : allowed.includes(state.status) ? state.status : 'unknown';
+  const message = failed ? 'Queue check failed. Inspect the local runner and reconcile any conflicting execution before proceeding.' : null;
+  return `INSERT INTO hq_agent_health(id,last_successful_check,current_request_id,queued,state,last_error,last_error_at,updated_at)
+    VALUES(1,${failed ? 'NULL' : timestamp},(SELECT id FROM records WHERE ${owned} AND status='in_progress' ORDER BY created_at,id LIMIT 1),
+      (SELECT count(*) FROM records WHERE ${owned} AND status='queued'),${sqlText(status)},${message ? sqlText(message) : 'NULL'},${failed ? timestamp : 'NULL'},${timestamp})
+    ON CONFLICT(id) DO UPDATE SET last_successful_check=${failed ? 'hq_agent_health.last_successful_check' : 'excluded.last_successful_check'},
+      current_request_id=excluded.current_request_id,queued=excluded.queued,state=excluded.state,
+      last_error=excluded.last_error,last_error_at=excluded.last_error_at,updated_at=excluded.updated_at`;
 }
 
 export function wranglerQuery(sql, root = ROOT) {
@@ -210,9 +253,11 @@ export function runOperation(command, options = {}, dependencies = {}) {
   const directory = resolve(root, '.data/norcal-hq-agent'), path = resolve(directory, 'active-claim.json');
   const snapshot = claim => inspectStatus(query(statusSQL(claim?.id).join(';\n') + ';'), claim);
   if (command === 'status') return snapshot(loadClaim(path));
-  if (!['claim', 'finish'].includes(command)) error('Unknown command. Use --help.');
-  return withLock(directory, () => {
+  if (!['check', 'claim', 'finish'].includes(command)) error('Unknown command. Use --help.');
+  try {
+  const result = withLock(directory, () => {
     let claim = loadClaim(path), state = snapshot(claim);
+    if (command === 'check') return state;
     if (command === 'finish' && claim && (options.id !== claim.id || versionValue(options.expectedVersion) !== claim.version)) {
       error('Finish ID and expected version must match the saved active claim exactly.');
     }
@@ -221,14 +266,21 @@ export function runOperation(command, options = {}, dependencies = {}) {
       if (command === 'finish') return { status: 'already_finished', request: state.request };
       state = snapshot(null);
     }
+    if (['reconciled', 'claim_superseded'].includes(state.status)) {
+      const archive = resolve(directory, 'retired');
+      mkdirSync(archive, { recursive: true, mode: 0o700 });
+      renameSync(path, resolve(archive, `${claim.id}-${hash(claim.token)}.json`));
+      // Return without claiming anything. The next heartbeat may take new work.
+      return { status: state.status, reconciliation: state.reconciliation, reason: state.reason };
+    }
     if (command === 'claim') {
       if (['resume', 'pending_finish', 'blocked', 'idle'].includes(state.status)) return state;
       if (!claim) {
         claim = { target: TARGET, id: state.next.id, base_version: state.next.version, version: state.next.version + 1,
-          token: uuid(), claimed_at: now(), phase: 'claiming' };
+          token: uuid(), run_id: uuid(), claimed_at: now(), phase: 'claiming' };
         saveClaim(path, claim, true); // Persist before sending: a lost response can be resumed safely.
       }
-      const results = query(claimSQL({ id: claim.id, version: claim.base_version, token: claim.token, now: claim.claimed_at }).join(';\n') + ';');
+      const results = query(claimSQL({ id: claim.id, version: claim.base_version, token: claim.token, runId: claim.run_id, now: claim.claimed_at }).join(';\n') + ';');
       if (results.at(-1)?.results?.length !== 1) error('Claim did not apply; local claim was retained. Run status and stop on a mismatch.');
       claim.phase = 'claimed'; saveClaim(path, claim);
       return snapshot(claim);
@@ -239,9 +291,6 @@ export function runOperation(command, options = {}, dependencies = {}) {
     const report = readFileSync(reportPath, 'utf8');
     textValue(report, 'plain-text report (1–12000 characters)', 12000);
     if (!['completed', 'needs_input'].includes(options.status)) error('Finish status must be completed or needs_input.');
-    if (state.request.body.length + reportAppendix(claim.finish?.at ?? now(), options.status, report).length > 20000) {
-      error('Original request plus report exceeds the HQ editor limit of 20000 characters. Shorten the report; original request was preserved.');
-    }
     if (claim.phase === 'finishing') {
       if (claim.finish.status !== options.status || claim.finish.report_sha256 !== hash(report)) error('Pending finish must use the same status and report; do not repeat the completed work.');
     } else {
@@ -257,30 +306,51 @@ export function runOperation(command, options = {}, dependencies = {}) {
     unlinkSync(path);
     return { status: options.status, request: verified.request };
   });
+  try { query(healthSQL(result, now()) + ';'); }
+  catch (cause) {
+    if (command === 'check') throw cause;
+    // A telemetry failure cannot turn a confirmed completion into an ambiguous
+    // operation after its local claim was safely retired.
+    return { ...result, health_warning: 'The queue operation succeeded, but its health update was not confirmed.' };
+  }
+  return result;
+  } catch (cause) {
+    // Health is best effort on failure; never replace the actual error, leak its
+    // text remotely, or discard the durable claim when connectivity is uncertain.
+    try { query(healthSQL({}, now(), true) + ';'); } catch {}
+    throw cause;
+  }
 }
 
 const HELP = `NorCal HQ request queue (existing authenticated Wrangler login required)
 
   node scripts/norcal-hq-agent.mjs status
+  node scripts/norcal-hq-agent.mjs check
   node scripts/norcal-hq-agent.mjs claim
   node scripts/norcal-hq-agent.mjs finish --id REQUEST_ID --expected-version N --status completed|needs_input --report-file PATH
 
-status is read-only and returns JSON. claim atomically takes the oldest queued
-request authored by the exact configured owner. Only one owner request may be
+status is read-only and returns JSON. check records a real successful poll in HQ.
+claim atomically takes the oldest queued request approved at its exact current
+revision by the configured owner and saves immutable execution instructions.
+Only one owner request may be
 in progress. Interrupted matching claims resume; they never expire or reclaim.
-finish appends a plain-text report to the original request and audits the change.
+finish saves a separate append-only plain-text result and audits the change.
 The helper never interprets or executes request text, publishes, or sends messages.
 
 Claims are private local state in ignored .data/norcal-hq-agent/active-claim.json.
 Never delete a mismatched claim or repeat work to resolve an uncertain response.
 Use status first. pending_finish means retry the saved report, not the work.
+reconciled means the owner closed an execution after reviewing prior effects;
+claim archives that local claim without replaying work or claiming another item.
+claim_superseded means a concurrent edit prevented acquisition; claim archives
+only that unused local candidate after confirming no execution exists for it.
 No credentials, alternative accounts, database overrides or shell commands are accepted.
 `;
 export function parseArgs(args) {
   if (!args.length || args[0] === '--help' || args[0] === 'help') return { help: true };
   const [command, ...rest] = args;
-  if (!['status', 'claim', 'finish'].includes(command)) error('Unknown command. Use --help.');
-  if (command !== 'finish' && rest.length) error('status and claim take no options.');
+  if (!['status', 'check', 'claim', 'finish'].includes(command)) error('Unknown command. Use --help.');
+  if (command !== 'finish' && rest.length) error('status, check and claim take no options.');
   const names = { '--id': 'id', '--expected-version': 'expectedVersion', '--status': 'status', '--report-file': 'reportFile' }, options = {};
   for (let i = 0; i < rest.length; i += 2) {
     const key = names[rest[i]], value = rest[i + 1];
