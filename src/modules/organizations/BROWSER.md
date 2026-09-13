@@ -2,6 +2,8 @@
 
 HQ organization field mapping, public contact/address/service-area editing, source/confirmation evidence, organization scope options and lifecycle.
 
+When the opened record is exactly `vfw-ca-8151`, `editor.html` also reveals the twelve-card meeting planner. `meeting-plans.mjs` maps its fixed month/time controls into the organization payload; all other organization records receive blank hidden planner fields and preserve their existing payload unchanged.
+
 `browser.mjs` exports `createFeature()`, `organizationFields(record)`, `organizationPayload(fields, previous)` and `loadScopeOptions(api, select)`. `editor.html` owns organization markup.
 
 Owns organization payload fields while preserving unknown provenance and private imported fields. Mailing addresses never become eligible for directions. Existing confirmation timestamps survive unchanged when the displayed date is unchanged.

@@ -26,3 +26,15 @@
                 <div><label for="confirmationSource">Evidence of organization confirmation</label><input id="confirmationSource" type="url" maxlength="2000" placeholder="https://"></div>
               </div>
             </section>
+
+            <section id="vfwMeetingPlanner" class="vfw-meeting-planner" hidden aria-labelledby="vfwMeetingPlannerHeading">
+              <input id="meetingPlannerOrganization" type="hidden">
+              <div class="bar">
+                <div><p class="eyebrow">VFW POST 8151 ONLY</p><h3 id="vfwMeetingPlannerHeading">Monthly meeting schedule</h3></div>
+                <div class="meeting-year"><label for="meetingPlanYear">Planning year</label><input id="meetingPlanYear" type="number" min="2026" max="2032" step="1"></div>
+              </div>
+              <p class="muted">Edit the date, title, and up to three labeled times for each month. Saving this organization publishes the schedule in the Post 8151 calendar; no separate meeting pages are created.</p>
+              <div class="vfw-meeting-grid">
+                <!-- HQ_PARTIAL: src/modules/organizations/meeting-months.html -->
+              </div>
+            </section>

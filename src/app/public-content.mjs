@@ -1,5 +1,5 @@
-import {publicOrganizationRecord} from '../modules/organizations/public.mjs';
-import {publicEventRecord} from '../modules/events/public.mjs';
+import {publicOrganizationRecord,publicMeetingPlanEvents} from '../modules/organizations/public.mjs';
+import {publicEventRecord,sanitizePublicEvent} from '../modules/events/public.mjs';
 const serializers = { organization: publicOrganizationRecord, event: publicEventRecord };
 export function publicPayload(r) {
  try {
@@ -15,8 +15,13 @@ export async function norcalPublicData(db) {
   const serialized = rows.map(row => ({ kind: row.kind, payload: publicPayload(row) }));
   const invalidCount = serialized.filter(row => !row.payload).length;
   if (invalidCount) console.warn(JSON.stringify({ event: 'public_content_rows_excluded', count: invalidCount }));
-  return {
-    records: serialized.filter(row => row.kind === 'organization' && row.payload).map(row => row.payload),
-    events: serialized.filter(row => row.kind === 'event' && row.payload).map(row => row.payload)
-  };
+  const organizations=serialized.filter(row => row.kind === 'organization' && row.payload).map(row => row.payload);
+  const planned=[];
+  for(const row of rows.filter(row=>row.kind==='organization')){
+    const organization=organizations.find(entry=>entry.id===row.id);if(!organization)continue;
+    try{planned.push(...publicMeetingPlanEvents(row,JSON.parse(row.payload),organization).map(sanitizePublicEvent).filter(Boolean));}catch{/* A malformed private plan cannot disable public content. */}
+  }
+  const plannedIds=new Set(planned.map(event=>event.id));
+  const events=serialized.filter(row => row.kind === 'event' && row.payload).map(row => row.payload).filter(event=>!plannedIds.has(event.id)).concat(planned).sort((a,b)=>String(a.start_at).localeCompare(String(b.start_at))||a.id.localeCompare(b.id));
+  return { records: organizations, events };
 }

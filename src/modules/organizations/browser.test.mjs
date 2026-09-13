@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createFeature, organizationPayload, loadScopeOptions } from './browser.mjs';
 import { controls } from '../../shared/browser-test-support.mjs';
+import { VFW_8151_ID } from './meeting-plans.mjs';
 
 test('organization editing retains evidence and private imported data without inventing verification', () => {
   const record = { title: 'Synthetic organization', payload: {
@@ -22,4 +23,20 @@ test('organization scope choices use escaped public labels and their existing st
   assert.deepEqual(paths, ['records?kind=organization']);
   assert.match($('org').innerHTML, /org-&quot;x/); assert.match($('org').innerHTML, /&lt;Example&gt;/);
   assert.doesNotMatch($('org').innerHTML, /<Example>/);
+});
+
+test('only VFW Post 8151 maps the twelve-month planner and multiple labeled times', () => {
+  const post = { id: VFW_8151_ID, title: 'Dixon VFW Post 8151', payload: { id: VFW_8151_ID, meeting_plans: [{ year: 2027, meetings: [{
+    month: 1, date: '2027-01-21', title: 'January meeting', notes: 'Monthly gathering.',
+    time_1: '18:00', label_1: 'Social hour', time_2: '19:00', label_2: 'Post meeting', time_3: '20:00', label_3: 'Social time'
+  }] }] } };
+  const fields = createFeature().fields(post);
+  assert.equal(fields.meetingPlannerOrganization, VFW_8151_ID);
+  assert.equal(fields.meetingDate1, '2027-01-21'); assert.equal(fields.meetingLabel1_3, 'Social time');
+  fields.meetingLabel1_2 = 'Business meeting';
+  const payload = organizationPayload(fields, post.payload);
+  assert.equal(payload.meeting_plans[0].meetings[0].label_2, 'Business meeting');
+  const other = createFeature().fields({ id: 'vfw-ca-other', payload: {} });
+  assert.equal(other.meetingPlannerOrganization, '');
+  assert.equal(organizationPayload(other, {}).meeting_plans, undefined);
 });

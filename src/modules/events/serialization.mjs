@@ -13,6 +13,8 @@ export function sanitizePublicEvent(record){
  if(!out.id||!out.title||!out.venue)return null;
  out.kind ||= 'Community event';
  out.start_at=start;out.date_only=record.date_only===true;out.end_at=out.date_only?null:end;
+ const meetingTimes=Array.isArray(record.meeting_times)?record.meeting_times.slice(0,3).filter(entry=>entry&&/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(entry.time)&&typeof entry.label==='string'&&entry.label.trim()).map(entry=>({time:entry.time,label:publicText(entry.label,100)})):[];
+ if(out.kind==='Organization meeting'&&meetingTimes.length)out.meeting_times=meetingTimes;
  out.source_url=publicURL(record.source_url);out.source_checked=out.source_url?privacyReviewDate(record.source_checked):null;
  out.source_kind=['public_source','project_team'].includes(record.source_kind)?record.source_kind:'public_source';
  out.status=['published','draft','archived'].includes(record.status)?record.status:'draft';

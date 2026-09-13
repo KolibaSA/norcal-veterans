@@ -90,6 +90,16 @@ test('one broken stored row cannot disable the public directory, pages or calend
  assert.equal(upcomingEvents([{...event,status:'published',start_at:'not a date'}]).length,0);
 });
 
+test('Post 8151 organization plan publishes stable monthly events with three labeled times',async t=>{
+ const env=setup(t),times=[{time:'18:00',label:'Social hour'},{time:'19:00',label:'Post meeting'},{time:'20:00',label:'Social time'}];
+ env.insert('vfw-ca-8151','organization',{...organization,id:'vfw-ca-8151',address:{type:'meeting_venue',text:'231 N. First Street, Dixon, CA 95620',map_eligible:true},meeting_plans:[{year:2027,meetings:[{month:1,date:'2027-01-21',title:'Dixon VFW Post 8151 monthly meeting',time_1:'18:00',label_1:'Social hour',time_2:'19:00',label_2:'Post meeting',time_3:'20:00',label_3:'Social time',notes:'Third-Thursday monthly meeting.'}]}]},'Dixon VFW Post 8151');
+ env.insert('organization-meeting-vfw-ca-8151-2027-01','event',{...event,organization_id:'vfw-ca-8151',kind:'Organization meeting'},'Old meeting row');
+ const data=await norcalPublicData(env.DB),meetings=data.events.filter(row=>row.organization_id==='vfw-ca-8151'&&row.kind==='Organization meeting');
+ assert.equal(meetings.length,1);assert.equal(meetings[0].id,'organization-meeting-vfw-ca-8151-2027-01');assert.equal(meetings[0].start_at,'2027-01-22T02:00:00.000Z');assert.deepEqual(meetings[0].meeting_times,times);
+ const page=await worker.fetch(new Request('https://site.test/organizations/vfw-ca-8151?meeting_year=2027'),env),html=await page.text();
+ assert.equal(page.status,200);assert.match(html,/Social hour/);assert.match(html,/Post meeting/);assert.match(html,/Social time/);assert.doesNotMatch(html,/href="\/events\/organization-meeting-vfw-ca-8151-2027-01"/);
+});
+
 test('custom organization categories remain visible and county filtering finds the new listing',async t=>{
  const env=setup(t);env.insert('new-org','organization',{...organization,organization_type:'Local veterans network'},'New Dixon connection');
  for(const path of ['/yolo-solano','/yolo-solano?place=Solano+County','/yolo-solano?type=Local+veterans+network']){

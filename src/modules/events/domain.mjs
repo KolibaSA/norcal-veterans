@@ -1,4 +1,4 @@
-import { text, present, invalid, canonicalInstant, pacificLocal, pacificToInstant } from '../../shared/validation.mjs';
+import { text, present, invalid, canonicalInstant, pacificLocal, pacificToInstant, object } from '../../shared/validation.mjs';
 import { validatePublicContent } from '../../shared/content-validation.mjs';
 import { validatePayload } from '../../shared/record-validation.mjs';
 
@@ -20,6 +20,18 @@ export function validateEvent(input, options = {}) {
     delete p.starts_local; delete p.ends_local;
     text(p.venue, 'Public event venue', 1000);
     if (!p.venue?.trim()) invalid('Enter the public event venue.');
+    if (present(p.meeting_times)) {
+      if (p.kind !== 'Organization meeting') invalid('Multiple labeled times are available only for organization meetings.');
+      if (!Array.isArray(p.meeting_times) || !p.meeting_times.length || p.meeting_times.length > 3) invalid('List one to three meeting times.');
+      let prior = '';
+      for (const entry of p.meeting_times) {
+        if (!object(entry) || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(entry.time || '')) invalid('Enter a valid meeting time.');
+        text(entry.label, 'Meeting time label', 100); if (!entry.label?.trim()) invalid('Give every meeting time a label.');
+        if (prior && entry.time <= prior) invalid('Meeting times must be listed from earliest to latest.');
+        prior = entry.time;
+      }
+      if (pacificLocal(p.start_at).slice(11, 16) !== p.meeting_times[0].time) invalid('The event start must match the first labeled meeting time.');
+    }
 
   });
 }

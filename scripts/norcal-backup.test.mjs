@@ -24,7 +24,7 @@ test('active HQ SQL restore verifies current schema and its revision baseline', 
   assert.equal(result.counts.audit, 1);
   assert.equal(result.counts.record_revisions, 2);
   assert.equal(result.counts.request_runs, 0);
-  assert.deepEqual(result.upgrades_checked, []);
+  assert.deepEqual(result.upgrades_checked, ['0004_vfw_8151_meeting_plan.sql']);
 });
 
 test('active HQ restore rejects missing tables, invalid SQL and malformed record payloads', () => {
@@ -39,7 +39,7 @@ test('additive restore rehearsal preserves existing data counts and creates one 
   const before = verifySQLBackup(sql);
   const upgraded = verifySQLBackup(sql, { upgradeCheck: true });
   for (const name of ['records', 'grants', 'audit', 'attachments', 'submission_limits']) assert.equal(upgraded.counts[name], before.counts[name], name);
-  assert.deepEqual(upgraded.upgrades_checked, ['0002_request_runs.sql', '0003_record_revisions.sql']);
+  assert.deepEqual(upgraded.upgrades_checked, ['0002_request_runs.sql', '0003_record_revisions.sql', '0004_vfw_8151_meeting_plan.sql']);
   assert.equal(upgraded.counts.record_revisions, before.counts.records);
   assert.equal(upgraded.counts.request_runs, 0);
   assert.equal(upgraded.counts.request_entries, 0);

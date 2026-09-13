@@ -2,6 +2,7 @@ import { sources } from '../../data.mjs';
 import { text, strings, shape, publicURL, present, object, invalid } from '../../shared/validation.mjs';
 import { validatePublicContent } from '../../shared/content-validation.mjs';
 import { validatePayload } from '../../shared/record-validation.mjs';
+import { validateMeetingPlans } from './meeting-plans.mjs';
 
 export const organizationMetadata = Object.freeze({
   organizationTypes: ['VFW', 'American Legion', 'Marine Corps League', 'Veterans Beer Club', 'Toys for Tots', 'DAV', 'County Veterans Office', 'Equine program provider', 'Veteran remembrance program', 'Veterans nonprofit', 'Other veteran organization'],
@@ -35,6 +36,7 @@ export function validateOrganization(input, options = {}) {
     for (const name of ['photos', 'officers', 'officer_profiles']) if (present(p[name])) {
       if (!Array.isArray(p[name]) || p[name].length > 50 || p[name].some(item => !object(item))) invalid(`${name} must be a list of at most 50 objects.`);
     }
+    validateMeetingPlans(p.meeting_plans, p.id);
     for (const photo of p.photos || []) {
       for (const key of ['id', 'src', 'image_url', 'source_url', 'license_url', 'caption', 'alt_text', 'credit', 'license']) text(photo[key], 'Photo ' + key, 2000);
       shape(photo.album, 'Photo album');

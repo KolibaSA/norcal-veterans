@@ -1,6 +1,7 @@
 import { esc, label, dateLabel } from '../../shared/browser-ui.mjs';
 import { createRecordFeature } from '../../shared/browser-records.mjs';
 import { joined, splitList } from '../../shared/browser-ui.mjs';
+import { VFW_8151_ID, meetingPlanFields, meetingPlansFromFields } from './meeting-plans.mjs';
 
 export function organizationFields(record = {}) {
   const p = record.payload ?? {};
@@ -12,7 +13,7 @@ export function organizationFields(record = {}) {
     serviceCategories: joined(p.service_categories), serviceNotes: p.service_area?.notes ?? '', referralNotes: p.referral_notes ?? '',
     sourceIds: joined(p.source_ids), reviewSource: p.review_source_url ?? '', verifiedDate: p.last_verified_date?.slice(0, 10) ?? '',
     confirmationDate: p.organization_confirmed_at?.slice(0, 10) ?? '', confirmationSource: p.confirmation_source_url ?? ''
-, reviewNotes: p.review_notes ?? ''
+, reviewNotes: p.review_notes ?? '', ...meetingPlanFields(record)
   };
 }
 export function organizationPayload(fields, previous = {}) {
@@ -31,13 +32,22 @@ export function organizationPayload(fields, previous = {}) {
         ? (previous.organization_confirmed_at?.slice(0, 10) === fields.confirmationDate ? previous.organization_confirmed_at : fields.confirmationDate + 'T00:00:00.000Z') : null,
       review_notes: fields.reviewNotes
     });
+  if (fields.meetingPlannerOrganization === VFW_8151_ID) {
+    p.meeting_plans = meetingPlansFromFields(fields, previous);
+    p.meeting_schedule = "See the annual meeting schedule below for each month's date and social and meeting times.";
+  }
   return p;
 }
 export function createFeature() {
   return createRecordFeature({ kind: 'organization', title: 'Organization profiles', editorLabel: 'organization',
-    statuses: ['draft', 'published', 'archived'], editorSections: ['organizationFields', 'reviewFields'],
+    statuses: ['draft', 'published', 'archived'], editorSections: ['organizationFields', 'vfwMeetingPlanner', 'reviewFields'],
     fields: organizationFields, payload: organizationPayload,
+    saveLabel: record => record.id === VFW_8151_ID ? 'Save profile and meeting schedule' : 'Save item',
+    savedMessage: value => value.organization_id === VFW_8151_ID ? 'VFW Post 8151 profile and meeting schedule published.' : 'Saved.',
     configureEditor({ $, record }) {
+      const postPlanner = record.id === VFW_8151_ID;
+      $('vfwMeetingPlanner').hidden = !postPlanner;
+      $('meetingPlanYear').required = postPlanner;
       const priorAddressType = record.payload?.address?.type;
       if (priorAddressType && !Array.from($('addressType').options).some(option => option.value === priorAddressType)) {
         $('addressType').add(new Option(label(priorAddressType) + ' (existing; not a verified public venue)', priorAddressType));
@@ -47,6 +57,12 @@ export function createFeature() {
     connect(context) {
       const { $ } = context;
       $('addressType').onchange = () => { if ($('addressType').value === 'mailing') $('mapEligible').checked = false; };
+      $('meetingPlanYear').onchange = () => {
+        const record = context.editing;
+        if (record?.id !== VFW_8151_ID) return;
+        const values = meetingPlanFields(record, Number($('meetingPlanYear').value));
+        for (const [id, value] of Object.entries(values)) if ($(id) && id !== 'meetingPlanYear') $(id).value = value;
+      };
       return { initialize(metadata) {
         $('countyOptions').innerHTML = metadata.counties.map(value => '<option value="' + esc(value) + '"></option>').join('');
         $('typeOptions').innerHTML = metadata.organizationTypes.map(value => '<option value="' + esc(value) + '"></option>').join('');
