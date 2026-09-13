@@ -27,6 +27,8 @@ Read these overview documents, then the requested module's README and BROWSER.md
 
 Chris's reason for modularity is to reduce the amount of source Codex must review and the chance of unintended changes elsewhere. Preserve existing website and HQ behavior unless the current request calls for a behavior change. Shared infrastructure and explicit dependencies support focused work; they do not make every feature completely independent.
 
+The [AI Working Guide](docs/AI-WORKING-GUIDE.md) and [project lessons log](docs/AI-LESSONS.md) were adopted on September 13, 2026. Consult the log's short current reference before changes and add only reusable, evidence-backed lessons afterward. These are adaptable guidance, not replacements for project requirements. Keep them in repository documentation, outside the public website assets.
+
 ## Super Admin access
 
 In HQ, open Organization & region access, enter an email, select **Super Admin**, and save. No region or organization is required. This grants full HQ access, including publishing, Requests, access management and exports; it does not change the Cloudflare Access sign-in policy. The configured owner keeps permanent access. No new person is granted access as part of this feature release.

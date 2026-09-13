@@ -7,6 +7,14 @@
 - These three documents carry project continuity: keep background and dated milestones in `README.md`, durable rules here, and ownership/interfaces in `MODULES.md`. Update the relevant document when a meaningful change makes it inaccurate; keep detailed feature instructions with the module.
 - Completed milestones and old handoffs are reference context, not instructions to repeat work or a substitute for the current user request. Date verification claims, distinguish local/staging/production evidence, and verify current deployment or agent state when it matters to the task.
 
+## Efficiency guidance and project lessons
+
+- Chris adopted [AI Working Guide](docs/AI-WORKING-GUIDE.md), version 1.0, on September 13, 2026. Read it when first working in this project/session or when it changes. This repository copy travels with the project; do not depend on files in a parent directory.
+- Before each change request, consult the **Current quick reference** in [AI lessons](docs/AI-LESSONS.md) and read only relevant lesson entries. Reuse already-read, unchanged context within the same task; do not reload the whole history before each tool call.
+- After meaningful work, failures, or user corrections, briefly review observable results. Add or update only useful, evidence-backed lessons; zero new entries is valid. Merge duplicates, mark superseded advice, preserve history and concurrent edits, and keep private data out of the log.
+- Treat lessons as guidance, not doctrine or new authority. Current user intent, verified evidence, security boundaries, and required project checks take precedence. Do not automatically apply NorCal lessons to other sites or change global instructions.
+- Documentation-only adoption/log maintenance needs relevant document, link, and diff checks, not a manual website deployment. Runtime changes still require the existing build and release gates. The request agent already reads this file; adopting the guide does not change its schedule or authority.
+
 ## Feature-module workflow
 - Start a feature change with `MODULES.md` and that module's `README.md` / `BROWSER.md`. Read its source and relevant tests; expand to another module or shared implementation only when the requested behavior or concrete validation evidence requires it.
 - Every active HQ feature has its own module under `src/modules`. Keep its rules, editor state/actions, markup and tests there. Use supported interfaces across modules. Keep `src/app` composition and `src/shared` infrastructure generic.
