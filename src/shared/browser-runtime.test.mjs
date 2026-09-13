@@ -19,4 +19,5 @@ test('new request form sends the selected section and status', () => {
   assert.equal(input.region_id, 'all');
   assert.equal(input.organization_id, null);
   assert.equal(input.payload.target, 'decide');
+  assert.equal(feature.openSavedAfterCreate, false);
 });

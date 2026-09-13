@@ -89,7 +89,7 @@ function configureRequestScope($, record, values) {
 export function canEditRequest(me, record) { return !!me?.owner && record.status !== 'in_progress'; }
 export function createFeature() {
   return createRecordFeature({ kind: 'request', title: 'Requests', editorLabel: 'request',
-    statuses: ['queued', 'in_progress', 'needs_input', 'completed', 'cancelled', 'closed'],
+    statuses: ['queued', 'in_progress', 'needs_input', 'completed', 'cancelled', 'closed'], openSavedAfterCreate: false,
     heading: 'What would you like to work on?', newLabel: 'New request', openNewOnLoad: true,
     editorSections: ['requestFields'], fields: requestFields, payload: requestPayload,
     organizationId: requestOrganizationId,

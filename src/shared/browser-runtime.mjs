@@ -213,7 +213,10 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
       draftMemory.delete(id); baseline = JSON.stringify(readFields());
       message(currentFeature().savedMessage(value));
       await currentFeature().afterSave?.(context);
-      await loadSection({ item: id });
+      // New request composition should be ready for another request after a
+      // successful create. Existing records still reopen for editing.
+      const reopenSaved = !!editing?.id || currentFeature().openSavedAfterCreate !== false;
+      await loadSection(reopenSaved ? { item: id } : {});
     } catch (cause) { message(cause.message, true); if (cause.status === 409) await showConflict(); }
     finally { $('save').disabled = false; recordSaving = false; }
   };
