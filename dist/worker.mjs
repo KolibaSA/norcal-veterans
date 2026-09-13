@@ -1129,6 +1129,8 @@ var meetingMonth = (event) => Number(new Intl.DateTimeFormat("en-US", { timeZone
 var meetingDateLabel = (event) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(new Date(event.start_at));
 var meetingTimeLabel = (event) => event.date_only ? "Time to be confirmed" : new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" }).format(new Date(event.start_at));
 var meetingMonthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+var isVfw8151Meeting = (event) => event.kind === "Organization meeting" && event.organization_id === "vfw-ca-8151";
+var calendarItem = (item) => item.id ? isVfw8151Meeting(item) ? `<span class="calendar-item calendar-event">${calendarEscape(item.title)}</span>` : `<a class="calendar-item calendar-event" href="/events/${calendarEscape(item.id)}">${calendarEscape(item.title)}</a>` : `<span class="calendar-item ${item.kind === "Service birthday" ? "calendar-service" : "calendar-holiday"}">${calendarEscape(item.title)}</span>`;
 function publicMonthCalendar(url, events, { organizationId = "", path = "/events", includeMilestones = true, title = "Community calendar" } = {}) {
   const selected = monthValue(url), [year, month] = selected.split("-").map(Number), first = new Date(Date.UTC(year, month - 1, 1)), days = new Date(Date.UTC(year, month, 0)).getUTCDate(), offset = first.getUTCDay();
   const filtered = events.filter((event) => event.status === "published" && (!organizationId || event.organization_id === organizationId)).map((event) => ({ ...event, date: eventDate(event) }));
@@ -1147,7 +1149,7 @@ function publicMonthCalendar(url, events, { organizationId = "", path = "/events
       continue;
     }
     const date = dayKey(year, month, day), dayItems = byDay.get(date) || [], birthday = dayItems.find((item) => item.kind === "Service birthday");
-    cells.push(`<div class="calendar-day ${birthday ? "calendar-birthday birthday-" + birthday.style : ""}" ${birthday ? `data-branch="${calendarEscape(birthday.branch)}"` : ""}><time datetime="${date}">${day}</time><div class="calendar-items">${dayItems.map((item) => item.id ? `<a class="calendar-item calendar-event" href="/events/${calendarEscape(item.id)}">${calendarEscape(item.title)}</a>` : `<span class="calendar-item ${item.kind === "Service birthday" ? "calendar-service" : "calendar-holiday"}">${calendarEscape(item.title)}</span>`).join("")}</div></div>`);
+    cells.push(`<div class="calendar-day ${birthday ? "calendar-birthday birthday-" + birthday.style : ""}" ${birthday ? `data-branch="${calendarEscape(birthday.branch)}"` : ""}><time datetime="${date}">${day}</time><div class="calendar-items">${dayItems.map(calendarItem).join("")}</div></div>`);
   }
   const label = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(first), link2 = (value) => `${path}?month=${value}#calendar`;
   const annualMeetings = organizationId === "vfw-ca-8151" ? publicYearMeetingGrid(url, events, { organizationId, path, title: title.replace(/ events$/, " annual meetings") }) : "";
@@ -1166,7 +1168,7 @@ function publicYearMeetingGrid(url, events, { organizationId = "", path = "/even
   const yearLink = (value) => `${path}?meeting_year=${value}#annual-meetings`, previousYear = years.filter((value) => value < year).at(-1), nextYear = years.find((value) => value > year), availableYears = years.length > 1 ? `<nav class="annual-meeting-years" aria-label="Choose meeting year">${previousYear ? `<a href="${calendarEscape(yearLink(previousYear))}">Previous year</a>` : ""}<strong>${year}</strong>${nextYear ? `<a href="${calendarEscape(yearLink(nextYear))}">Next year</a>` : ""}</nav>` : `<strong class="annual-meeting-year">${year}</strong>`;
   const cards = meetingMonthNames.map((name, index) => {
     const month = index + 1, monthMeetings = byMonth.get(month) || [];
-    return `<article class="annual-meeting-card ${monthMeetings.length ? "has-meeting" : "is-empty"}"><h3>${name}</h3>${monthMeetings.length ? `<div class="annual-meeting-list">${monthMeetings.map((meeting) => `<div class="annual-meeting-entry"><time datetime="${calendarEscape(String(meeting.start_at))}">${calendarEscape(meetingDateLabel(meeting))}</time><strong>${calendarEscape(meetingTimeLabel(meeting))}</strong>${meeting.title ? `<span>${calendarEscape(meeting.title)}</span>` : ""}${meeting.description ? `<p>${calendarEscape(meeting.description)}</p>` : ""}<a href="/events/${calendarEscape(meeting.id)}">Meeting details →</a></div>`).join("")}</div>` : '<p class="annual-meeting-empty">No meeting published yet.</p>'}</article>`;
+    return `<article class="annual-meeting-card ${monthMeetings.length ? "has-meeting" : "is-empty"}"><h3>${name}</h3>${monthMeetings.length ? `<div class="annual-meeting-list">${monthMeetings.map((meeting) => `<div class="annual-meeting-entry"><time datetime="${calendarEscape(String(meeting.start_at))}">${calendarEscape(meetingDateLabel(meeting))}</time><strong>${calendarEscape(meetingTimeLabel(meeting))}</strong>${meeting.title ? `<span>${calendarEscape(meeting.title)}</span>` : ""}${meeting.description ? `<p>${calendarEscape(meeting.description)}</p>` : ""}</div>`).join("")}</div>` : '<p class="annual-meeting-empty">No meeting published yet.</p>'}</article>`;
   }).join("");
   return `<section class="panel annual-meeting-grid" id="annual-meetings" aria-labelledby="annual-meetings-title"><div class="calendar-heading"><div><span class="eyebrow">THE YEAR AHEAD</span><h2 id="annual-meetings-title">${calendarEscape(title)}</h2></div>${availableYears}</div><p class="annual-meeting-intro">All twelve monthly meeting slots are listed below. Confirm the latest details with the post before attending.</p><div class="annual-meeting-cards">${cards}</div></section>`;
 }
@@ -1176,6 +1178,7 @@ var pe = escapeHtml;
 var publicDate = (s) => new Intl.DateTimeFormat("en-US", { dateStyle: "full", timeStyle: "short", timeZone: "America/Los_Angeles" }).format(new Date(s));
 var publicEventDate = (v) => v.date_only ? new Intl.DateTimeFormat("en-US", { dateStyle: "full", timeZone: "America/Los_Angeles" }).format(new Date(v.start_at)) + " · Time to be confirmed" : publicDate(v.start_at);
 var pacificDayKey = (s) => new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Los_Angeles" }).format(new Date(s));
+var isVfw8151Meeting2 = (v) => v.kind === "Organization meeting" && v.organization_id === "vfw-ca-8151";
 var upcomingEvents = (events, now = Date.now()) => events.map(sanitizePublicEvent).filter((v) => v && v.status === "published" && (v.date_only ? pacificDayKey(v.start_at) >= pacificDayKey(now) : Date.parse(v.end_at || v.start_at) + (!v.end_at ? 864e5 : 0) >= now)).sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at));
 function eventReview(v) {
   if (v.source_kind === "project_team") return `<span class="label">Project team update</span><h2>Check before you go.</h2><p>${pe(v.source_note || "Event details supplied by the project team.")}</p><p>${v.source_checked && v.source_url ? "Supporting source reviewed " + pe(v.source_checked) + "." : "Independent source verification is pending."}</p>`;
@@ -1183,7 +1186,8 @@ function eventReview(v) {
   return '<span class="label">Verification pending</span><h2>Check before you go.</h2><p>This published listing has no recorded source review. Confirm the details directly with the organizer.</p>';
 }
 function eventCard(v) {
-  return `<article class="panel event-card"><div class="row-between"><span class="eyebrow">${pe(v.kind)}</span><span class="label">${pe(v.county)} County</span></div><h2><a href="/events/${pe(v.id)}">${pe(v.title)}</a></h2><p class="event-time">${pe(publicEventDate(v))}</p><p>${pe(v.venue)}</p><p>${pe(v.description)}</p><a href="/events/${pe(v.id)}">Event details &amp; attendance →</a></article>`;
+  const listed = isVfw8151Meeting2(v);
+  return `<article class="panel event-card"><div class="row-between"><span class="eyebrow">${pe(v.kind)}</span><span class="label">${pe(v.county)} County</span></div><h2>${listed ? pe(v.title) : `<a href="/events/${pe(v.id)}">${pe(v.title)}</a>`}</h2><p class="event-time">${pe(publicEventDate(v))}</p><p>${pe(v.venue)}</p><p>${pe(v.description)}</p>${listed ? '<span class="small-note">Listed meeting — confirm details with the post.</span>' : `<a href="/events/${pe(v.id)}">Event details &amp; attendance →</a>`}</article>`;
 }
 function eventsPagePublic(url, events) {
   const county = ["Yolo", "Solano"].includes(url.searchParams.get("county")) ? url.searchParams.get("county") : "", upcoming = upcomingEvents(events).filter((v) => !county || v.county === county);
@@ -1218,7 +1222,7 @@ function eventCalendar(events) {
   for (const v of events) {
     if (v.status !== "published") continue;
     const day = pacificDayKey(v.start_at), nextDay = new Date(Date.parse(day + "T00:00:00Z") + 864e5).toISOString().slice(0, 10), schedule = v.date_only ? ["DTSTART;VALUE=DATE:" + day.replaceAll("-", ""), "DTEND;VALUE=DATE:" + nextDay.replaceAll("-", "")] : ["DTSTART:" + utc(v.start_at), ...v.end_at ? ["DTEND:" + utc(v.end_at)] : []], note = (v.date_only ? "Time to be confirmed. This calendar entry reserves the date; event hours have not been announced.\n" : "") + v.description + "\n" + v.audience + (v.source_kind === "project_team" ? "\n" + (v.source_note || "Details supplied by the project team.") : "") + (v.source_url ? "\nConfirm latest details: " + v.source_url : "");
-    lines.push("BEGIN:VEVENT", "UID:" + icsEscape(v.id) + "@yolo-county-veterans", "DTSTAMP:" + stamp, ...schedule, "SUMMARY:" + icsEscape(v.title + (v.date_only ? " — Time to be confirmed" : "")), "DESCRIPTION:" + icsEscape(note), "LOCATION:" + icsEscape(v.venue), "URL:" + origin + "/events/" + encodeURIComponent(v.id), "END:VEVENT");
+    lines.push("BEGIN:VEVENT", "UID:" + icsEscape(v.id) + "@yolo-county-veterans", "DTSTAMP:" + stamp, ...schedule, "SUMMARY:" + icsEscape(v.title + (v.date_only ? " — Time to be confirmed" : "")), "DESCRIPTION:" + icsEscape(note), "LOCATION:" + icsEscape(v.venue), ...!isVfw8151Meeting2(v) ? ["URL:" + origin + "/events/" + encodeURIComponent(v.id)] : [], "END:VEVENT");
   }
   lines.push("END:VCALENDAR");
   return lines.map(foldICS).join("\r\n") + "\r\n";
@@ -1864,7 +1868,7 @@ function publicExtension(url, events, organizations = records) {
   if (url.pathname === "/events") return { status: 200, html: eventsPagePublic(url, events) };
   if (url.pathname.startsWith("/events/")) {
     const v = events.find((v2) => v2.id === url.pathname.slice(8) && v2.status === "published");
-    if (v) return { status: 200, html: eventDetail(v, organizations) };
+    if (v && !(v.kind === "Organization meeting" && v.organization_id === "vfw-ca-8151")) return { status: 200, html: eventDetail(v, organizations) };
   }
   return null;
 }

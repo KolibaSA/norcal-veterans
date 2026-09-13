@@ -42,9 +42,10 @@ test('logo gallery keeps every organization reachable with accessible post and l
  test('VFW 8151 alone gets the annual meeting grid',()=>{
   const source=records.find(r=>r.id==='vfw-ca-8762');
   const vfw={...source,id:'vfw-ca-8151',verified_name:'Dixon VFW Post 8151'};
-  const meetings=Array.from({length:12},(_,index)=>({id:`vfw8151-meeting-${index+1}`,title:'Dixon VFW Post 8151 monthly meeting',description:'Social begins at 6:30 p.m.; meeting begins at 7 p.m.',organization_id:'vfw-ca-8151',kind:'Organization meeting',status:'published',start_at:`2027-${String(index+1).padStart(2,'0')}-20T03:00:00Z`}));
+  const meetings=Array.from({length:12},(_,index)=>({id:`vfw8151-meeting-${index+1}`,title:'Dixon VFW Post 8151 monthly meeting',description:'Social begins at 6:30 p.m.; meeting begins at 7 p.m.',organization_id:'vfw-ca-8151',kind:'Organization meeting',status:'published',start_at:`2027-${String(index+1).padStart(2,'0')}-20T03:00:00Z`,venue:'Olde Vets Hall',organizer:'Dixon VFW Post 8151',county:'Solano',city:'Dixon',audience:'Contact the post for attendance details.'}));
   const page=render(new URL('https://test/organizations/vfw-ca-8151'),[vfw],meetings);
-  assert.equal(page.status,200);assert.ok(page.html.includes('id="annual-meetings"'));assert.equal((page.html.match(/class="annual-meeting-card /g)||[]).length,12);
+  assert.equal(page.status,200);assert.ok(page.html.includes('id="annual-meetings"'));assert.equal((page.html.match(/class="annual-meeting-card /g)||[]).length,12);assert.ok(!page.html.includes('href="/events/vfw8151-meeting-'));
+  assert.equal(publicExtension(new URL('https://test/events/vfw8151-meeting-1'),meetings,[vfw]),null);
   const other=render(new URL('https://test/organizations/vfw-ca-8762'),[source],meetings);
   assert.ok(!other.html.includes('id="annual-meetings"'));
  });
