@@ -28,6 +28,7 @@ function fixture(t) {
   const db = new DatabaseSync(':memory:');
   db.exec(readFileSync(new URL('../../../migrations/legacy/0001_headquarters.sql', import.meta.url), 'utf8'));
   db.exec(readFileSync(new URL('../../../migrations/legacy/0002_request_runs.sql', import.meta.url), 'utf8'));
+  db.exec(readFileSync(new URL('../../../migrations/legacy/0005_super_admin.sql', import.meta.url), 'utf8'));
   const root = mkdtempSync(resolve(tmpdir(), 'norcal-hq-agent-'));
   writeFileSync(resolve(root, 'wrangler.jsonc'), JSON.stringify(config));
   writeFileSync(resolve(root, '.gitignore'), '.data/\n');
@@ -65,6 +66,47 @@ function fixture(t) {
   const api = (path, body, owner = true) => handleRequestRoute(new Request('https://hq.test/api/hq/' + path, { method:body ? 'POST' : 'GET', headers:{'Content-Type':'application/json',Origin:'https://hq.test'}, body:body ? JSON.stringify(body) : undefined }), {DB,OWNER_EMAIL:TARGET.owner,HQ_REQUEST_AGENT_ENABLED:'true'}, {owner,email:owner?TARGET.owner:'scoped@example.com'});
   return { db, batch, seed, one, auditCount, claim, finish, root, deps, run, activePath, reportFile, finishOptions, api };
 }
+
+test('Super Admin requests need current author and approver grants, and revocation stops execution', async t => {
+  const f = fixture(t), admin = 'admin@example.test';
+  f.db.prepare("INSERT INTO grants(id,email,role) VALUES('super',?,'super_admin')").run(admin);
+  f.seed('super-request', { owner: admin, payload: JSON.stringify({ request_approval: { approved_by: admin, approved_version: 1 } }) });
+  assert.equal(f.run('status').next.id, 'super-request');
+  const claimed = f.run('claim'); assert.equal(claimed.status, 'resume');
+  assert.equal(claimed.execution.created_by, admin);
+  assert.equal(f.run('status').status, 'resume');
+  f.db.exec("DELETE FROM grants WHERE id='super'");
+  assert.throws(() => f.run('status'), /no longer has platform access/);
+  assert.throws(() => f.run('finish', f.finishOptions('super-request')), /no longer has platform access/);
+  const localClaim = JSON.parse(readFileSync(f.activePath, 'utf8'));
+  assert.equal(f.finish('super-request', { token: localClaim.token })[0].results.length, 0);
+  const reconciled = await f.api('requests/super-request/reconcile', { expected_version: 2, expected_status: 'in_progress', expected_run_id: claimed.run_id, status: 'cancelled', note: 'Access revoked; synthetic execution stopped.' });
+  assert.equal(reconciled.status, 200);
+  assert.equal(f.run('status').status, 'reconciled');
+});
+
+test('Super Admin approved work completes with an immutable result and never repeats', t => {
+  const f = fixture(t), admin = 'admin@example.test';
+  f.db.prepare("INSERT INTO grants(id,email,role) VALUES('super',?,'super_admin')").run(admin);
+  f.seed('a', { owner: admin, payload: JSON.stringify({ request_approval: { approved_by: admin, approved_version: 1 } }) });
+  assert.equal(f.run('claim').status, 'resume');
+  assert.equal(f.run('finish', f.finishOptions()).status, 'completed');
+  assert.equal(f.run('status').status, 'idle');
+  assert.equal(f.db.prepare('SELECT count(*) AS n FROM request_entries WHERE request_id=?').get('a').n, 1);
+  assert.equal(f.one('a').body, 'Keep this original request.');
+});
+
+test('revoked approvers and unapproved or scoped authors are never eligible', t => {
+  const f = fixture(t), admin = 'admin@example.test';
+  f.db.prepare("INSERT INTO grants(id,email,role) VALUES('super',?,'super_admin')").run(admin);
+  f.seed('a', { payload: JSON.stringify({ request_approval: { approved_by: admin, approved_version: 1 } }) });
+  assert.equal(f.run('status').status, 'ready');
+  f.db.exec("DELETE FROM grants WHERE id='super'");
+  assert.equal(f.run('status').status, 'idle'); assert.equal(f.claim('a')[0].results.length, 0);
+  f.seed('foreign', { owner: 'scoped@example.test' });
+  f.db.exec("INSERT INTO grants(id,email,role,region_id) VALUES('scoped','scoped@example.test','region_admin','yolo-solano')");
+  assert.equal(f.claim('foreign')[0].results.length, 0);
+});
 
 test('claims only the oldest exact-owner queued request, preserving unrelated payload and body', t => {
   const f = fixture(t);

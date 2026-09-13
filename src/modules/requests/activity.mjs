@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from '../../shared/permissions.mjs';
 import { esc, label, dateLabel } from '../../shared/browser-ui.mjs';
 // Activity owns immutable-run history, comment/reconciliation actions and unsaved activity state.
 export function connectActivity(context) {
@@ -5,7 +6,7 @@ export function connectActivity(context) {
   const requestPath = id => 'requests/' + encodeURIComponent(id);
   let requestHistory = null;
   async function loadActivity(id = context.editing?.id) {
-    if (!id || !context.me.owner) return;
+    if (!id || !isPlatformAdmin(context.me)) return;
     $('refreshActivity').disabled = true;
     try {
       const activity = await api(requestPath(id) + '/history');
@@ -59,7 +60,7 @@ export function connectActivity(context) {
       $('requestActivity').hidden = true;
     },
     editorOpened(record) {
-      $('requestActivity').hidden = context.tab !== 'request' || !record?.id || !context.me.owner;
+      $('requestActivity').hidden = context.tab !== 'request' || !record?.id || !isPlatformAdmin(context.me);
       if (!$('requestActivity').hidden) void loadActivity(record.id);
     },
     editorClosed() { $('commentForm').reset(); $('reconcileForm').reset(); },

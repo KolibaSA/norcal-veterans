@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from '../../shared/permissions.mjs';
 import { validatePayload } from '../../shared/record-validation.mjs';
 import { HTTPError } from '../../shared/server-http.mjs';
 import { statement } from '../../shared/server-storage.mjs';
@@ -17,7 +18,7 @@ export function redactPayload(payload) {
 }
 
 export function authorizeSave({ user }) {
-  if (!user.owner) throw new HTTPError('Only the owner can approve or change executable requests.', 403);
+  if (!isPlatformAdmin(user)) throw new HTTPError('Only the platform owner or a Super Admin can approve or change executable requests.', 403);
 }
 
 export async function beforeSave({ env, existing, status, id }) {

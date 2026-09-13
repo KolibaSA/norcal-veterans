@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from '../../shared/permissions.mjs';
 import { esc } from '../../shared/browser-ui.mjs';
 import { createRecordFeature } from '../../shared/browser-records.mjs';
 import { connectActivity } from './activity.mjs';
@@ -86,20 +87,20 @@ function configureRequestScope($, record, values) {
   updateVisibility(values);
 }
 
-export function canEditRequest(me, record) { return !!me?.owner && record.status !== 'in_progress'; }
+export function canEditRequest(me, record) { return isPlatformAdmin(me) && record.status !== 'in_progress'; }
 export function createFeature() {
   return createRecordFeature({ kind: 'request', title: 'Requests', editorLabel: 'request',
     statuses: ['queued', 'in_progress', 'needs_input', 'completed', 'cancelled', 'closed'], openSavedAfterCreate: false,
     heading: 'What would you like to work on?', newLabel: 'New request', openNewOnLoad: true,
     editorSections: ['requestFields'], fields: requestFields, payload: requestPayload,
     organizationId: requestOrganizationId,
-    canCreate: me => !!me.owner, canEdit: canEditRequest,
+    canCreate: me => isPlatformAdmin(me), canEdit: canEditRequest,
     allowStatus: (status, record) => status !== 'in_progress' || record.status === 'in_progress',
     saveLabel: record => record.status === 'queued' ? 'Save and queue request' : 'Save item',
     savedMessage: record => record.status === 'queued' ? 'Request saved and queued.' : 'Saved.',
     notice: (_me, record, editable) => !editable
       ? record.status === 'in_progress' ? 'The agent is processing these instructions. Add a comment below, or reconcile the run before changing the instructions.'
-        : 'Executable requests are managed by the platform owner.'
+        : 'Executable requests are managed by the platform owner and Super Admins.'
       : 'Saving this request as queued authorizes the agent to process these instructions. Comments and results appear separately below.',
     configureEditor({ $, record, values }) { configureRequestScope($, record, values); },
     connect: connectRequests

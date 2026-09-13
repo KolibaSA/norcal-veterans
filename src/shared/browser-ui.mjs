@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from './permissions.mjs';
 export const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 }[char]));
@@ -6,7 +7,7 @@ export const joined = values => Array.isArray(values) ? values.join(', ') : '';
 export const label = value => String(value ?? '').replaceAll('_', ' ');
 
 export function canPublish(me, record) {
-  if (me?.owner) return true;
+  if (isPlatformAdmin(me)) return true;
   return (me?.grants ?? []).some(grant => grant.email === me.email && (
     grant.role === 'region_admin' && grant.region_id && grant.region_id === record.region_id ||
     grant.role === 'organization_admin' && grant.organization_id && grant.organization_id === record.organization_id

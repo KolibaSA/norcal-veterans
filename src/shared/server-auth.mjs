@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from './permissions.mjs';
 const bytes=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
 export async function verifyIdentity(request,env){
  if(!env.ACCESS_TEAM_DOMAIN||!env.ACCESS_AUD||!env.OWNER_EMAIL)throw new Error('AUTH_NOT_CONFIGURED');
@@ -9,8 +10,11 @@ export async function verifyIdentity(request,env){
  const res=await fetch(issuer+'/cdn-cgi/access/certs',{cf:{cacheTtl:300,cacheEverything:true}});if(!res.ok)throw Error();const {keys}=await res.json();const jwk=keys.find(k=>k.kid===head.kid&&k.kty==='RSA');if(!jwk)throw Error();const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);if(!await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,bytes(c),new TextEncoder().encode(a+'.'+b)))throw Error();return {id:claims.sub,email:claims.email.toLowerCase(),owner:claims.email.toLowerCase()===env.OWNER_EMAIL.toLowerCase()};
  }catch{throw new Error('UNAUTHORIZED')}
 }
+export function resolvePrivileges(identity, grants) {
+ return { ...identity, superAdmin: grants.some(grant => grant.email === identity.email && grant.role === 'super_admin' && grant.region_id === null && grant.organization_id === null) };
+}
 export function permitted(user,grants,record,action='read'){
- if(user.owner)return true;
+ if(isPlatformAdmin(user))return true;
  return grants.some(g=>{
  if(g.email!==user.email)return false;
  const scope=(g.region_id&&g.region_id===record.region_id)||(g.organization_id&&g.organization_id===record.organization_id);
@@ -22,7 +26,7 @@ export function permitted(user,grants,record,action='read'){
 }
 
 export function readScope(user, grants) {
-  if (user.owner) return { sql: '1', values: [] };
+  if (isPlatformAdmin(user)) return { sql: '1', values: [] };
   const terms = [], values = [];
   for (const grant of grants) {
     if (grant.email !== user.email) continue;

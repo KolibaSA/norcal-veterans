@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from '../../shared/permissions.mjs';
 import { json } from '../../shared/server-http.mjs';
 import { rows, visibleRecord } from '../../shared/server-storage.mjs';
 import { findRecord } from '../../shared/server-records.mjs';
@@ -14,7 +15,7 @@ export async function handleHistoryRoute(req, env, user, grants, path = new URL(
       .map(({ snapshot, ...revision }) => ({ ...revision, record: visibleRecord(JSON.parse(snapshot), redactPayload) })));
   }
   if (path === '/api/hq/audit' && req.method === 'GET') {
-    if (!user.owner) return json({ error: 'Owner access required.' }, 403);
+    if (!isPlatformAdmin(user)) return json({ error: 'Platform owner or Super Admin access required.' }, 403);
     return json(await rows(env, 'SELECT * FROM audit ORDER BY created_at DESC LIMIT 200'));
   }
   return null;

@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from '../../shared/permissions.mjs';
 import { esc, label, dateLabel } from '../../shared/browser-ui.mjs';
 
 const REGIONS = [
@@ -10,15 +11,25 @@ export function createFeature() { return { kind: 'access', title: 'Organization 
 export function connectAccess(context) {
   const { $, api, message, loadSection } = context;
   async function renderAccess({ isCurrent }) {
-    if (!context.me.owner) throw new Error('Only the platform owner manages access.');
+    if (!isPlatformAdmin(context.me)) throw new Error('Only the platform owner or a Super Admin manages access.');
     const grants = await api('access');
     if (!isCurrent()) return;
     const organizations = JSON.parse($('org').dataset.organizationOptions || '[]');
     const regionOptions = REGIONS.map(([value, text]) => `<option value="${esc(value)}">${esc(text)}</option>`).join('');
     const organizationOptions = organizations.map(org => `<option value="${esc(org.id)}">${esc(org.title)}</option>`).join('');
-    $('content').innerHTML = `<div class="notice">Assignments control access within this headquarters. People must also be allowed through Cloudflare Access. Revocation here takes effect on their next request.</div><form id="grant" class="panel"><h2>Assign an administrator or editor</h2><label for="email">Email</label><input id="email" type="email" required><label for="role">Role</label><select id="role"><option value="region_admin">Region administrator</option><option value="organization_admin">Organization administrator</option><option value="editor">Editor</option></select><label for="scopeType">Scope</label><select id="scopeType"><option value="region">Region</option><option value="organization">Organization</option></select><label for="scopeValue">Choose the region or organization</label><select id="scopeValue" required></select><p id="scopeHelp" class="small muted">Choose the region this person can manage.</p><button type="submit">Save assignment</button></form><div class="panel">${grants.map(grant => `<div class="record"><div><b>${esc(grant.email)}</b><p>${esc(label(grant.role))} · ${esc(grant.region_id || grant.organization_id)}</p></div><button type="button" class="secondary" data-revoke="${esc(grant.id)}" aria-label="Revoke ${esc(grant.email)} assignment">Revoke</button></div>`).join('')}</div>`;
+    $('content').innerHTML = `<div class="notice">Assignments control access within this headquarters. People must also be allowed through Cloudflare Access. Revocation here takes effect on their next request.</div><form id="grant" class="panel"><h2>Assign an administrator or editor</h2><label for="email">Email</label><input id="email" type="email" required><label for="role">Role</label><select id="role"><option value="region_admin">Region administrator</option><option value="organization_admin">Organization administrator</option><option value="editor">Editor</option><option value="super_admin">Super Admin</option></select><label for="scopeType">Scope</label><select id="scopeType"><option value="global" disabled>All regions and organizations</option><option value="region">Region</option><option value="organization">Organization</option></select><label for="scopeValue">Choose the region or organization</label><select id="scopeValue" required></select><p id="scopeHelp" class="small muted">Choose the region this person can manage.</p><button type="submit">Save assignment</button></form><div class="panel">${grants.map(grant => `<div class="record"><div><b>${esc(grant.email)}</b><p>${esc(grant.role === 'super_admin' ? 'Super Admin' : label(grant.role))} · ${esc(grant.role === 'super_admin' ? 'All HQ, regions and organizations' : grant.region_id || grant.organization_id)}</p></div><button type="button" class="secondary" data-revoke="${esc(grant.id)}" aria-label="Revoke ${esc(grant.email)} assignment">Revoke</button></div>`).join('')}</div>`;
     const scopeType = $('scopeType'), scopeValue = $('scopeValue'), role = $('role'), scopeHelp = $('scopeHelp');
     const updateScopeChoices = () => {
+      const global = role.value === 'super_admin';
+      scopeValue.disabled = global;
+      scopeValue.required = !global;
+      if (global) {
+        scopeType.value = 'global'; scopeType.disabled = true;
+        scopeValue.innerHTML = '<option value="">Entire HQ</option>'; scopeValue.value = '';
+        scopeHelp.textContent = 'Full HQ access: all regions and organizations, publishing, Requests, exports, and managing access—including other Super Admins. The platform owner retains permanent access.';
+        return;
+      }
+      if (scopeType.value === 'global') scopeType.value = 'region';
       const requiredScope = role.value === 'region_admin' ? 'region' : role.value === 'organization_admin' ? 'organization' : scopeType.value;
       scopeType.value = requiredScope;
       scopeType.disabled = role.value !== 'editor';
@@ -34,7 +45,7 @@ export function connectAccess(context) {
       const button = event.submitter; button.disabled = true;
       try {
         const value = { email: $('email').value, role: $('role').value };
-        value[scopeType.value === 'region' ? 'region_id' : 'organization_id'] = scopeValue.value;
+        if (value.role !== 'super_admin') value[scopeType.value === 'region' ? 'region_id' : 'organization_id'] = scopeValue.value;
         await api('access', { method: 'POST', body: JSON.stringify(value) });
         message('Assignment saved.'); await loadSection();
       } catch (cause) { message(cause.message, true); }
@@ -42,7 +53,7 @@ export function connectAccess(context) {
     };
     $('content').querySelectorAll('[data-revoke]').forEach(button => {
       button.onclick = async () => {
-        if (!window.confirm('Revoke this assignment? The person will lose this scope on their next request.')) return;
+        if (!window.confirm('Revoke this assignment? The person will lose this assignment on their next request.')) return;
         button.disabled = true;
         try { await api('access/' + encodeURIComponent(button.dataset.revoke), { method: 'DELETE' }); message('Assignment revoked.'); await loadSection(); }
         catch (cause) { message(cause.message, true); button.disabled = false; }

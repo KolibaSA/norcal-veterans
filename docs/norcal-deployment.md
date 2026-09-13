@@ -42,6 +42,12 @@ Pause the request agent for schema/code maintenance. Verify recovery and staging
 
 Existing queued work may receive an approval stamp only after checking exact owner authorship, latest audit actor and version. The stamp must use a guarded update with an audit in the same transaction. Any mismatch leaves the request for its owner's review. Never infer approval from an arbitrary original author.
 
+## Super Admin release
+
+`0005_super_admin.sql` extends the existing grants table's CHECK constraints using a transactional copy/rebuild. It preserves every scoped assignment, grant ID, audit and record, and creates no Super Admin grants. Rehearse migration with existing grants before applying to staging/production. Pause the agent until both schema and code are updated. The configured owner remains permanently authorized. Cloudflare Access admission/MFA are unchanged.
+
+Code rollback is compatible with the expanded table: previous code ignores global grants and continues recognizing the owner and scoped assignments. Keep the role feature and runner paused during rollback; do not restore production data merely to roll back code.
+
 ## Recovery
 Cloudflare's production Time Travel UI was verified to provide a seven-day recovery window on September 12. Its current recovery bookmark and exact release versions are recorded privately in ignored `.data`, not Git. See [Cloudflare Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
 

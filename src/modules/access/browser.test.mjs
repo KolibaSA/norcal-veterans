@@ -43,3 +43,21 @@ test('access response from an abandoned tab cannot replace current content', asy
   await connectAccess(context).render({ isCurrent: () => false });
   assert.equal(context.$('content').innerHTML, 'Current feature');
 });
+
+test('Super Admin uses global scope, posts no stale scope, and restores scoped editing', async () => {
+  const calls = [], context = { ...controls(), me: { owner: false, superAdmin: true }, message() {}, loadSection() {} };
+  context.api = async (path, options) => { calls.push({ path, options }); return [{ id: 'global', email: 'admin@example.test', role: 'super_admin' }]; };
+  await connectAccess(context).render({ isCurrent: () => true });
+  const { $ } = context;
+  assert.match($('content').innerHTML, /Super Admin/);
+  assert.match($('content').innerHTML, /All HQ, regions and organizations/);
+  $('email').value = 'new-admin@example.test'; $('role').value = 'super_admin'; $('role').onchange();
+  assert.equal($('scopeType').value, 'global');
+  assert.equal($('scopeValue').disabled, true); assert.equal($('scopeValue').required, false);
+  assert.match($('scopeHelp').textContent, /including other Super Admins/);
+  await $('grant').onsubmit(submitEvent());
+  assert.deepEqual(JSON.parse(calls.find(call => call.options?.method === 'POST').options.body), { email: 'new-admin@example.test', role: 'super_admin' });
+  $('role').value = 'editor'; $('role').onchange();
+  assert.equal($('scopeType').value, 'region');
+  assert.equal($('scopeType').disabled, false); assert.equal($('scopeValue').disabled, false); assert.equal($('scopeValue').required, true);
+});

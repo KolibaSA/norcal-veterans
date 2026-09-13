@@ -1,5 +1,6 @@
-// Authenticated owner-only request history and explicit recovery. The shell
-// verifies Access identity; this interface also enforces owner, origin and bytes.
+import { isPlatformAdmin } from '../../shared/permissions.mjs';
+// Authenticated platform-admin request history and explicit recovery. The shell
+// verifies Access identity and fresh grants; this interface enforces privilege, origin and bytes.
 import { json, readJson } from '../../shared/server-http.mjs';
 import { statement } from '../../shared/server-storage.mjs';
 const fail = (json, message, status = 400) => json({ error: message }, status);
@@ -22,15 +23,15 @@ export async function handleRequestRoute(req, env, user) {
   const match = path.match(/^\/api\/hq\/requests\/([^/]+)\/(history|comments|reconcile)$/);
   if (!match && path !== '/api/hq/agent-health') return null;
   if (!['GET', 'HEAD'].includes(req.method) && req.headers.get('Origin') !== new URL(req.url).origin) return fail(json, 'Request origin rejected.', 403);
-  if (user.owner !== true || user.email !== env.OWNER_EMAIL) return fail(json, 'Only the platform owner manages request execution.', 403);
+  if (!isPlatformAdmin(user) || (!user.superAdmin && user.email !== env.OWNER_EMAIL.toLowerCase())) return fail(json, 'Only the platform owner or a Super Admin manages request execution.', 403);
   if (path === '/api/hq/agent-health') {
     if (req.method !== 'GET') return fail(json, 'Method not allowed.', 405);
     const health = await statement(env, 'SELECT * FROM hq_agent_health WHERE id=1').first();
-    const current = await statement(env, "SELECT id,title FROM records WHERE kind='request' AND created_by=? AND status='in_progress' ORDER BY created_at,id LIMIT 1", env.OWNER_EMAIL).first();
+    const current = await statement(env, "SELECT id,title FROM records WHERE kind='request' AND status='in_progress' ORDER BY created_at,id LIMIT 1").first();
     return json({ configured: env.HQ_REQUEST_AGENT_ENABLED === 'true', ...(health || { last_successful_check: null, state: 'unknown', last_error: null, last_error_at: null }), current_request_id: current?.id || null, current_request_title: current?.title || null });
   }
   const [, id, action] = match;
-  const record = await statement(env, "SELECT * FROM records WHERE id=? AND kind='request' AND created_by=?", id, env.OWNER_EMAIL).first();
+  const record = await statement(env, "SELECT * FROM records WHERE id=? AND kind='request'", id).first();
   if (!record) return fail(json, 'Request unavailable.', 404);
   if (action === 'history') {
     if (req.method !== 'GET') return fail(json, 'Method not allowed.', 405);
@@ -47,7 +48,7 @@ export async function handleRequestRoute(req, env, user) {
     if (!validText(input.body, 12000)) return fail(json, 'Add a comment of at most 12000 characters.');
     // Comments intentionally do not change the execution revision or instructions.
     const result = await env.DB.batch([
-      statement(env, "INSERT INTO request_entries(id,request_id,kind,body,actor,created_at,mutation_id) SELECT ?,id,'comment',?,?,?,? FROM records WHERE id=? AND kind='request' AND created_by=? AND version=?", mutation, input.body.trim(), user.email, now, mutation, id, env.OWNER_EMAIL, input.expected_version),
+      statement(env, "INSERT INTO request_entries(id,request_id,kind,body,actor,created_at,mutation_id) SELECT ?,id,'comment',?,?,?,? FROM records WHERE id=? AND kind='request' AND version=?", mutation, input.body.trim(), user.email, now, mutation, id, input.expected_version),
       statement(env, "INSERT INTO audit(id,actor,action,record_id,created_at) SELECT ?,?,'request_comment',?,? WHERE EXISTS(SELECT 1 FROM request_entries WHERE mutation_id=?)", mutation, user.email, id, now, mutation)
     ]);
     return result[0].meta.changes === 1 ? json({ saved: true, id: mutation }, 201) : fail(json, 'The request changed. Reload before commenting.', 409);
@@ -61,7 +62,7 @@ export async function handleRequestRoute(req, env, user) {
   if (!active && record.status !== 'in_progress') return fail(json, 'There is no active or stranded execution to reconcile.', 409);
   const desiredRun = input.expected_run_id;
   const result = await env.DB.batch([
-    statement(env, "UPDATE records SET status=?,version=version+1,updated_at=?,mutation_id=?,payload=json_set(payload,'$.norcal_hq_agent.state',?,'$.norcal_hq_agent.finished_at',?,'$.norcal_hq_agent.reconciled_by',?) WHERE id=? AND kind='request' AND created_by=? AND version=? AND status=? AND ((? IS NULL AND NOT EXISTS(SELECT 1 FROM request_runs WHERE request_id=? AND state='in_progress')) OR EXISTS(SELECT 1 FROM request_runs WHERE id=? AND request_id=? AND state='in_progress'))", input.status, now, mutation, input.status, now, user.email, id, env.OWNER_EMAIL, input.expected_version, input.expected_status, desiredRun, id, desiredRun, id),
+    statement(env, "UPDATE records SET status=?,version=version+1,updated_at=?,mutation_id=?,payload=json_set(payload,'$.norcal_hq_agent.state',?,'$.norcal_hq_agent.finished_at',?,'$.norcal_hq_agent.reconciled_by',?) WHERE id=? AND kind='request' AND version=? AND status=? AND ((? IS NULL AND NOT EXISTS(SELECT 1 FROM request_runs WHERE request_id=? AND state='in_progress')) OR EXISTS(SELECT 1 FROM request_runs WHERE id=? AND request_id=? AND state='in_progress'))", input.status, now, mutation, input.status, now, user.email, id, input.expected_version, input.expected_status, desiredRun, id, desiredRun, id),
     statement(env, "UPDATE request_runs SET state=?,finished_at=?,finish_mutation=?,reconciled_by=? WHERE id=? AND request_id=? AND state='in_progress' AND EXISTS(SELECT 1 FROM records WHERE id=? AND mutation_id=?)", input.status, now, mutation, user.email, desiredRun, id, id, mutation),
     statement(env, "INSERT INTO request_entries(id,request_id,run_id,kind,body,actor,status,created_at,mutation_id) SELECT ?,id,?,'reconciliation',?,?,?,?,? FROM records WHERE id=? AND mutation_id=?", mutation, desiredRun, input.note.trim(), user.email, input.status, now, mutation, id, mutation),
     statement(env, "INSERT INTO audit(id,actor,action,record_id,created_at) SELECT ?,?,'request_reconciled',id,? FROM records WHERE id=? AND mutation_id=?", mutation, user.email, now, id, mutation)

@@ -4,6 +4,14 @@ import { createFeature, connectRequests, healthDescription } from './browser.mjs
 import { controls, submitEvent, deferred } from '../../shared/browser-test-support.mjs';
 import { recordInput } from '../../shared/browser-runtime.mjs';
 
+test('Super Admin sees request creation and editing while active execution stays locked', () => {
+  const feature = createFeature(), admin = { owner: false, superAdmin: true };
+  assert.equal(feature.canCreate(admin), true);
+  assert.equal(feature.canEdit(admin, { status: 'queued' }), true);
+  assert.equal(feature.canEdit(admin, { status: 'in_progress' }), false);
+  assert.equal(feature.canCreate({ owner: false, superAdmin: false }), false);
+});
+
 function scopeEditor(record = { kind: 'request', region_id: 'yolo-solano' }) {
   const feature = createFeature(), context = controls(), fields = feature.fields(record);
   feature.configureEditor({ ...context, record, values: fields });

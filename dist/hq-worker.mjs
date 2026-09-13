@@ -1296,6 +1296,9 @@ var recordDefinition2 = Object.freeze({ kind: "event", statuses: ["draft", "publ
 // src/app/content-metadata.mjs
 var contentMetadata = Object.freeze({ timeZone, ...organizationMetadata });
 
+// src/shared/permissions.mjs
+var isPlatformAdmin = (user) => user?.owner === true || user?.superAdmin === true;
+
 // src/shared/server-http.mjs
 var HTTPError = class extends Error {
   constructor(message, status = 400) {
@@ -1319,7 +1322,7 @@ function redactPayload(payload) {
   return payload;
 }
 function authorizeSave({ user }) {
-  if (!user.owner) throw new HTTPError("Only the owner can approve or change executable requests.", 403);
+  if (!isPlatformAdmin(user)) throw new HTTPError("Only the platform owner or a Super Admin can approve or change executable requests.", 403);
 }
 async function beforeSave({ env, existing, status, id }) {
   const active = existing && await statement(env, "SELECT id FROM request_runs WHERE request_id=? AND state='in_progress'", id).first();

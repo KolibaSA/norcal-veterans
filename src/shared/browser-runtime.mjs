@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from './permissions.mjs';
 import { esc, label, dateLabel, filterRecords, recordPath } from './browser-ui.mjs';
 
 export function recordInput(fields, tab, feature, editing = null) {
@@ -240,7 +241,7 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
     try {
       me = await api('me');
       $('identity').textContent = me.email;
-      document.querySelectorAll('.owner').forEach(element => { element.hidden = !me.owner; });
+      document.querySelectorAll('.owner').forEach(element => { element.hidden = !isPlatformAdmin(me); });
       const [metadata] = await Promise.all([api('content-metadata'), initializeOptions?.({ api, $ })]);
       notify('initialize', metadata);
       await loadSection({ item: params.get('item') });

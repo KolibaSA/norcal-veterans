@@ -1,6 +1,6 @@
 // Active HQ authentication, page delivery and compatibility route composition.
 // Feature behavior lives behind src/modules interfaces; this is not an editor or business-rule module.
-import { verifyIdentity } from '../../src/shared/server-auth.mjs';
+import { verifyIdentity, resolvePrivileges } from '../../src/shared/server-auth.mjs';
 import headquarters, { scriptHash } from './hq-template.mjs';
 import { publicPayload } from './public.mjs';
 import { contentMetadata } from '../../src/app/content-metadata.mjs';
@@ -48,6 +48,7 @@ export default {
       }
       if (!env.DB) return fail('Headquarters database is not connected.', 503);
       const grants = user.owner ? [] : await list(env, 'SELECT * FROM grants WHERE email=?', user.email);
+      user = resolvePrivileges(user, grants);
       if (!user.owner && !grants.length) return fail('Your account has no headquarters assignment.', 403);
       if ((path === '/hq' || path === '/hq/') && ['GET', 'HEAD'].includes(req.method)) {
         return new Response(req.method === 'HEAD' ? null : headquarters, { headers: {

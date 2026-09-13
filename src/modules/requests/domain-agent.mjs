@@ -9,8 +9,12 @@ export const TARGET = Object.freeze({
 export function createAgentPolicy({ hash }) {
 const ACTOR = 'Codex NorCal HQ agent';
 const KEY = '$.norcal_hq_agent';
-const owned = `kind='request' AND created_by=${sqlText(TARGET.owner)}`;
-const approved = `json_extract(payload,'$.request_approval.approved_by')=${sqlText(TARGET.owner)} AND json_extract(payload,'$.request_approval.approved_version')=version`;
+// Eligibility is rechecked against current grants at every poll and claim.
+const adminEmail = expression => `(${expression}=${sqlText(TARGET.owner)} OR EXISTS(SELECT 1 FROM grants WHERE email=${expression} AND role='super_admin' AND region_id IS NULL AND organization_id IS NULL))`;
+const author = adminEmail('records.created_by');
+const owned = `kind='request' AND ${author}`;
+const approver = adminEmail("json_extract(records.payload,'$.request_approval.approved_by')");
+const approved = `${approver} AND json_extract(payload,'$.request_approval.approved_version')=version`;
 const tokenAt = `json_extract(payload,'${KEY}.claim_token')`;
 const error = message => { throw new Error(message); };
 const textValue = (value, name, limit = 200) => {
@@ -43,16 +47,16 @@ function verifyConfig(config) {
 
 function statusSQL(localId) {
   return [
-    `SELECT count(CASE WHEN created_by=${sqlText(TARGET.owner)} AND status='queued' THEN 1 END) AS queued,
-      count(CASE WHEN created_by=${sqlText(TARGET.owner)} AND status='in_progress' THEN 1 END) AS in_progress,
-      count(CASE WHEN created_by=${sqlText(TARGET.owner)} AND status='needs_input' THEN 1 END) AS needs_input,
-      count(CASE WHEN created_by=${sqlText(TARGET.owner)} AND status='completed' THEN 1 END) AS completed,
-      count(CASE WHEN created_by=${sqlText(TARGET.owner)} AND status='queued' AND NOT COALESCE((${approved}),0) THEN 1 END) AS awaiting_approval,
-      count(CASE WHEN created_by<>${sqlText(TARGET.owner)} AND status IN ('queued','in_progress') THEN 1 END) AS ignored_other_authors
+    `SELECT count(CASE WHEN ${author} AND status='queued' THEN 1 END) AS queued,
+      count(CASE WHEN ${author} AND status='in_progress' THEN 1 END) AS in_progress,
+      count(CASE WHEN ${author} AND status='needs_input' THEN 1 END) AS needs_input,
+      count(CASE WHEN ${author} AND status='completed' THEN 1 END) AS completed,
+      count(CASE WHEN ${author} AND status='queued' AND NOT COALESCE((${approved}),0) THEN 1 END) AS awaiting_approval,
+      count(CASE WHEN NOT ${author} AND status IN ('queued','in_progress') THEN 1 END) AS ignored_other_authors
       FROM records WHERE kind='request'`,
     `SELECT id,title,created_at,version FROM records WHERE ${owned} AND status='queued' AND ${approved} ORDER BY created_at,id LIMIT 1`,
-    `SELECT * FROM records WHERE ${owned} AND (status='in_progress' OR EXISTS(SELECT 1 FROM request_runs WHERE request_id=records.id AND state='in_progress')) ORDER BY created_at,id`,
-    localId ? `SELECT *,EXISTS(SELECT 1 FROM request_entries WHERE request_id=records.id AND kind='reconciliation' AND mutation_id=records.mutation_id) AS owner_reconciled FROM records WHERE ${owned} AND id=${sqlText(textValue(localId, 'claim id'))}` : 'SELECT * FROM records WHERE 0',
+    `SELECT * FROM records WHERE kind='request' AND (status='in_progress' OR EXISTS(SELECT 1 FROM request_runs WHERE request_id=records.id AND state='in_progress')) ORDER BY created_at,id`,
+    localId ? `SELECT *,(${author} AND ${approver}) AS execution_authorized,EXISTS(SELECT 1 FROM request_entries WHERE request_id=records.id AND kind='reconciliation' AND mutation_id=records.mutation_id) AS owner_reconciled FROM records WHERE kind='request' AND id=${sqlText(textValue(localId, 'claim id'))}` : 'SELECT * FROM records WHERE 0',
     localId ? `SELECT * FROM request_runs WHERE request_id=${sqlText(localId)} ORDER BY claimed_at,id` : 'SELECT * FROM request_runs WHERE 0'
   ];
 }
@@ -74,7 +78,7 @@ function claimSQL(input) {
       AND json_valid(payload) AND json_type(payload)='object'
       AND ${approved}
       AND id=(SELECT id FROM records WHERE ${owned} AND status='queued' AND ${approved} ORDER BY created_at,id LIMIT 1)
-      AND NOT EXISTS(SELECT 1 FROM records WHERE ${owned} AND status='in_progress')
+      AND NOT EXISTS(SELECT 1 FROM records WHERE kind='request' AND status='in_progress')
       AND NOT EXISTS(SELECT 1 FROM request_runs WHERE state='in_progress') RETURNING *`,
     `INSERT INTO request_runs(id,request_id,claim_token,request_version,claimed_version,snapshot,state,claimed_at)
       SELECT ${sqlText(runId)},id,${sqlText(token)},${version},${version + 1},
@@ -96,6 +100,7 @@ function finishSQL(input) {
       payload=json_set(payload,'${KEY}.state',${sqlText(input.status)},'${KEY}.finished_at',${sqlText(now)},
         '${KEY}.report_sha256',${sqlText(hash(report))})
       WHERE ${owned} AND id=${sqlText(id)} AND version=${version} AND status='in_progress'
+      AND ${approver}
       AND json_valid(payload) AND ${tokenAt}=${sqlText(token)}
       AND EXISTS(SELECT 1 FROM request_runs WHERE request_id=${sqlText(id)} AND claim_token=${sqlText(token)}
         AND claimed_version=${version} AND state='in_progress') RETURNING *`,
@@ -157,6 +162,7 @@ function inspectStatus(results, claim) {
       reason: 'The candidate changed before this claim acquired an execution. No execution exists for its token. Retire the unused local claim without doing work.' };
   }
   if (same && run?.state === 'in_progress' && row.status === 'in_progress' && row.version === claim.version && working[0]?.id === claim.id) {
+    if (!row.execution_authorized) error('Request author or approver no longer has platform access. Stop and reconcile in HQ.');
     return { ...output, status: claim.phase === 'finishing' ? 'pending_finish' : 'resume',
       active_claim: publicClaim(claim), request: visibleRow(selected[0]), execution: JSON.parse(run.snapshot), run_id: run.id };
   }

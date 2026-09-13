@@ -1,17 +1,18 @@
+import { isPlatformAdmin } from '../../shared/permissions.mjs';
 import { json, readJson, field } from '../../shared/server-http.mjs';
 import { statement as stmt, rows as list } from '../../shared/server-storage.mjs';
 const fail = (message, status = 400) => json({ error: message }, status);
 
 export async function handleAccessRoute(req, env, user, path) {
   if (!['GET', 'HEAD'].includes(req.method) && req.headers.get('Origin') !== new URL(req.url).origin) return fail('Request origin rejected.', 403);
-  if (!user.owner) return fail('Only the platform owner manages access.', 403);
+  if (!isPlatformAdmin(user)) return fail('Only the platform owner or a Super Admin manages access.', 403);
   if (path === '/api/hq/access' && req.method === 'GET') return json(await list(env, 'SELECT * FROM grants ORDER BY email'));
   if (path === '/api/hq/access' && req.method === 'POST') {
     const x = await readJson(req), email = field(x.email, 'Email', 250, true).toLowerCase();
     const role = x.role, region = field(x.region_id, 'Region', 80) || null, org = field(x.organization_id, 'Organization', 120) || null;
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !['region_admin', 'organization_admin', 'editor'].includes(role) ||
-      !!region === !!org || (role === 'region_admin' && !region) || (role === 'organization_admin' && !org)) {
-      return fail('Choose one valid region or organization assignment.');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !['super_admin', 'region_admin', 'organization_admin', 'editor'].includes(role) ||
+      (role === 'super_admin' ? !!region || !!org : !!region === !!org) || (role === 'region_admin' && !region) || (role === 'organization_admin' && !org)) {
+      return fail('Choose Super Admin with no scope, or one valid region or organization assignment.');
     }
     if (org && !await stmt(env, "SELECT id FROM records WHERE id=? AND kind='organization'", org).first()) return fail('Choose an existing organization.');
     const id = crypto.randomUUID();

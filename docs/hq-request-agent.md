@@ -1,6 +1,6 @@
 # NorCal HQ request agent
 
-Chris requested a five-minute check of the NorCal Veterans HQ Requests queue on September 12, 2026. The Codex heartbeat `norcal-hq-request-agent` is attached to the existing Chat Automation task. When enabled, it processes at most one eligible owner request per run and saves its result in that request's activity history. Inspect the automation's current status; this document does not imply that a schedule paused for maintenance has been reenabled.
+Chris requested a five-minute check of the NorCal Veterans HQ Requests queue on September 12, 2026. The Codex heartbeat `norcal-hq-request-agent` is attached to the existing Chat Automation task. When enabled, it processes at most one eligible platform-admin request per run and saves its result in that request's activity history. Inspect the automation's current status; this document does not imply that a schedule paused for maintenance has been reenabled.
 
 The computer must be awake, Codex must be running, and its existing Cloudflare and GitHub sign-ins must remain usable. This is a local Codex agent. The Cloudflare Worker does not call a model or hold an OpenAI API key, and the five-minute cadence is not a promise of continuous availability or completion within five minutes. The HQ displays the configured schedule and separately reports observed agent health.
 
@@ -9,9 +9,9 @@ The computer must be awake, Codex must be running, and its existing Cloudflare a
 - Repository: `KolibaSA/norcal-veterans`, production branch `main`.
 - Worker: `norcal-veterans`, configured in `wrangler.jsonc`.
 - Database: the dedicated NorCal D1 binding in that configuration.
-- Queue: `records` rows with `kind='request'`, `status='queued'`, and `created_by` matching the configured owner. The reserved `payload.request_approval` must name that owner in `approved_by` and match the current record version in `approved_version`.
-- Other authors, public submissions, tasks, and the separate multi-project Headquarters queue are not eligible.
-- Only the owner can create or change executable requests. Saving a request as `queued` approves that exact new revision on the server; approval and execution credentials supplied in editor JSON are discarded. Other saved statuses clear approval. A queued row without current approval stays ineligible until the owner reviews and saves it as queued again.
+- Queue: `records` rows with `kind='request'`, `status='queued'`, and `created_by` matching the configured owner or a current global `super_admin` grant. The reserved `payload.request_approval` must name the configured owner or a current Super Admin in `approved_by` and match the current record version in `approved_version`.
+- Non-admin authors, public submissions, tasks, and the separate multi-project Headquarters queue are not eligible.
+- Only the platform owner or a current Super Admin can create or change executable requests. Saving a request as `queued` approves that exact new revision on the server; approval and execution credentials supplied in editor JSON are discarded. Other saved statuses clear approval. A queued row without current approval stays ineligible until the owner reviews and saves it as queued again.
 
 Use `scripts/norcal-hq-agent.mjs`. The imported `scripts/request-processor.mjs` operates on a different source application's schema and must not be used for this queue.
 
@@ -24,6 +24,8 @@ node scripts/norcal-hq-agent.mjs finish --id REQUEST_ID --expected-version N --s
 ```
 
 The helper verifies the exact worker/account/database/owner configuration, uses the existing Wrangler login, and sends SQL as explicit process arguments without a shell. On Windows it uses the trusted system certificate store. Never disable certificate validation. If the host sandbox blocks Wrangler child processes or its authenticated network access, use the normal tool approval review for the authorized command; do not change host protections.
+
+Super Admin grants are checked live for both the creator and approver; client-supplied role/approval fields are not authority. Apply `0005_super_admin.sql` before using the updated runner. Revocation stops new claims and active resume/finish; the owner or a remaining Super Admin can reconcile the interrupted execution. Terminal reconciliation can still be acknowledged after revocation. All owner review/reconciliation actions described below are also available to current Super Admins. Scope-limited roles remain ineligible. Delegating this role does not expand the agent's authorized project or permit queue text to change access, secrets or the schedule.
 
 ## Processing
 
@@ -74,7 +76,7 @@ Apply `migrations/legacy/0002_request_runs.sql` before using the revised runner.
 
 ### Reading health correctly
 
-`GET /api/hq/agent-health` is owner-only. It reports the last successful queue check, current request, observed state, queue count, and any recorded error. Health never includes request bodies, tokens or raw exception text.
+`GET /api/hq/agent-health` is restricted to the platform owner and Super Admins. It reports the last successful queue check, current request, observed state, queue count, and any recorded error. Health never includes request bodies, tokens or raw exception text.
 
 - `status` never writes health. `check` writes health even when it finds no eligible work or returns `blocked`; a fresh `last_successful_check` proves the queue was inspected, not that a request completed or the runner is free to proceed. Read the `state` and current request alongside the timestamp.
 - Confirmed `claim` and `finish` operations also attempt a health update, including a no-op `claim` that returns `idle`, `blocked` or a matching resume state. A separate telemetry failure returns `health_warning` without hiding a confirmed queue operation.

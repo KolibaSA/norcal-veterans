@@ -17,9 +17,9 @@ The 13-feature extraction was completed in `b5f19cc` on September 12, 2026. This
 | Organization Profiles | [organizations](src/modules/organizations/README.md) | Profile editor, taxonomy, locations/service areas, validation, typed public serialization and scope choices |
 | Coordination | [coordination](src/modules/coordination/README.md) | Coordination editor, statuses and record contract |
 | Ready-to-use Copy | [library](src/modules/library/README.md) | Copy-library editor, statuses and record contract |
-| Organization & Region Access | [access](src/modules/access/README.md) | Assignment administration UI and owner-only grant/revoke endpoints |
+| Organization & Region Access | [access](src/modules/access/README.md) | Assignment administration UI and platform-admin grant/revoke endpoints |
 | Change History and Revisions | [history](src/modules/history/README.md) | Change log, immutable revision display and scoped history endpoints |
-| Owner Export | [backup](src/modules/backup/README.md) | Existing owner export navigation and protected export endpoint |
+| Owner Export | [backup](src/modules/backup/README.md) | Existing platform-admin export navigation and protected export endpoint |
 | Attachments | [attachments](src/modules/attachments/README.md) | Attachment interface and existing disabled-upload behavior |
 
 Use `npm run test:module -- share-program` (replace the name with the module directory) for focused tests. `npm run test:active` covers the active application and modules. `npm run build` generates browser assets, enforces architecture, and runs the complete release suite, including imported regression fixtures. Use Node 24 and the existing lockfile.

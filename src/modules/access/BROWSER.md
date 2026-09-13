@@ -1,10 +1,10 @@
 # access: browser contract
 
-Owner-only organization/region assignment administration and revocation.
+Platform-owner/Super-Admin administration of global, organization and region assignments.
 
 `browser.mjs` exports `createFeature()` and `connectAccess(context)`; its controller owns access markup, form handling and scope payloads.
 
-Owns administrator assignment form state. Role-required scope choices are presented as escaped dropdowns populated with the available regions and organization records; POST still sends one selected region_id or organization_id. DELETE revocation requires the existing confirmation. Server authorization remains authoritative on every action.
+Owns administrator assignment form state. Role-required scope choices are presented as escaped dropdowns populated with the available regions and organization records; POST sends one selected region_id or organization_id for scoped roles. Super Admin disables both scope selectors, clearly describes full HQ privileges, and sends neither scope field; switching back restores the scoped controls. DELETE revocation requires the existing confirmation. Server authorization remains authoritative on every action.
 
 Dependencies: Injected HTTP/message/section refresh interface and shared escaped labels. Other features use common authorization interfaces and need not inspect this administration screen.
 

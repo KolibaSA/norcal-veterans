@@ -1,6 +1,6 @@
 # Backup export
 
-Owns the existing owner-only private logical JSON snapshot endpoint. `server.mjs` exports `handleBackupRoute(req, env, user, path)` for `GET /api/hq/export`; returns Response or null. It batches the existing eight tables and preserves schema version 3, headers and snapshot note. This endpoint is private recovery output and intentionally differs from public/display serializers.
+Owns the existing platform-owner/Super-Admin private logical JSON snapshot endpoint. `server.mjs` exports `handleBackupRoute(req, env, user, path)` for `GET /api/hq/export`; returns Response or null. It batches the existing eight tables and preserves schema version 3, headers and snapshot note. This endpoint is private recovery output and intentionally differs from public/display serializers.
 
 This refactor neither invokes the live endpoint nor creates private exports. Follow repository recovery instructions before operational exports/restores. Run `npm run test:module -- backup`; the synthetic export contract is also checked in `scripts/norcal-api.test.mjs`.
 

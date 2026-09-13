@@ -9,7 +9,7 @@ One project, one repository, and one Cloudflare Worker serve the public website 
 
 `wrangler.jsonc` deploys `src/norcal-worker.mjs` to the existing `norcal-veterans` Worker. Public pages and the embedded `worker/legacy` HQ share the dedicated NorCal D1 database. There is no dependency on the separate multi-project Headquarters service. The September 12 direction supersedes the proposed shared-HQ migration.
 
-HQ manages requests, project work, public submissions, organization profiles, events, coordination, reusable copy, scoped assignments, audit history, and a private database export. Cloudflare Access protects the private routes; the Worker independently verifies signed identity and enforces record permissions on every request. The existing owner remains the only allowlisted account. The NorCal HQ request agent checks queued owner requests every five minutes while its computer is awake and Codex is running, then saves results back to HQ. See [request agent operations](docs/hq-request-agent.md). File storage remains unconfigured.
+HQ manages requests, project work, public submissions, organization profiles, events, coordination, reusable copy, global Super Admin and scoped assignments, audit history, and a private database export. Cloudflare Access protects the private routes; the Worker independently verifies signed identity and enforces record permissions on every request. Cloudflare Access admission remains separate from HQ role assignments. The NorCal HQ request agent checks queued owner and currently authorized Super Admin requests every five minutes while its computer is awake and Codex is running, then saves results back to HQ. See [request agent operations](docs/hq-request-agent.md). File storage remains unconfigured.
 
 Public submissions enter a private review queue. Only published organizations and events appear publicly. Existing IDs, records, domains, and the Yolo-Solano launch redirect are preserved.
 
@@ -26,6 +26,10 @@ These three repository documents provide the starting context for a new task; a 
 Read these overview documents, then the requested module's README and BROWSER.md where present. Consult deployment/recovery or request-agent operations when the task involves those concerns. Reading every module or the entire application is not a prerequisite for changing one feature.
 
 Chris's reason for modularity is to reduce the amount of source Codex must review and the chance of unintended changes elsewhere. Preserve existing website and HQ behavior unless the current request calls for a behavior change. Shared infrastructure and explicit dependencies support focused work; they do not make every feature completely independent.
+
+## Super Admin access
+
+In HQ, open Organization & region access, enter an email, select **Super Admin**, and save. No region or organization is required. This grants full HQ access, including publishing, Requests, access management and exports; it does not change the Cloudflare Access sign-in policy. The configured owner keeps permanent access. No new person is granted access as part of this feature release.
 
 ## Recent milestones and verification context
 
