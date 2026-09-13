@@ -75,6 +75,8 @@ test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
   const page=render(new URL('https://test'+path));
   assert.equal(page.status,200);
   for(const phrase of ['NorCal Veterans','regional-hero','Find your people.','UPCOMING IN OUR REGION','FEATURED CONNECTIONS','THE FULL YOLO-SOLANO DIRECTORY','OFFICIAL COUNTY SUPPORT','BUILD THE NETWORK WITH US'])assert.ok(page.html.includes(phrase),phrase);
+  assert.ok(page.html.includes('/published-assets/norcal-veterans.png?v=logo-20260913-1'));
+  assert.ok(page.html.includes('/ysv-logo.png?v=logo-20260913-1'));
  }
  const logo=await worker.fetch(new Request('https://test/published-assets/norcal-veterans.png'));
  assert.equal(logo.status,200);

@@ -43,7 +43,10 @@ test('replacement renders the existing published directory, events and profiles 
     assert.equal(root.status,302);
     assert.equal(root.headers.get('Location'),'https://www.norcalveterans.org/yolo-solano?place=Davis');
     const home=await worker.fetch(new Request('https://www.norcalveterans.org/yolo-solano'),env);
-    assert.match(await home.text(),/Find your people/);
+    const homeHtml=await home.text();
+    assert.match(homeHtml,/Find your people/);
+    assert.match(homeHtml,/published-assets\/norcal-veterans\.png\?v=logo-20260913-1/);
+    assert.match(homeHtml,/ysv-logo\.png\?v=logo-20260913-1/);
     const denied=await worker.fetch(new Request('https://www.norcalveterans.org/hq'),env);
     assert.equal(denied.status,503);
   } finally {env.sqlite.close();}
