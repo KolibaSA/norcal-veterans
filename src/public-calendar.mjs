@@ -1,1 +1,1 @@
-export {calendarMilestones,publicMonthCalendar} from './modules/events/public.mjs';
+export {calendarMilestones,publicMonthCalendar,publicYearMeetingGrid} from './modules/events/public.mjs';

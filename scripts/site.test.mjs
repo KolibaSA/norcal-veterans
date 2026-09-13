@@ -38,7 +38,16 @@ test('logo gallery keeps every organization reachable with accessible post and l
  assert.equal(vetRecord.meeting_schedule,null);
  assert.ok(vetRecord.source_ids.some(id=>sources.some(s=>s.id===id&&s.url==='https://www.veteransequinetherapy.com/')));
  for(const flag of ['current_intake_unconfirmed','schedule_unconfirmed','visit_location_unconfirmed'])assert.ok(vetRecord.missing_data_flags.includes(flag));
-});
+  });
+ test('VFW 8151 alone gets the annual meeting grid',()=>{
+  const source=records.find(r=>r.id==='vfw-ca-8762');
+  const vfw={...source,id:'vfw-ca-8151',verified_name:'Dixon VFW Post 8151'};
+  const meetings=Array.from({length:12},(_,index)=>({id:`vfw8151-meeting-${index+1}`,title:'Dixon VFW Post 8151 monthly meeting',description:'Social begins at 6:30 p.m.; meeting begins at 7 p.m.',organization_id:'vfw-ca-8151',kind:'Organization meeting',status:'published',start_at:`2027-${String(index+1).padStart(2,'0')}-20T03:00:00Z`}));
+  const page=render(new URL('https://test/organizations/vfw-ca-8151'),[vfw],meetings);
+  assert.equal(page.status,200);assert.ok(page.html.includes('id="annual-meetings"'));assert.equal((page.html.match(/class="annual-meeting-card /g)||[]).length,12);
+  const other=render(new URL('https://test/organizations/vfw-ca-8762'),[source],meetings);
+  assert.ok(!other.html.includes('id="annual-meetings"'));
+ });
 test('source records are unique, auditable and have no invented confirmation',()=>{
  assert.equal(new Set(records.map(r=>r.id)).size,records.length);
  for(const r of records){assert.ok(r.verified_name);assert.ok(r.source_ids.length||r.missing_data_flags.includes('public_source_withheld_for_privacy'),'Source must be linked or explicitly withheld for privacy: '+r.id);assert.equal(r.organization_confirmed_at,null);assert.equal(r.verification_method,'public_source_review');for(const id of r.source_ids)assert.ok(sources.some(s=>s.id===id));for(const o of r.officers){assert.equal(o.term_verified,false);assert.ok(sources.some(s=>s.id===o.source_id));}assert.ok(!r.address||r.address.type!=='residential');}
