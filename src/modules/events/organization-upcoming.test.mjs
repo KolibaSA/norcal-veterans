@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {organizationUpcomingEvents} from './public.mjs';
+import {organizationUpcomingEvents, eventsPagePublic} from './public.mjs';
 import {render} from '../../site.mjs';
 import {records} from '../../data.mjs';
 
@@ -22,12 +22,19 @@ test('upcoming organization cards filter, sort and safely preserve meeting detai
   for (const value of ['6:00 PM','Social hour','7:00 PM','Post meeting','8:00 PM','Social time','Public hall','Time to be confirmed','href="/events/later"']) assert.ok(html.includes(value), value);
 });
 
-test('only Post 8151 replaces its calendar and shows an empty state', () => {
-  const target = render(new URL('https://site.test/organizations/vfw-ca-8151'), records, []).html;
-  assert.match(target, /Upcoming events/);
-  assert.match(target, /No upcoming events are currently published/);
-  assert.doesNotMatch(target, /class="panel month-calendar"|id="annual-meetings"/);
-  const other = records.find(record => record.id !== 'vfw-ca-8151' && record.id.startsWith('vfw-'));
-  assert.ok(other);
-  assert.match(render(new URL(`https://site.test/organizations/${other.id}`), records, []).html, /class="panel month-calendar"/);
+test('all organization templates use scoped cards and the shared Events calendar stays intact', () => {
+  const selected = [records.find(r => r.id === 'vfw-ca-8762'), records.find(r => r.organization_type === 'American Legion'), records.find(r => r.id === 'mcl-yolo')];
+  for (const record of selected) {
+    assert.ok(record);
+    const url = new URL('https://site.test/organizations/' + record.id);
+    const empty = render(url, records, []).html;
+    assert.match(empty, /No upcoming events are currently published/);
+    assert.doesNotMatch(empty, /class="panel month-calendar"|id="annual-meetings"/);
+    const assigned = {...event, id:'assigned-event', title:'Assigned event', organization_id:record.id, start_at:'2099-01-01T18:00:00-08:00'};
+    const populated = render(url, records, [assigned, {...assigned, id:'other-event', title:'Other organization event', organization_id:'other'}]).html;
+    assert.ok(populated.includes('href="/events/assigned-event"'));
+    assert.doesNotMatch(populated, /Other organization event/);
+  }
+  assert.match(render(new URL('https://site.test/mcl-yolo'), records, []).html, /id="upcoming-events"/);
+  assert.match(eventsPagePublic(new URL('https://site.test/events'), []), /class="panel month-calendar"/);
 });
