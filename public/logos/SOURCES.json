@@ -90,14 +90,13 @@
       "verification": "Exact logo used on official homepage; downloaded through its Wix image delivery service at 600px instead of the 8400px original. Visually inspected. This identifies the stable, not a separate established nonprofit or clinical program."
     },
     {
-      "file": "site/public/logos/veterans-equine-therapy.jpg",
+      "file": "site/public/logos/vets.jpg",
       "organization": "Veterans Equine Therapy (VETs)",
-      "mark": "Horse and dog-tag emblem from official website artwork",
+      "mark": "Patriotic horse and VETs dog-tag emblem",
       "source_page": "https://www.veteransequinetherapy.com/",
-      "download_url": "https://lh3.googleusercontent.com/sitesv/AG8ngQXIJ60F0URQmeN5yrGIgAxill4Pqpsqezz9y0PDGFI4O-goZNIJMhn7vjQEIgFxSPPmT9u2Ma5LzxvNgYWTXGUuXVjOU8hY7IhFfIY6ynqD4S26SPgPisSScgQMlKwpWPCQiIGOb_BOrALfM66FQmZ3xgTdRqyOsEEt5noRJInj4gH_iFrYmRJ0ChsU_cmjkTr381D45SiLFZX7znQr-p74A1s63PFx5lQd00AkiQ4=w1280",
-      "width": 1122,
-      "verification": "Exact official website artwork, visually inspected. The original image is retained unaltered. CSS frames only its upper emblem area; undated promotional dates are not displayed as directory events.",
-      "height": 1401
+      "width": 1103,
+      "verification": "Logo supplied directly by Chris on September 14, 2026. Only blank outer margins were trimmed and the JPEG was converted to web-safe RGB; the complete horse and VETs dog tag remain intact.",
+      "height": 1200
     }
   ]
 }

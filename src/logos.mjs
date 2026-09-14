@@ -1,6 +1,6 @@
 // Official artwork is stored locally; provenance is recorded with the assets.
 export const brandLogos={
- 'little-reata-veterans':{src:'/logos/veterans-equine-therapy.jpg',alt:'Veterans Equine Therapy - VETs horse and dog-tag emblem'},
+ 'little-reata-veterans':{src:'/logos/vets.jpg',alt:'Veterans Equine Therapy - patriotic horse and VETs dog-tag emblem'},
  'VFW':{src:'/logos/vfw.png',alt:'Veterans of Foreign Wars'},
  'American Legion':{src:'/logos/american-legion.png',alt:'The American Legion'},
  'DAV':{src:'/logos/dav.svg',alt:'Disabled American Veterans'},
