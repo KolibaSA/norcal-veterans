@@ -96,6 +96,8 @@ test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
  assert.ok((await logo.arrayBuffer()).byteLength>100);
 });
 test('Detachment 627 uses the simple profile with its branding and content',()=>{
+ const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
+ for(const phrase of [".mcl-profile .branded-profile-heading{width:auto",".mcl-profile .branded-profile-heading::after{content:'627'","position:absolute;z-index:2","width:min(25vw,320px)",'.mcl-profile .event-card{border-top-color:var(--mcl-red)'])assert.ok(styles.includes(phrase),phrase);
  for(const path of ['/mcl-yolo','/organizations/mcl-yolo']){
   const page=render(new URL('https://test'+path));
   assert.equal(page.status,200);
