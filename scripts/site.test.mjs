@@ -98,6 +98,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes(`class="wrap detail-page ${theme}"`),r.id+' '+theme);
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
+  assert.ok(!page.html.includes('View officers'),r.id);
   assert.ok(page.html.includes('/styles.css?v=profiles-20260913-1'),r.id);
   assert.ok(page.html.includes('/app.js?v=profiles-20260913-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
