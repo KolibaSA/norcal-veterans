@@ -22,6 +22,23 @@ test('upcoming organization cards filter, sort and safely preserve meeting detai
   for (const value of ['6:00 PM','Social hour','7:00 PM','Post meeting','8:00 PM','Social time','Public hall','Time to be confirmed','href="/events/later"']) assert.ok(html.includes(value), value);
 });
 
+test('VFW date headers use Pacific month and day for events and meetings only on that profile', () => {
+  const examples = [
+    {...event, id:'meeting', title:'January meeting', kind:'Organization meeting', start_at:'2027-01-08T03:00:00Z'},
+    {...event, id:'fundraiser', title:'January fundraiser', date_only:true, start_at:'2027-01-09T08:00:00Z'}
+  ];
+  const html = organizationUpcomingEvents(examples, 'vfw-ca-8151', now);
+  assert.equal((html.match(/class="vfw-card-date"/g) || []).length, 2);
+  assert.ok(html.includes('<span>January</span><span class="vfw-card-day">7</span>'));
+  assert.ok(html.includes('<span>January</span><span class="vfw-card-day">9</span>'));
+  assert.ok(html.indexOf('class="vfw-card-date"') < html.indexOf('January meeting'));
+  assert.ok(html.indexOf('January meeting') < html.indexOf('January fundraiser'));
+  for (const detail of ['Thursday, January 7, 2027', '7:00 PM', 'Time to be confirmed', 'Public hall', 'href="/events/fundraiser"']) assert.ok(html.includes(detail), detail);
+  assert.doesNotMatch(html, /href="\/events\/meeting"/);
+  assert.doesNotMatch(organizationUpcomingEvents(examples.map(item => ({...item, organization_id:'other'})), 'other', now), /vfw-card-date/);
+  assert.doesNotMatch(eventsPagePublic(new URL('https://site.test/events'), examples), /vfw-card-date/);
+});
+
 test('all organization templates use scoped cards and the shared Events calendar stays intact', () => {
   const selected = [records.find(r => r.id === 'vfw-ca-8762'), records.find(r => r.organization_type === 'American Legion'), records.find(r => r.id === 'mcl-yolo')];
   for (const record of selected) {
