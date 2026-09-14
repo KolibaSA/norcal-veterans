@@ -14,6 +14,12 @@ document.querySelectorAll('a[href="#officers"]').forEach(link=>link.addEventList
 if(location.hash==='#officers')openOfficerDetails();
 window.addEventListener('hashchange',()=>{if(location.hash==='#officers')openOfficerDetails();});
 
+document.querySelectorAll('.branded-profile-heading').forEach(hero=>{
+ const name=hero.querySelector('h1')?.textContent||'';
+ const match=name.match(/\b(?:post|detachment|chapter|unit)\s*(?:no\.?\s*)?#?\s*([a-z]?\d+[a-z-]*)\b/i);
+ if(match)hero.dataset.profileMark=match[1];
+});
+
 if(location.pathname==='/'||location.pathname==='/yolo-solano')try{localStorage.setItem('norcal-veterans-region','yolo-solano');}catch{}
 {
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;

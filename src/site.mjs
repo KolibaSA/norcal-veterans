@@ -117,12 +117,31 @@ function americanLegionSite(r,events,url){
   <section class="wrap org-site-sources"><details><summary>Sources for this profile</summary>${sourceNotice}${organizationReview(r)}</details><a href="/yolo-solano">Explore the Yolo-Solano region →</a></section>
  </div>`,{path:'/organizations/'+r.id,detail:true});
 }
+const profileThemes=Object.freeze({
+ 'VFW':'vfw-profile',
+ 'American Legion':'legion-profile',
+ 'Marine Corps League':'mcl-profile',
+ 'Veterans Beer Club':'beer-club-profile',
+ 'Toys for Tots':'toys-profile',
+ 'DAV':'dav-profile',
+ 'County Veterans Office':'county-profile',
+ 'Equine program provider':'equine-profile',
+ 'Veteran remembrance program':'remembrance-profile',
+ 'Veterans nonprofit':'nonprofit-profile',
+ 'Other veteran organization':'community-profile'
+});
+function profileTheme(type){return profileThemes[type]||'community-profile';}
+function profileFallbackLogo(r){
+ const initials=String(r.verified_name||'Veteran organization').split(/\s+/).filter(Boolean).slice(0,3).map(word=>word[0]).join('').toUpperCase();
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="108" fill="#fffaf0"/><circle cx="120" cy="120" r="101" fill="none" stroke="#c9a44b" stroke-width="7"/><text x="120" y="137" text-anchor="middle" font-family="Arial,sans-serif" font-size="58" font-weight="800" fill="#17395f">${initials}</text></svg>`;
+ return {src:'data:image/svg+xml,'+encodeURIComponent(svg),alt:r.verified_name+' initials mark'};
+}
 function profile(r,events,url) {
  const description=`Public contacts, meeting information and sources for ${r.verified_name}.`;
  const contact=r.public_contacts;
- const legion=r.organization_type==='American Legion',mcl=r.id==='mcl-yolo',branded=legion||mcl;
- const logo=branded?(brandLogos[r.id]||brandLogos[r.organization_type]):null;
- const theme=legion?' legion-profile':mcl?' mcl-profile':'';
+ const branded=true;
+ const logo=brandLogos[r.id]||brandLogos[r.organization_type]||profileFallbackLogo(r);
+ const theme=' '+profileTheme(r.organization_type);
  const canonicalPath=url.pathname==='/mcl-yolo'?'/mcl-yolo':'/organizations/'+r.id;
  const related=organizationLinks(r),linkList=items=>items.map(item=>`<li>${external(item.url,item.label)}</li>`).join('');
  const connections=`<section class="panel"><h2>Social media &amp; parent organizations</h2><h3>Official social pages</h3>${related.social.length?`<ul>${linkList(related.social)}</ul>`:'<p>No official local social page has been verified for this listing yet.</p>'}<h3>Parent organization links</h3>${related.parent.length?`<ul>${linkList(related.parent)}</ul>`:'<p>This listing does not have a parent organization link.</p>'}${branded?'<h3>Organization editor</h3><p><a href="/hq?tab=organization">Open organization editor →</a></p>':''}</section>`;

@@ -67,7 +67,7 @@ test('invalid, empty and injection input stays safe',()=>{
 test('each profile has its own metadata, source links and term caveat',()=>{
  for(const r of records){const p=render(new URL('https://test/organizations/'+r.id));assert.equal(p.status,200);assert.ok(p.html.includes(escapeHtml(r.verified_name)));assert.ok(p.html.includes('Sources for this profile'));assert.ok(!p.html.includes('property="og:image"'));if(r.officers.length)assert.ok(p.html.includes('current terms have not been confirmed'));}
 });
-test('American Legion profiles use the simple profile with Legion family styling',()=>{
+test('American Legion profiles use the shared profile design with Legion family styling',()=>{
  const legion=records.filter(r=>r.organization_type==='American Legion');
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  assert.ok(styles.includes("url('/american-legion-background.png')"));
@@ -81,6 +81,31 @@ test('American Legion profiles use the simple profile with Legion family styling
   for(const phrase of ['Upcoming events','Plan your visit','Activities &amp; member information','Sources for this profile','Submit an update'])assert.ok(page.html.includes(phrase),r.id+' '+phrase);
   assert.ok(!page.html.includes('class="org-site legion-site"'),r.id);
  }
+});
+test('every organization type uses the shared branded profile design and its family theme',()=>{
+ const themeByType={
+  VFW:'vfw-profile','American Legion':'legion-profile','Marine Corps League':'mcl-profile',
+  'Veterans Beer Club':'beer-club-profile','Toys for Tots':'toys-profile',DAV:'dav-profile',
+  'County Veterans Office':'county-profile','Equine program provider':'equine-profile',
+  'Veteran remembrance program':'remembrance-profile','Veterans nonprofit':'nonprofit-profile',
+  'Other veteran organization':'community-profile'
+ };
+ const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
+ const app=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');
+ for(const r of records){
+  const page=render(new URL('https://test/organizations/'+r.id));
+  const theme=themeByType[r.organization_type]||'community-profile';
+  assert.ok(page.html.includes(`class="wrap detail-page ${theme}"`),r.id+' '+theme);
+  assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
+  assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=profiles-20260913-1'),r.id);
+  assert.ok(page.html.includes('/app.js?v=profiles-20260913-1'),r.id);
+  assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
+ }
+ assert.ok(styles.includes('.branded-profile-heading::after{content:attr(data-profile-mark)'));
+ assert.ok(styles.includes('@media(max-width:850px){.branded-profile-heading'));
+ assert.ok(styles.includes('@media(max-width:650px){.branded-profile-heading'));
+ assert.ok(app.includes("(?:post|detachment|chapter|unit)"));
 });
 test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
  for(const path of ['/','/yolo-solano']){
@@ -97,7 +122,7 @@ test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
 });
 test('Detachment 627 uses the simple profile with its branding and content',()=>{
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
- for(const phrase of [".mcl-profile .branded-profile-heading{width:auto",".mcl-profile .branded-profile-heading::after{content:'627'","position:absolute;z-index:2","width:min(25vw,320px)",'.mcl-profile .event-card{border-top-color:var(--mcl-red)'])assert.ok(styles.includes(phrase),phrase);
+ for(const phrase of [".branded-profile-heading{position:relative;width:auto",".branded-profile-heading::after{content:attr(data-profile-mark)","position:absolute;z-index:2","width:min(25vw,320px)",'.mcl-profile{--profile-primary:#861f2d'])assert.ok(styles.includes(phrase),phrase);
  for(const path of ['/mcl-yolo','/organizations/mcl-yolo']){
   const page=render(new URL('https://test'+path));
   assert.equal(page.status,200);
