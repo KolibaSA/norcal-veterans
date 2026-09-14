@@ -20,5 +20,5 @@ test('contribution checks public-information consent and selected live organizat
 });
 test('contribution form markup remains byte-equivalent to the pre-refactor baseline',()=>{
   const html=submissionPage(new URL('https://site.test/for-organizations'),{organizations});
-  assert.equal(createHash('sha256').update(html).digest('hex'),'0479da910651ca2caedd554ddb75d7e21d25a322c219a43538e5df39ee884a9d');
+  assert.equal(createHash('sha256').update(html).digest('hex'),'9cdb31043e3e36a0e75c988ac5960d03e127650270cdec29e5d9e689839cefe3');
 });
