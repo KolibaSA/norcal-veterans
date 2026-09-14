@@ -19,16 +19,31 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
     const times = event.meeting_times?.length
       ? `<dl class="annual-meeting-times">${event.meeting_times.map(entry => `<div><dt>${h(wallTime(entry.time))}</dt><dd>${h(entry.label)}</dd></div>`).join('')}</dl>`
       : `<p class="event-time">${event.date_only ? 'Time to be confirmed' : h(timeFormat.format(new Date(event.start_at)))}${!event.date_only && event.end_at ? ` – ${h(timeFormat.format(new Date(event.end_at)))}` : ''}</p>`;
+    if (listedMeeting) {
+      return `<article class="panel event-card">
+        <div class="vfw-card-topline"><span class="vfw-card-badge">${h(event.kind)}</span><span class="vfw-card-county">${h(event.county)} County</span></div>
+        ${dateHeader}
+        <h3>${h(event.title)}</h3>
+        <div class="vfw-card-facts">
+          <p class="vfw-card-fact"><span class="vfw-card-icon" aria-hidden="true">▣</span><time datetime="${h(event.start_at)}">${h(dateFormat.format(date))}</time></p>
+          ${event.venue ? `<p class="vfw-card-fact"><span class="vfw-card-icon" aria-hidden="true">⌖</span><span>${h(event.venue)}</span></p>` : ''}
+        </div>
+        ${times}
+        ${event.description ? `<p class="vfw-card-description">${h(event.description)}</p>` : ''}
+        ${event.time_note ? `<p class="small-note">${h(event.time_note)}</p>` : ''}
+        <p class="small-note vfw-card-confirmation">Confirm the latest details with the post before attending.</p>
+      </article>`;
+    }
     return `<article class="panel event-card">
       ${dateHeader}
       <span class="eyebrow">${h(event.kind)}</span>
-      <h3>${listedMeeting ? h(event.title) : `<a href="/events/${h(event.id)}">${h(event.title)}</a>`}</h3>
+      <h3><a href="/events/${h(event.id)}">${h(event.title)}</a></h3>
       <time datetime="${h(event.start_at)}">${h(dateFormat.format(new Date(event.start_at)))}</time>
       ${times}
       ${event.venue ? `<p>${h(event.venue)}</p>` : ''}
       ${event.description ? `<p>${h(event.description)}</p>` : ''}
       ${event.time_note ? `<p class="small-note">${h(event.time_note)}</p>` : ''}
-      ${listedMeeting ? '<p class="small-note">Confirm the latest details with the post before attending.</p>' : `<a href="/events/${h(event.id)}">Event details &amp; attendance →</a>`}
+      <a href="/events/${h(event.id)}">Event details &amp; attendance →</a>
     </article>`;
   }).join('');
   return `<section id="upcoming-events" aria-labelledby="upcoming-events-title">
