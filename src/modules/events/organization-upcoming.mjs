@@ -21,16 +21,17 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
       : `<p class="event-time">${event.date_only ? 'Time to be confirmed' : h(timeFormat.format(new Date(event.start_at)))}${!event.date_only && event.end_at ? ` – ${h(timeFormat.format(new Date(event.end_at)))}` : ''}</p>`;
     if (listedMeeting) {
       return `<article class="panel event-card">
-        <div class="vfw-card-topline"><span class="vfw-card-badge">${h(event.kind)}</span><span class="vfw-card-county">${h(event.county)} County</span></div>
-        ${dateHeader}
+        <div class="vfw-card-header">
+          ${dateHeader}
+          <span class="vfw-card-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19v-2.3c0-2.8 2.2-4.7 5.5-4.7s5.5 1.9 5.5 4.7V19z"/><path d="M14.2 13.1c.8-.4 1.7-.6 2.8-.6 2.7 0 4.5 1.6 4.5 4V19h-5.3v-2.3c0-1.4-.4-2.6-1.2-3.5z"/></svg>${h(event.kind)}</span>
+        </div>
         <h3>${h(event.title)}</h3>
         <div class="vfw-card-facts">
-          <p class="vfw-card-fact"><span class="vfw-card-icon" aria-hidden="true">▣</span><time datetime="${h(event.start_at)}">${h(dateFormat.format(date))}</time></p>
-          ${event.venue ? `<p class="vfw-card-fact"><span class="vfw-card-icon" aria-hidden="true">⌖</span><span>${h(event.venue)}</span></p>` : ''}
+          <p class="vfw-card-fact"><svg class="vfw-card-icon vfw-card-calendar" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M7.5 3v5M16.5 3v5M3.5 10h17"/></svg><time datetime="${h(event.start_at)}">${h(dateFormat.format(date))}</time></p>
+          ${event.venue ? `<p class="vfw-card-fact"><svg class="vfw-card-icon vfw-card-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-7.1 7-13a7 7 0 1 0-14 0c0 5.9 7 13 7 13z"/><circle cx="12" cy="9" r="2.4"/></svg><span>${h(event.venue)}</span></p>` : ''}
         </div>
         ${times}
         ${event.description ? `<p class="vfw-card-description">${h(event.description)}</p>` : ''}
-        ${event.time_note ? `<p class="small-note">${h(event.time_note)}</p>` : ''}
         <p class="small-note vfw-card-confirmation">Confirm the latest details with the post before attending.</p>
       </article>`;
     }
