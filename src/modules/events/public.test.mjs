@@ -9,10 +9,10 @@ test('event detail works independently with optional supplied organization choic
   assert.match(eventDetail(event,[{id:'synthetic-host'}]),/href="\/organizations\/synthetic-host"/);
 });
 
-test('VFW 8151 monthly meetings stay listed without detail-page links',()=>{
+test('organization meetings stay off the public Events page without changing calendar safeguards',()=>{
   const meeting=sanitizePublicEvent({id:'organization-meeting-vfw-ca-8151-2030-01',title:'Dixon VFW Post 8151 monthly meeting',description:'Monthly gathering.',start_at:'2030-01-18T02:00:00Z',venue:'Olde Vets Hall',status:'published',organization_id:'vfw-ca-8151',kind:'Organization meeting',organizer:'Dixon VFW Post 8151',county:'Solano',city:'Dixon',audience:'Contact the post for attendance details.',meeting_times:[{time:'18:00',label:'Social hour'},{time:'19:00',label:'Post meeting'},{time:'20:00',label:'Social time'}]});
   const html=eventsPagePublic(new URL('https://test/events?month=2030-01'),[meeting]);
-  assert.match(html,/Dixon VFW Post 8151 monthly meeting/);assert.doesNotMatch(html,/href="\/events\/organization-meeting-vfw-ca-8151-2030-01"/);
+  assert.doesNotMatch(html,/Dixon VFW Post 8151 monthly meeting/);assert.doesNotMatch(html,/href="\/events\/organization-meeting-vfw-ca-8151-2030-01"/);
   assert.deepEqual(meeting.meeting_times.map(entry=>entry.label),['Social hour','Post meeting','Social time']);
   assert.doesNotMatch(eventCalendar([meeting]),/URL:https:\/\/www\.norcalveterans\.org\/events\/organization-meeting-vfw-ca-8151-2030-01/);
 });
