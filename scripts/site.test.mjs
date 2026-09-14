@@ -64,10 +64,10 @@ test('VFW, Legion and MCL directory cards share the branded card design with fam
  assert.equal(page.status,200);
  for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
  for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
- assert.ok(page.html.includes('/styles.css?v=event-cards-20260914-1'));
+ assert.ok(page.html.includes('/styles.css?v=event-cards-20260914-2'));
  assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
- for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
+ for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','.vfw-profile .profile-brand-logo{object-fit:cover}','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
 });
 test('invalid, empty and injection input stays safe',()=>{
  const p=render(new URL('https://test/?q='+encodeURIComponent('<script>alert(1)</script>')));assert.ok(!p.html.includes('<script>alert(1)</script>'));assert.ok(p.html.includes('No matching organizations'));
@@ -109,7 +109,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=event-cards-20260914-1'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=event-cards-20260914-2'),r.id);
   assert.ok(page.html.includes('/app.js?v=profiles-20260913-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }
