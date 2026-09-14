@@ -27,7 +27,7 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
       const dateLabel = listedMeeting
         ? dateFormat.format(date)
         : `${dateFormat.format(date)}${event.date_only ? ' · Time to be confirmed' : ` · ${timeFormat.format(date)}${event.end_at ? ` – ${timeFormat.format(new Date(event.end_at))}` : ''}`}`;
-      return `<article class="panel event-card">
+      return `<article class="panel event-card${listedMeeting ? ' vfw-meeting-card' : ''}">
         <div class="vfw-card-header">
           ${dateHeader}
           <span class="vfw-card-badge${listedMeeting ? '' : ' vfw-card-badge-community'}">${badgeIcon}${h(event.kind)}</span>
@@ -56,6 +56,6 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
   }).join('');
   return `<section id="upcoming-events" aria-labelledby="upcoming-events-title">
     <h2 id="upcoming-events-title">Upcoming events</h2>
-    ${upcoming.length ? `<p class="small-note">Soonest first · All times Pacific.</p><div class="two-up">${cards}</div>` : '<p class="panel">No upcoming events are currently published. Check back soon.</p>'}
+    ${upcoming.length ? `<p class="small-note">Soonest first · All times Pacific.</p><div class="two-up${organizationId === 'vfw-ca-8151' ? ' vfw-event-grid' : ''}">${cards}</div>` : '<p class="panel">No upcoming events are currently published. Check back soon.</p>'}
   </section>`;
 }
