@@ -123,7 +123,7 @@ test('regional home images resolve to complete bundled images and health identif
     const legion=await worker.fetch(new Request('https://www.norcalveterans.org/organizations/legion-ca-208'),env);
     assert.equal(legion.status,200);
     const legionHtml=await legion.text();
-    assert.match(legionHtml,/class="org-site legion-site"/);
+    assert.match(legionHtml,/class="wrap detail-page legion-profile"/);
     const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
     assert.match(styles,/american-legion-background\.png/);
     for(const path of imagePaths){

@@ -67,7 +67,7 @@ test('invalid, empty and injection input stays safe',()=>{
 test('each profile has its own metadata, source links and term caveat',()=>{
  for(const r of records){const p=render(new URL('https://test/organizations/'+r.id));assert.equal(p.status,200);assert.ok(p.html.includes(escapeHtml(r.verified_name)));assert.ok(p.html.includes('Sources for this profile'));assert.ok(!p.html.includes('property="og:image"'));if(r.officers.length)assert.ok(p.html.includes('current terms have not been confirmed'));}
 });
-test('American Legion profiles share a post-numbered family theme and official logo watermark',()=>{
+test('American Legion profiles use the simple profile with Legion family styling',()=>{
  const legion=records.filter(r=>r.organization_type==='American Legion');
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  assert.ok(styles.includes("url('/american-legion-background.png')"));
@@ -75,9 +75,11 @@ test('American Legion profiles share a post-numbered family theme and official l
  for(const r of legion){
   const page=render(new URL('https://test/organizations/'+r.id));
   assert.equal(page.status,200,r.id);
-  assert.ok(page.html.includes('class="org-site legion-site"'),r.id);
-  assert.ok(page.html.includes('class="legion-site-watermark"'),r.id);
-  assert.ok(page.html.includes('id="events"')&&page.html.includes('id="resources"')&&page.html.includes('id="contact"'),r.id);
+  assert.ok(page.html.includes('class="wrap detail-page legion-profile"'),r.id);
+  assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
+  assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
+  for(const phrase of ['Upcoming events','Plan your visit','Activities &amp; member information','Sources for this profile','Submit an update'])assert.ok(page.html.includes(phrase),r.id+' '+phrase);
+  assert.ok(!page.html.includes('class="org-site legion-site"'),r.id);
  }
 });
 test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
@@ -93,16 +95,18 @@ test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
  assert.equal(logo.headers.get('Content-Type'),'image/png');
  assert.ok((await logo.arrayBuffer()).byteLength>100);
 });
-test('Detachment 627 has a complete organization-owned web experience',()=>{
+test('Detachment 627 uses the simple profile with its branding and content',()=>{
  for(const path of ['/mcl-yolo','/organizations/mcl-yolo']){
   const page=render(new URL('https://test'+path));
   assert.equal(page.status,200);
-  for(const phrase of ['Detachment 627','Built on service.','id="about"','id="events"','id="resources"','id="photos"','id="contact"','Sources for this profile','Open the organization editor'])assert.ok(page.html.includes(phrase),phrase);
-  assert.ok(page.html.includes('class="org-site mcl-site"'));
-  assert.ok(page.html.includes('aria-hidden="true">627</div>'));
+  for(const phrase of ['Detachment 627','Upcoming events','id="photos"','id="officers"','Plan your visit','Activities &amp; member information','Sources for this profile','Submit an update'])assert.ok(page.html.includes(phrase),phrase);
+  assert.ok(page.html.includes('class="wrap detail-page mcl-profile"'));
+  assert.ok(page.html.includes('class="profile-brand-logo"'));
+  assert.ok(!page.html.includes('class="org-site mcl-site"'));
   assert.ok(page.html.includes('href="https://www.mclnational.org/"'));
-  assert.ok(page.html.includes('/hq?org=mcl-yolo'));
-  assert.ok(page.html.includes('<link rel="canonical" href="https://www.norcalveterans.org/mcl-yolo">'));
+  assert.ok(page.html.includes('/hq?org=mcl-yolo#photos'));
+  const canonical=path==='/mcl-yolo'?'/mcl-yolo':'/organizations/mcl-yolo';
+  assert.ok(page.html.includes(`<link rel="canonical" href="https://www.norcalveterans.org${canonical}">`));
   assert.ok(!page.html.includes('mailto:'));
   assert.ok(!page.html.includes('tel:'));
  }
