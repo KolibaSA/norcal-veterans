@@ -45,9 +45,9 @@ test('public organization page renders consented profiles and optional approved 
  const json=await (await publicWorker.fetch(new Request(PUBLIC+'/data.json'),{DB:db})).text();assert.ok(!json.includes('Jordan Rivera'));assert.ok(!json.includes('officer_profiles'));
 });
 
-test('every organization gets an officer link and empty state; private editor gets consent-first controls',async t=>{
+test('every organization gets an officer empty state without the removed shortcut; private editor gets consent-first controls',async t=>{
  const db=setup(t),live=await publicData(db,records);
- for(const record of live.records){const html=render(new URL(PUBLIC+'/organizations/'+record.id),live.records).html;assert.match(html,/href="#officers"/);assert.match(html,/No officer profiles have been provided for publication/);}
+ for(const record of live.records){const html=render(new URL(PUBLIC+'/organizations/'+record.id),live.records).html;assert.doesNotMatch(html,/href="#officers"/);assert.match(html,/No officer profiles have been provided for publication/);}
  const page=await hqFetch(new Request(HQ+'/organization?org='+ORG),{DB:db,OWNER_EMAIL:ADMIN,ACCESS_AUD:'aud'},{access:{aud:'aud',getIdentity:async()=>({email:REP})}},{}),html=await page.text();assert.equal(page.status,200);assert.match(html,/id="officers"/);assert.match(html,/Add an officer profile/);assert.match(html,/agreed to public display/);
 });
 
