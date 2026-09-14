@@ -18,11 +18,32 @@ export function filterRecords(params, list=records) {
  return list.filter(r=>(!type||r.organization_type===type)&&(!county||r.location_county===county||r.service_area?.counties?.includes(county))&&(!q||[r.verified_name,r.city,r.location_county,r.member_information,...(Array.isArray(r.service_categories)?r.service_categories:[])].join(' ').toLowerCase().includes(q)))
  .sort((a,b)=>Number(b.city===place)-Number(a.city===place)||a.verified_name.localeCompare(b.verified_name));
 }
+const profileThemes=Object.freeze({
+ 'VFW':'vfw-profile',
+ 'American Legion':'legion-profile',
+ 'Marine Corps League':'mcl-profile',
+ 'Veterans Beer Club':'beer-club-profile',
+ 'Toys for Tots':'toys-profile',
+ 'DAV':'dav-profile',
+ 'County Veterans Office':'county-profile',
+ 'Equine program provider':'equine-profile',
+ 'Veteran remembrance program':'remembrance-profile',
+ 'Veterans nonprofit':'nonprofit-profile',
+ 'Other veteran organization':'community-profile'
+});
+const brandedCardTypes=new Set(['VFW','American Legion','Marine Corps League']);
+function profileTheme(type){return profileThemes[type]||'community-profile';}
+function organizationNumber(r){return (String(r.verified_name||'').match(/\b(?:post|detachment|chapter|unit)\s*(?:no\.?\s*)?#?\s*([a-z]?\d+[a-z-]*)\b/i)||[])[1]||'';}
+function brandedOrganizationCard(r,place,logo,city,label){
+ const number=organizationNumber(r),location=r.city?r.city+', CA':r.location_county+' County, CA';
+ return `<a class="logo-tile organization-brand-card ${profileTheme(r.organization_type)}" href="/organizations/${r.id}" aria-label="${h(label)}"><span class="organization-brand-visual"><span class="organization-brand-kicker">${h(r.organization_type)} &middot; ${h(r.location_county).toUpperCase()} COUNTY</span><strong class="organization-brand-title">${h(r.verified_name)}</strong>${logo?`<span class="organization-brand-logo"><img src="${h(logo.src)}?v=silver-20260902-2" alt="${h(logo.alt)}" width="220" height="220" loading="lazy" decoding="async"></span>`:''}${number?`<span class="organization-brand-number" aria-hidden="true">${h(number)}</span>`:''}</span><span class="organization-brand-details"><strong>${h(r.verified_name)}</strong><span>${h(r.organization_type)}</span><span class="organization-brand-location"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-13A7 7 0 1 0 5 9c0 6.9 7 13 7 13Zm0-9.6A3.4 3.4 0 1 1 12 5.6a3.4 3.4 0 0 1 0 6.8Z"/></svg>${h(location)}${place===r.city?' · In your city':''}</span></span></a>`;
+}
 function logoCard(r,place) {
  const logo=brandLogos[r.id]||brandLogos[r.organization_type],city=r.city||r.location_county+' County';
  const label=r.verified_name+' — '+city;
  const fallback=r.id==='little-reata-veterans'?'<span class="logo-wordmark vets-wordmark"><strong>VETs</strong><span>Veterans Equine Therapy</span></span>':`<span class="logo-wordmark"><span>${h(r.location_county)} County</span>Veterans<br>Services</span>`;
- return `<a class="logo-tile ${r.id==='little-reata-veterans'?'logo-tile--vets':r.organization_type==='Toys for Tots'?'logo-tile--toys':r.organization_type==='VFW'?'logo-tile--vfw':''}" href="/organizations/${r.id}" aria-label="${h(label)}"><span class="logo-art">${logo?`<img src="${h(logo.src)}?v=silver-20260902-2" alt="${h(logo.alt)}" width="220" height="130" loading="lazy" decoding="async">`:fallback}</span><span class="logo-reveal"><strong>${h(r.verified_name)}</strong><span>${h(city)}${place===r.city?' · In your city':''}</span>${r.entity_kind==='developing_program'?'<small>Contact for availability</small>':''}<span class="logo-open" aria-hidden="true">View details →</span></span></a>`;
+ if(brandedCardTypes.has(r.organization_type))return brandedOrganizationCard(r,place,logo,city,label);
+ return `<a class="logo-tile ${r.id==='little-reata-veterans'?'logo-tile--vets':r.organization_type==='Toys for Tots'?'logo-tile--toys':''}" href="/organizations/${r.id}" aria-label="${h(label)}"><span class="logo-art">${logo?`<img src="${h(logo.src)}?v=silver-20260902-2" alt="${h(logo.alt)}" width="220" height="130" loading="lazy" decoding="async">`:fallback}</span><span class="logo-reveal"><strong>${h(r.verified_name)}</strong><span>${h(city)}${place===r.city?' · In your city':''}</span>${r.entity_kind==='developing_program'?'<small>Contact for availability</small>':''}<span class="logo-open" aria-hidden="true">View details →</span></span></a>`;
 }
 function logoGallery(found,place){
  const groups=[{id:'veteran-organizations',title:'Veteran Organizations',types:[['VFW','VFW'],['American Legion','American Legion'],['Marine Corps League','Marine Corps League'],['DAV','DAV'],['Veterans Beer Club','Veterans Beer Club']]},{id:'veteran-nonprofits',title:'Veteran Non-Profits & Programs',types:[['Toys for Tots','Toys for Tots'],['Equine program provider','Veterans Equine Therapy'],['Veteran remembrance program','RememberAVet']]},{id:'veteran-services',title:'County Veterans Services',types:[['County Veterans Office','Benefits & local support']]}];
@@ -32,7 +53,7 @@ function logoGallery(found,place){
  return groups.map(group=>{
   const sections=group.types.map(([type,label])=>{
    const items=found.filter(r=>r.organization_type===type).sort((a,b)=>Number(b.city===place)-Number(a.city===place)||a.city?.localeCompare(b.city||'')||a.verified_name.localeCompare(b.verified_name));
-   return items.length?`<section class="logo-type-group" aria-label="${h(label)}"><div class="logo-type-heading"><h3>${h(label)}</h3><span>${items.length} ${items.length===1?'connection':'connections'}</span></div><div class="logo-grid">${items.map(r=>logoCard(r,place)).join('')}</div></section>`:'';
+    return items.length?`<section class="logo-type-group" aria-label="${h(label)}"><div class="logo-type-heading"><h3>${h(label)}</h3><span>${items.length} ${items.length===1?'connection':'connections'}</span></div><div class="logo-grid${brandedCardTypes.has(type)?' logo-grid--branded':''}">${items.map(r=>logoCard(r,place)).join('')}</div></section>`:'';
   }).join('');
   return sections?`<section class="logo-category" id="${group.id}" aria-labelledby="${group.id}-title"><div class="logo-category-heading"><h2 id="${group.id}-title">${group.title}</h2><span aria-hidden="true">↘</span></div>${sections}</section>`:'';
  }).join('');
@@ -117,20 +138,6 @@ function americanLegionSite(r,events,url){
   <section class="wrap org-site-sources"><details><summary>Sources for this profile</summary>${sourceNotice}${organizationReview(r)}</details><a href="/yolo-solano">Explore the Yolo-Solano region →</a></section>
  </div>`,{path:'/organizations/'+r.id,detail:true});
 }
-const profileThemes=Object.freeze({
- 'VFW':'vfw-profile',
- 'American Legion':'legion-profile',
- 'Marine Corps League':'mcl-profile',
- 'Veterans Beer Club':'beer-club-profile',
- 'Toys for Tots':'toys-profile',
- 'DAV':'dav-profile',
- 'County Veterans Office':'county-profile',
- 'Equine program provider':'equine-profile',
- 'Veteran remembrance program':'remembrance-profile',
- 'Veterans nonprofit':'nonprofit-profile',
- 'Other veteran organization':'community-profile'
-});
-function profileTheme(type){return profileThemes[type]||'community-profile';}
 function profileFallbackLogo(r){
  const initials=String(r.verified_name||'Veteran organization').split(/\s+/).filter(Boolean).slice(0,3).map(word=>word[0]).join('').toUpperCase();
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="108" fill="#fffaf0"/><circle cx="120" cy="120" r="101" fill="none" stroke="#c9a44b" stroke-width="7"/><text x="120" y="137" text-anchor="middle" font-family="Arial,sans-serif" font-size="58" font-weight="800" fill="#17395f">${initials}</text></svg>`;

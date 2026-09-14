@@ -59,6 +59,16 @@ test('combined county/type search and same-city ranking',()=>{
  assert.equal(filterRecords(new URLSearchParams({type:'DAV',place:'Yolo County'})).length,0);
  assert.equal(filterRecords(new URLSearchParams({q:'8762'}))[0].id,'vfw-ca-8762');
 });
+test('VFW, Legion and MCL directory cards share the branded card design with family themes',()=>{
+ const page=render(new URL('https://test/yolo-solano'));
+ assert.equal(page.status,200);
+ for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
+ for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
+ assert.ok(page.html.includes('/styles.css?v=organization-cards-20260913-1'));
+ assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
+ const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
+ for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
+});
 test('invalid, empty and injection input stays safe',()=>{
  const p=render(new URL('https://test/?q='+encodeURIComponent('<script>alert(1)</script>')));assert.ok(!p.html.includes('<script>alert(1)</script>'));assert.ok(p.html.includes('No matching organizations'));
  assert.equal(render(new URL('https://test/organizations/missing')).status,404);
