@@ -40,7 +40,7 @@ test('organization cards standardize Pacific month and day without changing shar
   assert.doesNotMatch(eventsPagePublic(new URL('https://site.test/events'), examples), /organization-card-date/);
 });
 
-test('all organization templates use scoped cards and the shared Events calendar stays intact', () => {
+test('all organization templates and the shared Events page use card listings without a month grid', () => {
   const selected = [records.find(r => r.id === 'vfw-ca-8762'), records.find(r => r.organization_type === 'American Legion'), records.find(r => r.id === 'mcl-yolo')];
   for (const record of selected) {
     assert.ok(record);
@@ -54,5 +54,5 @@ test('all organization templates use scoped cards and the shared Events calendar
     assert.doesNotMatch(populated, /Other organization event/);
   }
   assert.match(render(new URL('https://site.test/mcl-yolo'), records, []).html, /id="upcoming-events"/);
-  assert.match(eventsPagePublic(new URL('https://site.test/events'), []), /class="panel month-calendar"/);
+  assert.doesNotMatch(eventsPagePublic(new URL('https://site.test/events'), []), /class="panel month-calendar"|id="calendar"|MONTH AT A GLANCE/);
 });

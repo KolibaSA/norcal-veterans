@@ -16,3 +16,17 @@ test('VFW 8151 monthly meetings stay listed without detail-page links',()=>{
   assert.deepEqual(meeting.meeting_times.map(entry=>entry.label),['Social hour','Post meeting','Social time']);
   assert.doesNotMatch(eventCalendar([meeting]),/URL:https:\/\/www\.norcalveterans\.org\/events\/organization-meeting-vfw-ca-8151-2030-01/);
 });
+
+test('events page lists every Yolo and Solano city and filters by the selected city',()=>{
+  const base={description:'Community gathering.',start_at:'2099-01-15T18:00:00-08:00',venue:'Public hall',status:'published',kind:'Volunteering',organizer:'Local host',audience:'Community members welcome.'};
+  const html=eventsPagePublic(new URL('https://test/events?city=Winters'),[
+    {...base,id:'winters-event',title:'Winters volunteer day',county:'Yolo',city:'Winters'},
+    {...base,id:'davis-event',title:'Davis volunteer day',county:'Yolo',city:'Davis'}
+  ]);
+  assert.match(html,/for="event-city">Explore by city/);
+  assert.match(html,/name="city"/);
+  for(const city of ['Davis','West Sacramento','Winters','Woodland','Benicia','Dixon','Fairfield','Rio Vista','Suisun City','Vacaville','Vallejo'])assert.match(html,new RegExp(`<option value="${city}"`),city);
+  assert.match(html,/value="Winters" selected/);
+  assert.match(html,/Winters volunteer day/);
+  assert.doesNotMatch(html,/Davis volunteer day|class="panel month-calendar"|id="calendar"|MONTH AT A GLANCE/);
+});
