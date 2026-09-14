@@ -22,21 +22,22 @@ test('upcoming organization cards filter, sort and safely preserve meeting detai
   for (const value of ['6:00 PM','Social hour','7:00 PM','Post meeting','8:00 PM','Social time','Public hall','Time to be confirmed','href="/events/later"']) assert.ok(html.includes(value), value);
 });
 
-test('VFW date headers use Pacific month and day for events and meetings only on that profile', () => {
+test('organization cards standardize Pacific month and day without changing shared event cards', () => {
   const examples = [
     {...event, id:'meeting', title:'January meeting', kind:'Organization meeting', start_at:'2027-01-08T03:00:00Z'},
     {...event, id:'fundraiser', title:'January fundraiser', date_only:true, start_at:'2027-01-09T08:00:00Z'}
   ];
   const html = organizationUpcomingEvents(examples, 'vfw-ca-8151', now);
-  assert.equal((html.match(/class="vfw-card-date"/g) || []).length, 2);
-  assert.ok(html.includes('<span>January</span><span class="vfw-card-day">7</span>'));
-  assert.ok(html.includes('<span>January</span><span class="vfw-card-day">9</span>'));
-  assert.ok(html.indexOf('class="vfw-card-date"') < html.indexOf('January meeting'));
+  assert.equal((html.match(/class="organization-card-date"/g) || []).length, 2);
+  assert.ok(html.includes('<span>January</span><span class="organization-card-day">7</span>'));
+  assert.ok(html.includes('<span>January</span><span class="organization-card-day">9</span>'));
+  assert.ok(html.indexOf('class="organization-card-date"') < html.indexOf('January meeting'));
   assert.ok(html.indexOf('January meeting') < html.indexOf('January fundraiser'));
   for (const detail of ['Thursday, January 7, 2027', '7:00 PM', 'Time to be confirmed', 'Public hall', 'href="/events/fundraiser"']) assert.ok(html.includes(detail), detail);
   assert.doesNotMatch(html, /href="\/events\/meeting"/);
-  assert.doesNotMatch(organizationUpcomingEvents(examples.map(item => ({...item, organization_id:'other'})), 'other', now), /vfw-card-date/);
-  assert.doesNotMatch(eventsPagePublic(new URL('https://site.test/events'), examples), /vfw-card-date/);
+  const futureOrganization = organizationUpcomingEvents(examples.map(item => ({...item, organization_id:'future-org'})), 'future-org', now);
+  assert.equal((futureOrganization.match(/class="organization-card-date"/g) || []).length, 2);
+  assert.doesNotMatch(eventsPagePublic(new URL('https://site.test/events'), examples), /organization-card-date/);
 });
 
 test('all organization templates use scoped cards and the shared Events calendar stays intact', () => {

@@ -15,9 +15,7 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
   const cards = upcoming.map(event => {
     const listedMeeting = organizationId === 'vfw-ca-8151' && event.kind === 'Organization meeting';
     const date = new Date(event.start_at);
-    const dateHeader = organizationId === 'vfw-ca-8151'
-      ? `<time class="vfw-card-date" datetime="${h(event.start_at)}" aria-label="${h(dateFormat.format(date))}"><span>${h(monthFormat.format(date))}</span><span class="vfw-card-day">${h(dayFormat.format(date))}</span></time>`
-      : '';
+    const dateHeader = `<time class="organization-card-date" datetime="${h(event.start_at)}" aria-label="${h(dateFormat.format(date))}"><span>${h(monthFormat.format(date))}</span><span class="organization-card-day">${h(dayFormat.format(date))}</span></time>`;
     const times = event.meeting_times?.length
       ? `<dl class="annual-meeting-times">${event.meeting_times.map(entry => `<div><dt>${h(wallTime(entry.time))}</dt><dd>${h(entry.label)}</dd></div>`).join('')}</dl>`
       : `<p class="event-time">${event.date_only ? 'Time to be confirmed' : h(timeFormat.format(new Date(event.start_at)))}${!event.date_only && event.end_at ? ` – ${h(timeFormat.format(new Date(event.end_at)))}` : ''}</p>`;
