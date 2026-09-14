@@ -143,6 +143,10 @@ function profileFallbackLogo(r){
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="108" fill="#fffaf0"/><circle cx="120" cy="120" r="101" fill="none" stroke="#c9a44b" stroke-width="7"/><text x="120" y="137" text-anchor="middle" font-family="Arial,sans-serif" font-size="58" font-weight="800" fill="#17395f">${initials}</text></svg>`;
  return {src:'data:image/svg+xml,'+encodeURIComponent(svg),alt:r.verified_name+' initials mark'};
 }
+function profileTerminology(r,html){
+ if(r.id!=='veterans-beer-club-yolo-solano')return html;
+ return html.replaceAll('Meetings','Gatherings').replaceAll('meetings','gatherings').replaceAll('Meeting','Gathering').replaceAll('meeting','gathering');
+}
 function profile(r,events,url) {
  const description=`Public contacts, meeting information and sources for ${r.verified_name}.`;
  const contact=r.public_contacts;
@@ -161,7 +165,7 @@ export function render(url,list=records,events=[]){
  if(url.pathname==='/mcl-yolo'){const r=list.find(record=>record.id==='mcl-yolo');if(r)return {status:200,html:profile(r,events,url)};}
  if(url.pathname==='/resources')return {status:200,html:shell('Veteran resources | Yolo Solano Veterans','Verified starting points for disability, education, employment, housing and mental health support.',resourcesPageContent(),{path:'/resources'})};
  if(url.pathname==='/about')return {status:200,html:about()};
- if(url.pathname.startsWith('/organizations/')){const r=list.find(r=>r.id===url.pathname.split('/')[2]);if(r&&url.pathname==='/organizations/'+r.id)return {status:200,html:profile(r,events,url)};}
+ if(url.pathname.startsWith('/organizations/')){const r=list.find(r=>r.id===url.pathname.split('/')[2]);if(r&&url.pathname==='/organizations/'+r.id)return {status:200,html:profileTerminology(r,profile(r,events,url))};}
  return {status:404,html:shell('Page not found | Yolo Solano Veterans','Return to the veteran organization directory.',`<section class="wrap empty-state"><h1>Let’s find your way back.</h1><p>This page isn’t in the directory.</p>${button('/','Explore organizations')}</section>`,{detail:true,path:'/404'})};
 }
 export {dataset};

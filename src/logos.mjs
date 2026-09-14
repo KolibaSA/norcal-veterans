@@ -7,6 +7,6 @@ export const brandLogos={
  'Marine Corps League':{src:'/logos/marine-corps-league.png',alt:'Marine Corps League'},
  'Toys for Tots':{src:'/logos/toys-for-tots.svg',alt:'Marine Toys for Tots'},
  'rememberavet':{src:'/logos/rememberavet.png',alt:'Remember A Vet - Wreath Project'},
- 'veterans-beer-club-yolo-solano':{src:'/published-assets/vbc-yolo-solano.png',alt:'Veterans Beer Club Yolo-Solano chapter logo'}
+ 'veterans-beer-club-yolo-solano':{src:'/logos/vbc.jpg',alt:'Veterans Beer Club Yolo-Solano logo'}
 };
 

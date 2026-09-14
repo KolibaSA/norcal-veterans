@@ -90,6 +90,15 @@
       "verification": "Exact logo used on official homepage; downloaded through its Wix image delivery service at 600px instead of the 8400px original. Visually inspected. This identifies the stable, not a separate established nonprofit or clinical program."
     },
     {
+      "file": "site/public/logos/vbc.jpg",
+      "organization": "Veterans Beer Club Yolo-Solano",
+      "mark": "VBC Yolo-Solano barrel logo",
+      "width": 1254,
+      "height": 1254,
+      "background": "White; brown barrel linework and lettering.",
+      "verification": "Logo supplied directly by Chris on September 14, 2026. The complete artwork is retained unaltered."
+    },
+    {
       "file": "site/public/logos/vets.jpg",
       "organization": "Veterans Equine Therapy (VETs)",
       "mark": "Patriotic horse and VETs dog-tag emblem",
