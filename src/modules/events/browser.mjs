@@ -19,6 +19,7 @@ export function eventFields(record = {}) {
     dateOnly: dayOnly, start: p.starts_local ?? pacificInput(p.start_at, dayOnly),
     end: p.ends_local ?? pacificInput(p.end_at, dayOnly), venue: p.venue ?? '', eventCity: p.city ?? '',
     eventCounty: p.county ?? '', eventKind: p.kind ?? '', organizer: p.organizer ?? '', audience: p.audience ?? '',
+    eventImage: p.image_url ?? '',
     source: p.source_url ?? '', sourceChecked: p.source_checked?.slice(0, 10) ?? '', timeNote: p.time_note ?? '',
     sourceKind: p.source_kind ?? '', sourceNote: p.source_note ?? '', reviewNotes: p.review_notes ?? ''
   };
@@ -31,6 +32,7 @@ export function eventPayload(fields, previous = {}) {
       ends_local: fields.dateOnly ? '' : fields.end, date_only: !!fields.dateOnly,
       venue: fields.venue, city: fields.eventCity, county: fields.eventCounty,
       kind: fields.eventKind || 'Community event', organizer: fields.organizer, audience: fields.audience,
+      image_url: fields.eventImage,
       source_url: fields.source, source_checked: fields.sourceChecked || null, time_note: fields.timeNote,
       source_kind: fields.sourceKind, source_note: fields.sourceNote, review_notes: fields.reviewNotes
     });

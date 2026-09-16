@@ -16,3 +16,9 @@ test('Events rejects impossible or ambiguous Pacific times but preserves a previ
   assert.throws(() => validateEvent(fall), /occurs twice/);
   assert.equal(validateEvent(fall, { previousPayload: { start_at: '2026-11-01T09:30:00Z' } }).start_at, '2026-11-01T09:30:00.000Z');
 });
+
+test('Events accepts only safe HTTPS event image URLs', () => {
+  const base={start_at:'2030-01-15T18:00:00-08:00',venue:'Public hall'};
+  assert.equal(validateEvent({...base,image_url:'https://images.example.org/event.jpg'}).image_url,'https://images.example.org/event.jpg');
+  assert.throws(()=>validateEvent({...base,image_url:'http://images.example.org/event.jpg'}),/valid HTTPS event image URL/);
+});

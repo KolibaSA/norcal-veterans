@@ -1,4 +1,4 @@
-import {publicText,publicURL,privacyReviewDate,publicInstant} from '../../shared/public-privacy.mjs';
+import {publicText,publicStrings,publicURL,privacyReviewDate,publicInstant} from '../../shared/public-privacy.mjs';
 export function publicEventRecord(row, payload) {
   return sanitizePublicEvent({ ...payload, id: row.id, title: row.title, description: row.body,
     status: row.status, organization_id: row.organization_id || payload.organization_id || null });
@@ -16,6 +16,8 @@ export function sanitizePublicEvent(record){
  const meetingTimes=Array.isArray(record.meeting_times)?record.meeting_times.slice(0,3).filter(entry=>entry&&/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(entry.time)&&typeof entry.label==='string'&&entry.label.trim()).map(entry=>({time:entry.time,label:publicText(entry.label,100)})):[];
  if(out.kind==='Organization meeting'&&meetingTimes.length)out.meeting_times=meetingTimes;
  out.source_url=publicURL(record.source_url);out.source_checked=out.source_url?privacyReviewDate(record.source_checked):null;
+ out.image_url=publicURL(record.image_url);
+ out.accepted_organization_ids=publicStrings(record.accepted_organization_ids).slice(0,24);
  out.source_kind=['public_source','project_team'].includes(record.source_kind)?record.source_kind:'public_source';
  out.status=['published','draft','archived'].includes(record.status)?record.status:'draft';
  return out;

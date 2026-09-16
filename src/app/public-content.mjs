@@ -22,6 +22,16 @@ export async function norcalPublicData(db) {
     try{planned.push(...publicMeetingPlanEvents(row,JSON.parse(row.payload),organization).map(sanitizePublicEvent).filter(Boolean));}catch{/* A malformed private plan cannot disable public content. */}
   }
   const plannedIds=new Set(planned.map(event=>event.id));
-  const events=serialized.filter(row => row.kind === 'event' && row.payload).map(row => row.payload).filter(event=>!plannedIds.has(event.id)).concat(planned).sort((a,b)=>String(a.start_at).localeCompare(String(b.start_at))||a.id.localeCompare(b.id));
+  const events=serialized.filter(row => row.kind === 'event' && row.payload).map(row => row.payload).filter(event=>!plannedIds.has(event.id)).concat(planned);
+  try {
+    const invitationTable=await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='organization_event_invitations'").first();
+    if(invitationTable){
+      const accepted=(await db.prepare("SELECT event_id,recipient_org_id FROM organization_event_invitations WHERE status='accepted' ORDER BY decision_at,created_at,id").all()).results;
+      const byEvent=new Map();
+      for(const row of accepted){const ids=byEvent.get(row.event_id)||[];if(!ids.includes(row.recipient_org_id))ids.push(row.recipient_org_id);byEvent.set(row.event_id,ids);}
+      for(const event of events)event.accepted_organization_ids=[...new Set([...(event.accepted_organization_ids||[]),...(byEvent.get(event.id)||[])])].slice(0,24);
+    }
+  }catch{/* Older isolated databases may not contain the collaboration tables. */}
+  events.sort((a,b)=>String(a.start_at).localeCompare(String(b.start_at))||a.id.localeCompare(b.id));
   return { records: organizations, events };
 }

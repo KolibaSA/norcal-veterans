@@ -30,3 +30,23 @@ test('events page lists every Yolo and Solano city and filters by the selected c
   assert.match(html,/Winters volunteer day/);
   assert.doesNotMatch(html,/Davis volunteer day|class="panel month-calendar"|id="calendar"|MONTH AT A GLANCE/);
 });
+
+test('events page groups compact cards by month and identifies hosts and accepted partners',()=>{
+  const organizations=[
+    {id:'vfw-ca-8151',verified_name:'Dixon VFW Post 8151',organization_type:'VFW'},
+    {id:'legion-ca-77',verified_name:'Yolo American Legion Post 77',organization_type:'American Legion'},
+    {id:'mcl-yolo',verified_name:'Marine Corps League - Yolo County Detachment 627',organization_type:'Marine Corps League'}
+  ];
+  const base={description:'A deliberately omitted card description.',venue:'Grocery Outlet, Davis, CA',status:'published',kind:'Community event',county:'Yolo',city:'Davis',audience:'Community members welcome.'};
+  const html=eventsPagePublic(new URL('https://test/events'),[
+    {...base,id:'poppy',title:'VFW Post 8151 Buddy Poppy Fundraiser',start_at:'2099-09-16T18:00:00-07:00',organization_id:'vfw-ca-8151',accepted_organization_ids:['legion-ca-77','mcl-yolo']},
+    {...base,id:'train',title:'Halloween Train',start_at:'2099-10-31T11:00:00-07:00',organization_id:'legion-ca-77',image_url:'https://images.example.org/train.jpg'}
+  ],organizations);
+  assert.match(html,/September 2099/);assert.match(html,/October 2099/);
+  assert.match(html,/class="event-card-media"><span class="event-card-fallback"/);
+  assert.match(html,/src="https:\/\/images\.example\.org\/train\.jpg"/);
+  assert.match(html,/>Buddy Poppy Fundraiser<\/a>/);assert.doesNotMatch(html,/>VFW Post 8151 Buddy Poppy Fundraiser<\/a>/);
+  assert.match(html,/Dixon VFW Post 8151/);assert.match(html,/Yolo American Legion Post 77/);assert.match(html,/Marine Corps League - Yolo County Detachment 627/);
+  assert.match(html,/event-card-theme--vfw/);assert.match(html,/>8151<\/span>/);
+  assert.doesNotMatch(html,/deliberately omitted card description/);
+});

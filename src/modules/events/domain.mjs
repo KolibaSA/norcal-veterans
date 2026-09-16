@@ -20,6 +20,11 @@ export function validateEvent(input, options = {}) {
     delete p.starts_local; delete p.ends_local;
     text(p.venue, 'Public event venue', 1000);
     if (!p.venue?.trim()) invalid('Enter the public event venue.');
+    if (present(p.image_url)) {
+      let image;
+      try { image = new URL(p.image_url); } catch { invalid('Enter a valid HTTPS event image URL.'); }
+      if (image.protocol !== 'https:' || image.username || image.password) invalid('Enter a valid HTTPS event image URL.');
+    }
     if (present(p.meeting_times)) {
       if (p.kind !== 'Organization meeting') invalid('Multiple labeled times are available only for organization meetings.');
       if (!Array.isArray(p.meeting_times) || !p.meeting_times.length || p.meeting_times.length > 3) invalid('List one to three meeting times.');

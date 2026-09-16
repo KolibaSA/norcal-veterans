@@ -641,13 +641,13 @@
       "organization_confirmed_at": null,
       "confidence": "high",
       "missing_data_flags": [
-        "next_meeting_venue_unconfirmed",
+        "next_gathering_venue_unconfirmed",
         "instagram_link_unverified"
       ],
       "display_name_update": {
         "method": "authenticated_project_update",
         "date": "2026-09-04",
-        "scope": "Chapter name, meeting pattern and official chapter social links supplied by an authenticated project editor."
+        "scope": "Chapter name, gathering pattern and official chapter social links supplied by an authenticated project editor."
       }
     },
     {
