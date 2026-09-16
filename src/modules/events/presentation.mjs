@@ -14,7 +14,7 @@ function eventReview(v){
 const icons={
  calendar:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v3M17 2v3M3.5 9h17M5.5 4h13a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/></svg>',
  location:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
- poppy:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-8-4.7-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6.3-8 11-8 11Z"/></svg>',
+ poppy:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 29c-9 3-17-2-15-9 2-6 10-7 15-2-4-8-1-16 6-17 7-1 11 7 7 13 8-4 16 0 15 7-1 7-10 9-15 3 5 7 2 15-5 16-7 0-10-8-6-14-4 6-12 8-17 4-6-5-2-14 5-16 6-1 11 4 12 9Z"/><circle cx="32" cy="29" r="3.5"/><path d="M32 33c1 9-2 17-7 23M29 45c-4-3-8-3-11 0M28 49c4-3 8-2 10 1"/></svg>',
  football:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.7 4.3c2.3 2.3.8 7.6-3.3 11.7s-9.4 5.6-11.7 3.3-.8-7.6 3.3-11.7 9.4-5.6 11.7-3.3Z"/><path d="m8.5 15.5 7-7M10.5 9.5l4 4M8.7 11.3l4 4"/></svg>',
  volunteer:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.1-7-9.4a4 4 0 0 1 7-2.5 4 4 0 0 1 7 2.5C19 15.9 12 20 12 20Z"/><path d="M12 4v4M9.5 6h5"/></svg>',
  ceremony:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 22V3M7 4h11l-2.5 4L18 12H7"/></svg>',
@@ -55,13 +55,14 @@ function eventCard(v,organizations){
  const host=organizations.find(organization=>organization.id===v.organization_id),visual=eventVisual(v),title=compactEventTitle(v.title,host),accepted=(v.accepted_organization_ids||[]).map(id=>organizations.find(organization=>organization.id===id)).filter(organization=>organization&&organization.id!==host?.id),shown=accepted.slice(0,2),remaining=accepted.length-shown.length;
  const hostName=host?.verified_name||v.organizer||'',hostBadge=host?`<a class="event-card-host" href="/organizations/${pe(host.id)}">${pe(hostName)}</a>`:hostName?`<span class="event-card-host">${pe(hostName)}</span>`:'';
  const participants=shown.length?`<p class="event-card-partners"><span>with</span> ${shown.map(organization=>`<a href="/organizations/${pe(organization.id)}">${pe(organization.verified_name)}</a>`).join(' <span aria-hidden="true">·</span> ')}${remaining?` <a href="/events/${pe(v.id)}">+${remaining} more</a>`:''}</p>`:'';
- const image=v.image_url?`<img src="${pe(v.image_url)}" alt="${pe(title)} event image" width="320" height="320" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:`<span class="event-card-fallback" aria-hidden="true">${icons[visual]}</span>`;
+ const image=v.image_url&&visual!=='poppy'?`<img src="${pe(v.image_url)}" alt="${pe(title)} event image" width="320" height="320" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:`<span class="event-card-fallback" aria-hidden="true">${icons[visual]}</span>`;
  return `<article class="event-card event-card--${visual}">
   <div class="event-card-media">${image}</div>
   <time class="event-card-date" datetime="${pe(v.date_only?pacificDayKey(v.start_at):v.start_at)}"><span>${pe(eventMonthShort.format(new Date(v.start_at)))}</span><strong>${pe(eventDayFormat.format(new Date(v.start_at)))}</strong></time>
-  <div class="event-card-content"><div class="event-card-title-row"><h2><a href="/events/${pe(v.id)}">${pe(title)}</a></h2>${hostBadge}</div>${participants}<p class="event-card-summary"><strong>${pe(eventTime(v))}</strong><span aria-hidden="true"> · </span>${pe(v.venue)}</p></div>
+  <div class="event-card-content"><div class="event-card-title-row"><h2>${pe(title)}</h2>${hostBadge}</div>${participants}<p class="event-card-summary"><strong>${pe(eventTime(v))}</strong><span aria-hidden="true"> · </span>${pe(v.venue)}</p></div>
   <div class="event-card-backdrop event-card-theme--${organizationTheme(host)}" aria-hidden="true"><span>${pe(organizationMark(host))}</span></div>
-  <a class="event-card-link" href="/events/${pe(v.id)}">Details <span aria-hidden="true">→</span><span class="sr-only"> about ${pe(title)}</span></a>
+  <span class="event-card-link">Details <span aria-hidden="true">→</span></span>
+  <a class="event-card-hit-area" href="/events/${pe(v.id)}" aria-label="View details for ${pe(title)}"><span class="sr-only">View details for ${pe(title)}</span></a>
  </article>`;
 }
 const eventCityGroups=[
