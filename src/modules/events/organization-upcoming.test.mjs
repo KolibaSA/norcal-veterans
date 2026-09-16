@@ -28,13 +28,16 @@ test('organization cards standardize Pacific month and day without changing shar
     {...event, id:'fundraiser', title:'January fundraiser', date_only:true, start_at:'2027-01-09T08:00:00Z'}
   ];
   const html = organizationUpcomingEvents(examples, 'vfw-ca-8151', now);
-  assert.equal((html.match(/class="organization-card-date"/g) || []).length, 2);
+  assert.equal((html.match(/class="organization-card-date"/g) || []).length, 1);
+  assert.equal((html.match(/class="event-card-date"/g) || []).length, 1);
   assert.ok(html.includes('<span>January</span><span class="organization-card-day">7</span>'));
-  assert.ok(html.includes('<span>January</span><span class="organization-card-day">9</span>'));
+  assert.ok(html.includes('<span>Jan</span><strong>9</strong>'));
   assert.ok(html.indexOf('class="organization-card-date"') < html.indexOf('January meeting'));
   assert.ok(html.indexOf('January meeting') < html.indexOf('January fundraiser'));
   for (const detail of ['Thursday, January 7, 2027', '7:00 PM', 'Time to be confirmed', 'Public hall', 'href="/events/fundraiser"']) assert.ok(html.includes(detail), detail);
   assert.doesNotMatch(html, /href="\/events\/meeting"/);
+  assert.match(html,/class="events-page vfw-public-event-card"/);
+  assert.match(html,/class="event-card event-card--public/);
   const futureOrganization = organizationUpcomingEvents(examples.map(item => ({...item, organization_id:'future-org'})), 'future-org', now);
   assert.equal((futureOrganization.match(/class="organization-card-date"/g) || []).length, 2);
   assert.doesNotMatch(eventsPagePublic(new URL('https://site.test/events'), examples), /organization-card-date/);

@@ -1,5 +1,5 @@
 import {escapeHtml as h} from '../../shared/public-shell.mjs';
-import {upcomingEvents} from './presentation.mjs';
+import {publicEventCard,upcomingEvents} from './presentation.mjs';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {dateStyle: 'full', timeZone: 'America/Los_Angeles'});
 const timeFormat = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: '2-digit', timeZone: 'America/Los_Angeles'});
@@ -10,11 +10,15 @@ const wallTime = value => {
   return `${hour % 12 || 12}:${String(minute).padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`;
 };
 
-export function organizationUpcomingEvents(events, organizationId, now = Date.now()) {
+export function organizationUpcomingEvents(events, organizationId, now = Date.now(), organizations = []) {
   const upcoming = upcomingEvents(events, now).filter(event => event.organization_id === organizationId);
   const cards = upcoming.map(event => {
     const vfw8151Event = organizationId === 'vfw-ca-8151';
     const listedMeeting = vfw8151Event && event.kind === 'Organization meeting';
+    if (vfw8151Event && !listedMeeting) {
+      const host=organizations.find(organization=>organization.id===organizationId)||{id:organizationId,verified_name:'Dixon VFW Post 8151',organization_type:'VFW'};
+      return `<div class="events-page vfw-public-event-card">${publicEventCard(event,[host,...organizations.filter(organization=>organization.id!==organizationId)])}</div>`;
+    }
     const date = new Date(event.start_at);
     const dateHeader = `<time class="organization-card-date" datetime="${h(event.start_at)}" aria-label="${h(dateFormat.format(date))}"><span>${h(monthFormat.format(date))}</span><span class="organization-card-day">${h(dayFormat.format(date))}</span></time>`;
     const times = event.meeting_times?.length
