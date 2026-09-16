@@ -215,10 +215,6 @@ dd a{display:inline-block;margin-top:8px}
 .events-page .event-card-theme--legion{background:radial-gradient(circle at 88% 24%,#285a86 0,#0d477c 35%,#071b32 72%);box-shadow:inset 0 4px #b21e32}
 .events-page .event-card-theme--toys{background:radial-gradient(circle at 90% 22%,#315f91 0,#123c68 38%,#071d38 75%);box-shadow:inset 0 4px #c9273d}
 .events-page .event-card-theme--vbc{background:radial-gradient(circle at 90% 22%,#805c25 0,#3c342c 38%,#17283e 75%);box-shadow:inset 0 4px #d5a84a}
-.events-page .event-card-link{position:absolute;z-index:4;right:16px;bottom:16px;padding:10px 14px;border:1px solid rgba(255,255,255,.72);border-radius:9px;background:rgba(255,255,255,.94);box-shadow:0 4px 15px rgba(3,18,37,.18);color:var(--ink);font-size:14px;font-weight:820;white-space:nowrap;pointer-events:none;transition:background .2s ease,transform .2s ease}
-.events-page .event-card:hover .event-card-link,.events-page .event-card:focus-within .event-card-link{background:#fff;transform:translateX(3px)}
-.events-page .event-card-link>span[aria-hidden]{display:inline-block;margin-left:4px;font-size:18px;line-height:.8;transition:transform .15s ease}
-.events-page .event-card:hover .event-card-link>span[aria-hidden],.events-page .event-card:focus-within .event-card-link>span[aria-hidden]{transform:translateX(3px)}
 .events-page .event-card-hit-area{position:absolute;z-index:3;inset:0;margin:0!important;padding:0!important;border-radius:inherit}
 .events-page .event-card-hit-area:focus-visible{outline:3px solid #176db5;outline-offset:-4px}
 .edit-form{display:grid;gap:21px;margin-top:24px}
@@ -431,7 +427,7 @@ details[open]>summary{margin-bottom:10px}
  .events-page .event-card-media{width:100px;height:100px}.events-page .event-card-date{width:72px;height:86px}
  .events-page .event-card-backdrop{position:absolute;z-index:0;right:0;bottom:0;left:0;width:auto;height:58px;margin:0}
  .events-page .event-card-backdrop::before{background:linear-gradient(90deg,#fff 0,rgba(255,255,255,.78) 38%,transparent 72%),repeating-linear-gradient(120deg,transparent 0 55px,rgba(255,255,255,.035) 55px 56px)}
- .events-page .event-card-backdrop>span{right:105px;bottom:-23px;font-size:78px}.events-page .event-card-link{bottom:9px}
+ .events-page .event-card-backdrop>span{right:20px;bottom:-23px;font-size:78px}
 }
 @media(max-width:420px){
  .wrap{padding-left:18px;padding-right:18px}.header nav{gap:12px 16px;font-size:11px}
@@ -452,8 +448,8 @@ details[open]>summary{margin-bottom:10px}
 @media(prefers-reduced-motion:reduce){
  html{scroll-behavior:auto}
  .logo-art,.logo-reveal,.logo-tile,.button{transition:none}
- .events-page .event-card,.events-page .event-card-media img,.events-page .event-card-date,.events-page .event-card-backdrop,.events-page .event-card-link,.events-page .event-card-link span{transition:none}
- .events-page .event-card:hover,.events-page .event-card:focus-within,.events-page .event-card:hover .event-card-media img,.events-page .event-card:focus-within .event-card-media img,.events-page .event-card:hover .event-card-date,.events-page .event-card:focus-within .event-card-date,.events-page .event-card:hover .event-card-backdrop,.events-page .event-card:focus-within .event-card-backdrop,.events-page .event-card:hover .event-card-link,.events-page .event-card:focus-within .event-card-link{transform:none}
+ .events-page .event-card,.events-page .event-card-media img,.events-page .event-card-date,.events-page .event-card-backdrop{transition:none}
+ .events-page .event-card:hover,.events-page .event-card:focus-within,.events-page .event-card:hover .event-card-media img,.events-page .event-card:focus-within .event-card-media img,.events-page .event-card:hover .event-card-date,.events-page .event-card:focus-within .event-card-date,.events-page .event-card:hover .event-card-backdrop,.events-page .event-card:focus-within .event-card-backdrop{transform:none}
 }
 .organization-photos{margin-bottom:28px;scroll-margin-top:24px}
 .photo-heading{display:flex;align-items:center;justify-content:space-between;gap:22px;margin-bottom:22px}.photo-heading h2{margin:6px 0 0}

@@ -47,6 +47,7 @@ test('events page groups compact cards by month and identifies hosts and accepte
   assert.match(html,/src="https:\/\/images\.example\.org\/train\.jpg"/);
   assert.match(html,/<h2>Buddy Poppy Fundraiser<\/h2>/);assert.doesNotMatch(html,/<h2><a[^>]*>Buddy Poppy Fundraiser<\/a>/);
   assert.match(html,/class="event-card-hit-area" href="\/events\/poppy"/);assert.match(html,/event-card--poppy/);
+  assert.doesNotMatch(html,/>Details\s*</);
   assert.match(html,/viewBox="0 0 64 64"/);assert.match(html,/circle cx="32" cy="29" r="3\.5"/);
   assert.doesNotMatch(html,/not-a-poppy\.jpg/);
   assert.match(html,/Dixon VFW Post 8151/);assert.match(html,/Yolo American Legion Post 77/);assert.match(html,/Marine Corps League - Yolo County Detachment 627/);

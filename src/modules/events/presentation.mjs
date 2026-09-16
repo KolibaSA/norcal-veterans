@@ -61,7 +61,6 @@ function eventCard(v,organizations){
   <time class="event-card-date" datetime="${pe(v.date_only?pacificDayKey(v.start_at):v.start_at)}"><span>${pe(eventMonthShort.format(new Date(v.start_at)))}</span><strong>${pe(eventDayFormat.format(new Date(v.start_at)))}</strong></time>
   <div class="event-card-content"><div class="event-card-title-row"><h2>${pe(title)}</h2>${hostBadge}</div>${participants}<p class="event-card-summary"><strong>${pe(eventTime(v))}</strong><span aria-hidden="true"> · </span>${pe(v.venue)}</p></div>
   <div class="event-card-backdrop event-card-theme--${organizationTheme(host)}" aria-hidden="true"><span>${pe(organizationMark(host))}</span></div>
-  <span class="event-card-link">Details <span aria-hidden="true">→</span></span>
   <a class="event-card-hit-area" href="/events/${pe(v.id)}" aria-label="View details for ${pe(title)}"><span class="sr-only">View details for ${pe(title)}</span></a>
  </article>`;
 }
