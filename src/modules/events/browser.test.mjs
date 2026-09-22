@@ -4,11 +4,13 @@ import { createFeature, eventFields, eventPayload, pacificInput, updateDateField
 import { controls } from '../../shared/browser-test-support.mjs';
 
 test('event form preserves Pacific day boundaries and unknown payload evidence', () => {
-  const record = { title: 'Winter meeting', body: 'Public details', payload: { start_at: '2026-12-04T02:00:00Z', end_at: '2026-12-04T04:00:00Z', image_url:'https://images.example.org/winter.jpg', provenance: { verified: false } } };
+  const record = { title: 'Winter meeting', body: 'Public details', payload: { start_at: '2026-12-04T02:00:00Z', end_at: '2026-12-04T04:00:00Z', image_url:'https://images.example.org/winter.jpg', volunteer_enabled:true, volunteer_url:'https://example.org/volunteer', donate_enabled:true, donate_url:'https://example.org/donate', provenance: { verified: false } } };
   const fields = createFeature().fields(record), result = eventPayload(fields, record.payload);
   assert.equal(fields.start, '2026-12-03T18:00'); assert.equal(fields.end, '2026-12-03T20:00');
   assert.equal(result.starts_local, '2026-12-03T18:00');
   assert.equal(fields.eventImage,'https://images.example.org/winter.jpg');assert.equal(result.image_url,fields.eventImage);
+  assert.equal(fields.eventVolunteer,true);assert.equal(result.volunteer_url,'https://example.org/volunteer');
+  assert.equal(fields.eventDonate,true);assert.equal(result.donate_url,'https://example.org/donate');
   assert.deepEqual(result.provenance, { verified: false });
   assert.equal(pacificInput('2026-07-12T19:30:00Z'), '2026-07-12T12:30');
   assert.equal(pacificInput('invalid'), '');

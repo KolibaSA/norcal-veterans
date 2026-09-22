@@ -25,6 +25,14 @@ export function validateEvent(input, options = {}) {
       try { image = new URL(p.image_url); } catch { invalid('Enter a valid HTTPS event image URL.'); }
       if (image.protocol !== 'https:' || image.username || image.password) invalid('Enter a valid HTTPS event image URL.');
     }
+    for (const [enabledName, urlName, label] of [['volunteer_enabled','volunteer_url','volunteer'],['donate_enabled','donate_url','donation']]) {
+      if (p[enabledName] !== undefined && typeof p[enabledName] !== 'boolean') invalid(`${label} option must be true or false.`);
+      if (present(p[urlName])) {
+        let action;
+        try { action = new URL(p[urlName]); } catch { invalid(`Enter a valid HTTPS ${label} URL.`); }
+        if (action.protocol !== 'https:' || action.username || action.password) invalid(`Enter a valid HTTPS ${label} URL.`);
+      }
+    }
     if (present(p.meeting_times)) {
       if (p.kind !== 'Organization meeting') invalid('Multiple labeled times are available only for organization meetings.');
       if (!Array.isArray(p.meeting_times) || !p.meeting_times.length || p.meeting_times.length > 3) invalid('List one to three meeting times.');

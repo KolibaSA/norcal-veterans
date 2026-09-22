@@ -17,6 +17,8 @@ export function sanitizePublicEvent(record){
  if(out.kind==='Organization meeting'&&meetingTimes.length)out.meeting_times=meetingTimes;
  out.source_url=publicURL(record.source_url);out.source_checked=out.source_url?privacyReviewDate(record.source_checked):null;
  out.image_url=publicURL(record.image_url);
+ out.volunteer_enabled=record.volunteer_enabled===true;out.volunteer_url=out.volunteer_enabled?publicURL(record.volunteer_url):'';
+ out.donate_enabled=record.donate_enabled===true;out.donate_url=out.donate_enabled?publicURL(record.donate_url):'';
  out.accepted_organization_ids=publicStrings(record.accepted_organization_ids).slice(0,24);
  out.source_kind=['public_source','project_team'].includes(record.source_kind)?record.source_kind:'public_source';
  out.status=['published','draft','archived'].includes(record.status)?record.status:'draft';

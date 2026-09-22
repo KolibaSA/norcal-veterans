@@ -32,6 +32,7 @@ const eventMonthFormat=new Intl.DateTimeFormat('en-US',{month:'long',year:'numer
 const eventMonthShort=new Intl.DateTimeFormat('en-US',{month:'short',timeZone:'America/Los_Angeles'});
 const eventDayFormat=new Intl.DateTimeFormat('en-US',{day:'numeric',timeZone:'America/Los_Angeles'});
 const eventTimeFormat=new Intl.DateTimeFormat('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Los_Angeles'});
+const eventChipFormat=new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'America/Los_Angeles'});
 function organizationMark(organization){
  const name=organization?.verified_name||'';
  return (name.match(/\b(?:post|detachment|chapter|unit)\s*(?:no\.?\s*)?#?\s*([a-z]?\d+[a-z-]*)\b/i)||[])[1]||name.split(/\s+/).filter(Boolean).slice(0,3).map(word=>word[0]).join('').toUpperCase();
@@ -51,16 +52,31 @@ function eventTime(v){
  const start=eventTimeFormat.format(new Date(v.start_at));
  return v.end_at?`${start} – ${eventTimeFormat.format(new Date(v.end_at))}`:start;
 }
-export function publicEventCard(v,organizations=[]){
+function compactOccurrenceDays(occurrences){
+ const months=new Set(occurrences.map(event=>eventMonthShort.format(new Date(event.start_at))));
+ const values=occurrences.map(event=>months.size===1?eventDayFormat.format(new Date(event.start_at)):`${eventMonthShort.format(new Date(event.start_at))} ${eventDayFormat.format(new Date(event.start_at))}`);
+ return values.length===2?`${values[0]} & ${values[1]}`:`${values.slice(0,-1).join(', ')} & ${values.at(-1)}`;
+}
+function occurrenceTime(occurrences){
+ const values=occurrences.map(event=>eventTime(event));
+ return occurrences.every(event=>event.date_only)?'Time TBD':values.every(value=>value===values[0])?values[0]:'Times vary';
+}
+export function publicEventCard(v,organizations=[],occurrences=[v],{showActions=false}={}){
+ occurrences=[...occurrences].sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at));
+ const multi=occurrences.length>1;
  const host=organizations.find(organization=>organization.id===v.organization_id),visual=eventVisual(v),title=compactEventTitle(v.title,host),accepted=(v.accepted_organization_ids||[]).map(id=>organizations.find(organization=>organization.id===id)).filter(organization=>organization&&organization.id!==host?.id),shown=accepted.slice(0,2),remaining=accepted.length-shown.length;
  const hostName=host?.verified_name||v.organizer||'',hostBadge=host?`<a class="event-card-host" href="/organizations/${pe(host.id)}">${pe(hostName)}</a>`:hostName?`<span class="event-card-host">${pe(hostName)}</span>`:'';
  const participants=shown.length?`<p class="event-card-partners"><span>with</span> ${shown.map(organization=>`<a href="/organizations/${pe(organization.id)}">${pe(organization.verified_name)}</a>`).join(' <span aria-hidden="true">·</span> ')}${remaining?` <a href="/events/${pe(v.id)}">+${remaining} more</a>`:''}</p>`:'';
  const image=v.image_url&&visual!=='poppy'?`<img src="${pe(v.image_url)}" alt="${pe(title)} event image" width="320" height="320" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:`<span class="event-card-fallback" aria-hidden="true">${icons[visual]}</span>`;
- return `<article class="event-card event-card--public event-card--${visual}">
+ const dateBlock=multi?`<div class="event-card-date event-card-date--multi"><span>${new Set(occurrences.map(event=>eventMonthShort.format(new Date(event.start_at)))).size===1?pe(eventMonthShort.format(new Date(v.start_at))):'DATES'}</span><strong>${pe(compactOccurrenceDays(occurrences))}</strong><em>MULTI-DAY EVENT</em></div>`:`<time class="event-card-date" datetime="${pe(v.date_only?pacificDayKey(v.start_at):v.start_at)}"><span>${pe(eventMonthShort.format(new Date(v.start_at)))}</span><strong>${pe(eventDayFormat.format(new Date(v.start_at)))}</strong></time>`;
+ const dates=multi?`<div class="event-card-occurrences"><b>Event Dates:</b><span>${occurrences.map(event=>`<time datetime="${pe(event.date_only?pacificDayKey(event.start_at):event.start_at)}">${pe(eventChipFormat.format(new Date(event.start_at)))}</time>`).join('')}</span></div>`:'';
+ const actions=showActions?[v.volunteer_enabled&&v.volunteer_url?`<a class="event-card-action event-card-action--volunteer" href="${pe(v.volunteer_url)}">Volunteer Now</a>`:'',v.donate_enabled&&v.donate_url?`<a class="event-card-action event-card-action--donate" href="${pe(v.donate_url)}">Donate Now</a>`:''].filter(Boolean).join(''):'';
+ return `<article class="event-card event-card--public event-card--${visual}${actions?' event-card--has-actions':''}">
   <div class="event-card-media">${image}</div>
-  <time class="event-card-date" datetime="${pe(v.date_only?pacificDayKey(v.start_at):v.start_at)}"><span>${pe(eventMonthShort.format(new Date(v.start_at)))}</span><strong>${pe(eventDayFormat.format(new Date(v.start_at)))}</strong></time>
-  <div class="event-card-content"><div class="event-card-title-row"><h2>${pe(title)}</h2>${hostBadge}</div>${participants}<p class="event-card-summary"><strong>${pe(eventTime(v))}</strong><span aria-hidden="true"> · </span>${pe(v.venue)}</p></div>
+  ${dateBlock}
+  <div class="event-card-content"><div class="event-card-title-row"><h2>${pe(title)}</h2>${hostBadge}</div>${participants}${dates}<p class="event-card-summary"><strong>${pe(multi?occurrenceTime(occurrences):eventTime(v))}</strong><span aria-hidden="true"> · </span>${pe(v.venue)}</p></div>
   <div class="event-card-backdrop event-card-theme--${organizationTheme(host)}" aria-hidden="true"><span>${pe(organizationMark(host))}</span></div>
+  ${actions?`<div class="event-card-actions">${actions}</div>`:''}
   <a class="event-card-hit-area" href="/events/${pe(v.id)}" aria-label="View details for ${pe(title)}"><span class="sr-only">View details for ${pe(title)}</span></a>
  </article>`;
 }

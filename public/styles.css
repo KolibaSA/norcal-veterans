@@ -196,6 +196,9 @@ dd a{display:inline-block;margin-top:8px}
 .events-page .event-card:hover .event-card-date,.events-page .event-card:focus-within .event-card-date{transform:translateY(-2px);background:#dfeaf4}
 .events-page .event-card-date span{color:var(--red);font-family:var(--font);font-size:12px;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
 .events-page .event-card-date strong{margin-top:6px;font-size:43px;font-variant-numeric:tabular-nums}
+.events-page .event-card-date--multi{padding:7px 5px}
+.events-page .event-card-date--multi strong{margin-top:5px;font-family:var(--font);font-size:20px;font-weight:850;line-height:1.05;letter-spacing:-.04em}
+.events-page .event-card-date--multi em{margin-top:7px;color:#536b84;font-family:var(--font);font-size:7px;font-style:normal;font-weight:850;letter-spacing:.06em;line-height:1.15}
 .events-page .event-card-content{position:relative;z-index:4;min-width:0;padding:5px 10px 5px 0;pointer-events:none}
 .events-page .event-card-content a{pointer-events:auto}
 .events-page .event-card-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -204,6 +207,10 @@ dd a{display:inline-block;margin-top:8px}
 .events-page a.event-card-host:hover{background:#dce8f3;text-decoration:none}
 .events-page .event-card-partners{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin:9px 0 0;color:#557089;font-size:13px;line-height:1.35}
 .events-page .event-card-partners a{font-weight:720}
+.events-page .event-card-occurrences{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px;color:#405771;font-size:11px;line-height:1.25}
+.events-page .event-card-occurrences>b{color:var(--ink);font-size:10px;letter-spacing:.045em;text-transform:uppercase}
+.events-page .event-card-occurrences>span{display:flex;gap:5px;flex-wrap:wrap}
+.events-page .event-card-occurrences time{padding:4px 7px;border:1px solid #d1dce8;border-radius:999px;background:#f4f7fa;color:#304a68;font-weight:760;white-space:nowrap}
 .events-page .event-card-summary{margin:10px 0 0;color:#405771;font-size:14px;line-height:1.4}
 .events-page .event-card-summary strong{color:var(--ink)}
 .events-page .event-card-backdrop{position:relative;z-index:0;align-self:stretch;height:calc(100% + 24px);margin:-12px 0 -12px -115px;overflow:hidden;background:radial-gradient(circle at 92% 28%,#355373 0,#112c4c 34%,#071a33 72%);box-shadow:inset 0 4px #b51f36;transition:filter .25s ease,transform .35s ease}
@@ -215,6 +222,11 @@ dd a{display:inline-block;margin-top:8px}
 .events-page .event-card-theme--legion{background:radial-gradient(circle at 88% 24%,#285a86 0,#0d477c 35%,#071b32 72%);box-shadow:inset 0 4px #b21e32}
 .events-page .event-card-theme--toys{background:radial-gradient(circle at 90% 22%,#315f91 0,#123c68 38%,#071d38 75%);box-shadow:inset 0 4px #c9273d}
 .events-page .event-card-theme--vbc{background:radial-gradient(circle at 90% 22%,#805c25 0,#3c342c 38%,#17283e 75%);box-shadow:inset 0 4px #d5a84a}
+.events-page .event-card--has-actions .event-card-backdrop>span{right:190px}
+.events-page .event-card-actions{position:absolute;z-index:4;right:16px;bottom:14px;display:flex;gap:7px;align-items:center;pointer-events:auto}
+.events-page .event-card-action{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 11px;border:1px solid rgba(255,255,255,.8);border-radius:8px;background:#fff;color:#12345d!important;box-shadow:0 4px 14px rgba(3,18,37,.2);font-size:10px;font-weight:880;letter-spacing:.045em;line-height:1;text-transform:uppercase;white-space:nowrap}
+.events-page .event-card-action:hover{transform:translateY(-2px);text-decoration:none}
+.events-page .event-card-action--donate{border-color:#be263c;background:#be263c;color:#fff!important}
 .events-page .event-card-hit-area{position:absolute;z-index:3;inset:0;margin:0!important;padding:0!important;border-radius:inherit}
 .events-page .event-card-hit-area:focus-visible{outline:3px solid #176db5;outline-offset:-4px}
 .edit-form{display:grid;gap:21px;margin-top:24px}
@@ -440,7 +452,10 @@ details[open]>summary{margin-bottom:10px}
  .events-page .event-month{margin-top:34px}.events-page .event-card{grid-template-columns:78px 60px minmax(0,1fr);gap:10px;min-height:126px;padding:10px 0 64px 10px}
  .events-page .event-card-media{width:78px;height:78px;border-radius:8px}.events-page .event-card-fallback svg{width:40px;height:40px}
  .events-page .event-card-date{width:60px;height:72px}.events-page .event-card-date span{font-size:10px}.events-page .event-card-date strong{font-size:33px}
+ .events-page .event-card-date--multi strong{font-size:16px}.events-page .event-card-date--multi em{margin-top:4px;font-size:6px}
  .events-page .event-card-content{padding-right:12px}.events-page .event-card h2{font-size:21px}.events-page .event-card-host{font-size:9px}.events-page .event-card-partners,.events-page .event-card-summary{font-size:12px}
+ .events-page .event-card-occurrences{align-items:flex-start;flex-direction:column;gap:5px}.events-page .event-card-occurrences time{font-size:10px}
+ .events-page .event-card-actions{right:10px;bottom:11px}.events-page .event-card-action{min-height:32px;padding:7px 8px;font-size:8px}
 }
 @media(hover:none){
  .hover-instruction{display:none!important}.touch-instruction{display:block!important}
@@ -448,8 +463,8 @@ details[open]>summary{margin-bottom:10px}
 @media(prefers-reduced-motion:reduce){
  html{scroll-behavior:auto}
  .logo-art,.logo-reveal,.logo-tile,.button{transition:none}
- .events-page .event-card,.events-page .event-card-media img,.events-page .event-card-date,.events-page .event-card-backdrop{transition:none}
- .events-page .event-card:hover,.events-page .event-card:focus-within,.events-page .event-card:hover .event-card-media img,.events-page .event-card:focus-within .event-card-media img,.events-page .event-card:hover .event-card-date,.events-page .event-card:focus-within .event-card-date,.events-page .event-card:hover .event-card-backdrop,.events-page .event-card:focus-within .event-card-backdrop{transform:none}
+ .events-page .event-card,.events-page .event-card-media img,.events-page .event-card-date,.events-page .event-card-backdrop,.events-page .event-card-action{transition:none}
+ .events-page .event-card:hover,.events-page .event-card:focus-within,.events-page .event-card:hover .event-card-media img,.events-page .event-card:focus-within .event-card-media img,.events-page .event-card:hover .event-card-date,.events-page .event-card:focus-within .event-card-date,.events-page .event-card:hover .event-card-backdrop,.events-page .event-card:focus-within .event-card-backdrop,.events-page .event-card-action:hover{transform:none}
 }
 .organization-photos{margin-bottom:28px;scroll-margin-top:24px}
 .photo-heading{display:flex;align-items:center;justify-content:space-between;gap:22px;margin-bottom:22px}.photo-heading h2{margin:6px 0 0}

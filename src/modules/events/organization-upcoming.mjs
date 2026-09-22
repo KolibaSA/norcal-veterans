@@ -12,12 +12,22 @@ const wallTime = value => {
 
 export function organizationUpcomingEvents(events, organizationId, now = Date.now(), organizations = []) {
   const upcoming = upcomingEvents(events, now).filter(event => event.organization_id === organizationId);
-  const cards = upcoming.map(event => {
+  const grouped=[];
+  const communityGroups=new Map();
+  for(const event of upcoming){
+    if(organizationId!=='vfw-ca-8151'||event.kind==='Organization meeting'){grouped.push([event]);continue;}
+    const key=[event.title,event.organization_id,event.venue,event.city,event.county].map(value=>String(value||'').trim().toLowerCase()).join('\u0000');
+    const existing=communityGroups.get(key);
+    if(existing)existing.push(event);else{const group=[event];communityGroups.set(key,group);grouped.push(group);}
+  }
+  const cards = grouped.map(occurrences => {
+    const event=occurrences[0];
     const vfw8151Event = organizationId === 'vfw-ca-8151';
     const listedMeeting = vfw8151Event && event.kind === 'Organization meeting';
     if (vfw8151Event && !listedMeeting) {
       const host=organizations.find(organization=>organization.id===organizationId)||{id:organizationId,verified_name:'Dixon VFW Post 8151',organization_type:'VFW'};
-      return `<div class="events-page vfw-public-event-card">${publicEventCard(event,[host,...organizations.filter(organization=>organization.id!==organizationId)])}</div>`;
+      const cardEvent={...event,accepted_organization_ids:[...new Set(occurrences.flatMap(item=>item.accepted_organization_ids||[]))],volunteer_enabled:occurrences.some(item=>item.volunteer_enabled&&item.volunteer_url),volunteer_url:occurrences.find(item=>item.volunteer_enabled&&item.volunteer_url)?.volunteer_url||'',donate_enabled:occurrences.some(item=>item.donate_enabled&&item.donate_url),donate_url:occurrences.find(item=>item.donate_enabled&&item.donate_url)?.donate_url||''};
+      return `<div class="events-page vfw-public-event-card">${publicEventCard(cardEvent,[host,...organizations.filter(organization=>organization.id!==organizationId)],occurrences,{showActions:true})}</div>`;
     }
     const date = new Date(event.start_at);
     const dateHeader = `<time class="organization-card-date" datetime="${h(event.start_at)}" aria-label="${h(dateFormat.format(date))}"><span>${h(monthFormat.format(date))}</span><span class="organization-card-day">${h(dayFormat.format(date))}</span></time>`;

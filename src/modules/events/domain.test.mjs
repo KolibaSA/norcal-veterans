@@ -22,3 +22,11 @@ test('Events accepts only safe HTTPS event image URLs', () => {
   assert.equal(validateEvent({...base,image_url:'https://images.example.org/event.jpg'}).image_url,'https://images.example.org/event.jpg');
   assert.throws(()=>validateEvent({...base,image_url:'http://images.example.org/event.jpg'}),/valid HTTPS event image URL/);
 });
+
+test('Events validates optional volunteer and donation actions', () => {
+  const base={start_at:'2030-01-15T18:00:00-08:00',venue:'Public hall'};
+  const event=validateEvent({...base,volunteer_enabled:true,volunteer_url:'https://example.org/volunteer',donate_enabled:true,donate_url:'https://example.org/donate'});
+  assert.equal(event.volunteer_url,'https://example.org/volunteer');assert.equal(event.donate_url,'https://example.org/donate');
+  assert.throws(()=>validateEvent({...base,volunteer_enabled:'yes'}),/volunteer option must be true or false/);
+  assert.throws(()=>validateEvent({...base,donate_url:'http://example.org/donate'}),/valid HTTPS donation URL/);
+});

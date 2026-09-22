@@ -43,6 +43,28 @@ test('organization cards standardize Pacific month and day without changing shar
   assert.doesNotMatch(eventsPagePublic(new URL('https://site.test/events'), examples), /organization-card-date/);
 });
 
+test('Post 8151 groups future community occurrences by event and location', () => {
+  const occurrence=(id,day,venue,city,extra={})=>({id,title:`Buddy Poppy Fundraiser — ${city}`,description:'Poppy distribution.',date_only:true,start_at:`2026-11-${String(day).padStart(2,'0')}T08:00:00Z`,venue,status:'published',organization_id:'vfw-ca-8151',kind:'Community event',city,county:'Solano',...extra});
+  const events=[7,8,11].flatMap(day=>[
+    occurrence(`dixon-${day}`,day,'Safeway, 1235 Stratford Avenue, Dixon, CA 95620','Dixon',day===7?{volunteer_enabled:true,volunteer_url:'https://example.org/volunteer',donate_enabled:true,donate_url:'https://example.org/donate'}:{}),
+    occurrence(`davis-${day}`,day,'Grocery Outlet, 1800 East 8th Street, Davis, CA 95616','Davis')
+  ]);
+  const html=organizationUpcomingEvents(events,'vfw-ca-8151',Date.parse('2026-11-06T20:00:00Z'));
+  assert.equal((html.match(/vfw-public-event-card/g)||[]).length,2);
+  assert.equal((html.match(/event-card-date--multi/g)||[]).length,2);
+  assert.equal((html.match(/<strong>7, 8 &amp; 11<\/strong>/g)||[]).length,2);
+  for(const date of ['Sat, Nov 7','Sun, Nov 8','Wed, Nov 11'])assert.match(html,new RegExp(date));
+  assert.equal((html.match(/Safeway, 1235 Stratford Avenue/g)||[]).length,1);
+  assert.equal((html.match(/Grocery Outlet, 1800 East 8th Street/g)||[]).length,1);
+  assert.match(html,/MULTI-DAY EVENT/);assert.match(html,/Event Dates:/);assert.match(html,/Time TBD/);
+  assert.match(html,/href="https:\/\/example\.org\/volunteer"[^>]*>Volunteer Now/);
+  assert.match(html,/href="https:\/\/example\.org\/donate"[^>]*>Donate Now/);
+  const pruned=organizationUpcomingEvents(events,'vfw-ca-8151',Date.parse('2026-11-08T20:00:00Z'));
+  assert.equal((pruned.match(/<strong>8 &amp; 11<\/strong>/g)||[]).length,2);assert.doesNotMatch(pruned,/Sat, Nov 7/);
+  const single=organizationUpcomingEvents(events,'vfw-ca-8151',Date.parse('2026-11-09T20:00:00Z'));
+  assert.equal((single.match(/event-card-date--multi/g)||[]).length,0);assert.equal((single.match(/<strong>11<\/strong>/g)||[]).length,2);
+});
+
 test('all organization templates and the shared Events page use card listings without a month grid', () => {
   const selected = [records.find(r => r.id === 'vfw-ca-8762'), records.find(r => r.organization_type === 'American Legion'), records.find(r => r.id === 'mcl-yolo')];
   for (const record of selected) {
