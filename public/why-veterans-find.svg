@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 130" role="img" aria-label="Veteran overlooking a local mountain community">
+  <path fill="#dce8f4" d="M0 83 48 45l30 23 48-50 46 51 38-34 55 54v41H0Z"/>
+  <path fill="#c6d9eb" d="m0 101 55-29 39 21 52-36 54 43 48-24 45 29 55-23 92 25v23H0Z"/>
+  <path fill="#b2cae0" d="M18 130V91l8-17 8 17h-6l9 18h-7l10 21Zm49 0v-31l7-14 7 14h-5l8 15h-6l8 16Z"/>
+  <path fill="#eef4fa" d="M103 130c34-26 59-38 95-35 24 2 43 12 68 35Z"/>
+  <path fill="none" stroke="#9fbed9" stroke-linecap="round" stroke-width="3" d="M118 130c25-22 45-27 78-30 28-2 45 4 66 20"/>
+  <g fill="#9cbad5">
+    <path d="M212 130v-25l22-15 22 15v25Z"/><path fill="#edf4fa" d="M225 112h9v18h-9Z"/><path d="M166 130v-18l16-11 16 11v18Z"/>
+  </g>
+  <g fill="#86a9ca">
+    <path d="M337 51c0-12 9-21 21-21s21 9 21 21c0 8-4 15-11 19v8h-21v-8c-6-4-10-11-10-19Z"/>
+    <path d="m344 33 11-9 19 8-1 7-29 2Z"/>
+    <path d="M323 130c2-39 10-59 34-59 25 0 35 20 39 59Z"/>
+    <path d="m345 80-25-23 7-9 32 18-3 20Z"/>
+    <path d="m320 57 3-23 9 1 1 23Z"/>
+  </g>
+  <path fill="none" stroke="#6f99bf" stroke-linecap="round" stroke-width="3" d="M343 95h28m-16-17v52"/>
+</svg>
