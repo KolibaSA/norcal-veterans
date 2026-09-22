@@ -6,6 +6,8 @@ HQ event field mapping, Pacific wall-time display, date-only controls, source ev
 
 Owns event payload fields and preserves unknown imported fields. Pacific time uses America/Los_Angeles. Date-only events deliberately clear timed endings. The Additional event dates control adds or removes calendar dates on the same record; every extra date inherits the first occurrence's time, duration, location and event details. Optional Volunteer Now and Donate Now controls preserve an enable flag plus an HTTPS destination. Review dates remain blank unless supplied; public filtering and authoritative validation remain server responsibilities.
 
+An editable saved event shows a destructive Delete event control with explicit confirmation. New events and records the current user cannot edit do not show it. Successful deletion returns to the Events list; the server independently rechecks scope, publication permission and optimistic version.
+
 Dependencies: Shared record controls. The app initializes county choices through the Organizations supported lookup interface; routine event changes do not require opening organization editor code.
 
 Focused checks: `node scripts/run-tests.mjs --module events`. Browser coverage: winter/summer wall time, UTC day boundaries, payload preservation, additional-date sorting, date-only conversion and required-control cleanup. Wider release checks remain required before publication.

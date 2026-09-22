@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateEvent } from './domain.mjs';
+import { recordDefinition, validateEvent } from './domain.mjs';
 
 test('Events converts date-only entries to Pacific midnight and clears an end time', () => {
   const event = validateEvent({ starts_local: '2026-07-04', date_only: true, end_at: '2026-07-05T01:00:00Z', venue: 'Public hall' });
@@ -42,4 +42,8 @@ test('Events validates and derives additional occurrences from the first date an
   assert.deepEqual(dayOnly.additional_occurrences,[{start_at:'2026-11-08T08:00:00.000Z',end_at:null}]);
   assert.throws(()=>validateEvent({starts_local:'2026-11-07',date_only:true,additional_dates:['2026-11-07'],venue:'Public hall'}),/after the first event date/);
   assert.throws(()=>validateEvent({starts_local:'2026-11-07',date_only:true,additional_dates:['2026-02-30'],venue:'Public hall'}),/does not exist/);
+});
+
+test('only the event record contract enables deletion',()=>{
+  assert.equal(recordDefinition.deleteEnabled,true);
 });

@@ -85,7 +85,8 @@ export function createFeature() {
       $('end').disabled = !!values.dateOnly;
       $('start').required = true; $('venue').required = true;
     },
-    connect({ $, message }) {
+    connect(context) {
+      const { $, message, api, loadSection } = context;
       $('dateOnly').onchange = () => updateDateFields($);
       $('addEventDate').onclick = () => {
         const date = $('additionalDate').value, firstDate = $('start').value.slice(0, 10);
@@ -95,9 +96,20 @@ export function createFeature() {
         $('additionalDate').value = '';
         renderAdditionalDates($);
       };
+      $('deleteEvent').onclick = async () => {
+        const record = context.editing;
+        if (!record?.id || !window.confirm(`Delete “${record.title}”? This removes it from HQ and all public event listings. Any unsaved edits will also be lost.`)) return;
+        $('deleteEvent').disabled = true;
+        try {
+          await api('records/' + encodeURIComponent(record.id), { method: 'DELETE', body: JSON.stringify({ version: record.version }) });
+          message('Event deleted.');
+          await loadSection();
+        } catch (cause) { message(cause.message, true); }
+        finally { $('deleteEvent').disabled = false; }
+      };
       return {
-        editorOpened() { renderAdditionalDates($); },
-        resetEditor() { $('start').required = false; $('venue').required = false; $('additionalDate').value = ''; }
+        editorOpened(record, { editable }) { renderAdditionalDates($); $('deleteEventSection').hidden = !record?.id || !editable; },
+        resetEditor() { $('start').required = false; $('venue').required = false; $('additionalDate').value = ''; $('deleteEventSection').hidden = true; }
       };
     }
   });

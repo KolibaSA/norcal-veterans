@@ -1348,7 +1348,7 @@ function validateEvent(input, options = {}) {
     }
   });
 }
-var recordDefinition2 = Object.freeze({ kind: "event", statuses: ["draft", "published", "archived"], validate: validateEvent });
+var recordDefinition2 = Object.freeze({ kind: "event", statuses: ["draft", "published", "archived"], validate: validateEvent, deleteEnabled: true });
 
 // src/app/content-metadata.mjs
 var contentMetadata = Object.freeze({ timeZone, ...organizationMetadata });

@@ -74,4 +74,4 @@ export function validateEvent(input, options = {}) {
   });
 }
 
-export const recordDefinition = Object.freeze({ kind: 'event', statuses: ['draft', 'published', 'archived'], validate: validateEvent });
+export const recordDefinition = Object.freeze({ kind: 'event', statuses: ['draft', 'published', 'archived'], validate: validateEvent, deleteEnabled: true });

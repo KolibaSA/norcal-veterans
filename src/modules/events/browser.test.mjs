@@ -45,3 +45,17 @@ test('event form stores sorted additional dates on one event record', () => {
   assert.deepEqual(payload.additional_dates,['2026-11-08','2026-11-11','2026-11-15']);
   assert.deepEqual(eventDateList('2026-11-11,2026-11-08,2026-11-11,not-a-date'),['2026-11-08','2026-11-11']);
 });
+
+test('event editor offers confirmed deletion only for an editable saved event', async t => {
+  const { $ }=controls(),record={id:'event-a',title:'Community event',version:4};
+  let request,notice='',reloads=0;
+  const originalWindow=globalThis.window;globalThis.window={confirm:()=>true};t.after(()=>{globalThis.window=originalWindow;});
+  const context={$,editing:record,message:value=>{notice=value;},loadSection:async()=>{reloads++;},api:async(path,options)=>{request={path,options};}};
+  const controller=createFeature().connect(context);
+  controller.editorOpened(record,{editable:true});assert.equal($('deleteEventSection').hidden,false);
+  await $('deleteEvent').onclick();
+  assert.equal(request.path,'records/event-a');assert.equal(request.options.method,'DELETE');assert.deepEqual(JSON.parse(request.options.body),{version:4});
+  assert.equal(notice,'Event deleted.');assert.equal(reloads,1);
+  controller.editorOpened(record,{editable:false});assert.equal($('deleteEventSection').hidden,true);
+  controller.resetEditor();assert.equal($('deleteEventSection').hidden,true);
+});

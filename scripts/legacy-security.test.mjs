@@ -37,6 +37,26 @@ test('organization creation checks its stored scope and retains legitimate scope
   assert.equal(response.status,403);
 });
 
+test('event deletion is event-only, confirmed by version, permission checked and historically audited',async t=>{
+  const env={...envBase,DB:db(t)},owner=envBase.OWNER_EMAIL,input={kind:'event',title:'Deletable event',body:'Public details',region_id:'a',status:'published',payload:{start_at:'2027-01-10T18:00:00-08:00',venue:'Public hall'}};
+  let response=await req(env,'/api/hq/records',owner,'POST',input);assert.equal(response.status,201);const {id}=await response.json();
+  const record=await (await req(env,'/api/hq/records/'+id,owner)).json();
+  assert.equal((await req(env,'/api/hq/records/'+id,owner,'DELETE',{version:record.version},'https://attacker.test')).status,403);
+  assert.equal((await req(env,'/api/hq/records/'+id,owner,'DELETE',{version:record.version-1})).status,409);
+  await req(env,'/api/hq/access',owner,'POST',{email:'editor@example.com',role:'editor',region_id:'a'});
+  assert.equal((await req(env,'/api/hq/records/'+id,'editor@example.com','DELETE',{version:record.version})).status,403);
+  env.DB.raw.prepare('INSERT INTO attachments VALUES(?,?,?,?,?,?,?,?)').run('event-file',id,'details.txt','text/plain',4,'events/details.txt',owner,'2026-09-21T00:00:00Z');
+  assert.equal((await req(env,'/api/hq/records/'+id,owner,'DELETE',{version:record.version})).status,409);
+  env.DB.raw.prepare('DELETE FROM attachments WHERE id=?').run('event-file');
+  response=await req(env,'/api/hq/records/'+id,owner,'DELETE',{version:record.version});assert.equal(response.status,200);assert.equal((await response.json()).deleted,true);
+  assert.equal(env.DB.raw.prepare('SELECT count(*) n FROM records WHERE id=?').get(id).n,0);
+  assert.deepEqual(env.DB.raw.prepare('SELECT action FROM audit WHERE record_id=? ORDER BY created_at,id').all(id).map(row=>row.action),['create','delete']);
+  const revisions=env.DB.raw.prepare('SELECT version,action FROM record_revisions WHERE record_id=? ORDER BY version').all(id);assert.deepEqual(revisions.map(row=>[row.version,row.action]),[[1,'create'],[2,'delete']]);
+  assert.equal((await req(env,'/api/hq/records/'+id,owner)).status,404);
+  response=await req(env,'/api/hq/records',owner,'POST',{kind:'task',title:'Private task',region_id:'a',status:'open',payload:{}});const task=await response.json();
+  assert.equal((await req(env,'/api/hq/records/'+task.id,owner,'DELETE',{version:1})).status,405);
+});
+
 test('embedded HQ reports configured request processing and serves its generated CSP-protected template',async()=>{
   const env={...envBase,DB:db()};
   let response=await req(env,'/api/hq/me','owner@example.com');

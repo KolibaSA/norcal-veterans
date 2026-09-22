@@ -49,6 +49,21 @@ export async function saveRecord(input, env, user, grants, definition, existing 
   return json({ id, saved: true, version }, existing ? 200 : 201);
 }
 
+export async function deleteRecord(input, env, user, grants, definition, existing) {
+  if (definition.deleteEnabled !== true) return fail('This section does not support deletion.', 405);
+  const action = existing.status === 'published' ? 'publish' : 'write';
+  if (!permitted(user, grants, existing, action)) return fail('This event is outside your assignment or requires publishing permission.', 403);
+  if (!Number.isInteger(input.version) || input.version !== existing.version) return fail('This event changed. Reload it before deleting.', 409);
+  const attachments = await stmt(env, 'SELECT id FROM attachments WHERE record_id=? LIMIT 1', existing.id).first();
+  if (attachments) return fail('Remove this event’s attachments before deleting it.', 409);
+  const now = new Date().toISOString(), mutation = crypto.randomUUID(), version = existing.version + 1;
+  const update = stmt(env, 'UPDATE records SET updated_at=?,version=version+1,mutation_id=? WHERE id=? AND version=?', now, mutation, existing.id, input.version);
+  const remove = stmt(env, 'DELETE FROM records WHERE id=? AND version=? AND mutation_id=?', existing.id, version, mutation);
+  const result = await env.DB.batch([update, audit(env, user, 'delete', existing.id, mutation), remove]);
+  if (result[0].meta.changes !== 1 || result[2].meta.changes !== 1) return fail('This event changed. Reload it before deleting.', 409);
+  return json({ id: existing.id, deleted: true });
+}
+
 export async function listRecords(env, user, grants, definition) {
   const scope = readScope(user, grants);
   return (await rows(env, 'SELECT * FROM records WHERE kind=? AND ' + scope.sql + ' ORDER BY updated_at DESC,id DESC LIMIT 500', definition.kind, ...scope.values)).map(record => visibleRecord(record, definition.redactPayload));

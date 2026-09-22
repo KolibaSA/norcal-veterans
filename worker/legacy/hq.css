@@ -40,6 +40,7 @@ textarea { min-height: 100px; resize: vertical; }
 fieldset:disabled input, fieldset:disabled textarea, fieldset:disabled select { opacity: 1; background: #f3f6f9; color: #405269; }
 button, .button { cursor: pointer; padding: 11px 19px; background: #a72d3a; color: #fff; border: 1px solid #a72d3a; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: 600; }
 button.secondary { background: white; color: #203c58; border-color: #b8c8d7; }
+button.danger { background: white; color: #8f2431; border-color: #b93645; }
 button:disabled { opacity: .5; cursor: default; }
 .record { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 15px; padding: 24px; border-bottom: 1px solid #dce4ed; }
 .record:last-child { border-bottom: 0; }
@@ -75,6 +76,8 @@ summary { cursor: pointer; font-weight: 600; padding: 5px; }
 .event-date-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .event-date-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border: 1px solid #c3d0de; border-radius: 999px; background: #fff; }
 .event-date-chip button { padding: 4px 8px; border-radius: 999px; font-size: 13px; }
+.event-delete { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-top: 28px; padding: 18px; border: 1px solid #e4bdc2; border-radius: 6px; background: #fff7f8; }
+.event-delete p { margin: 4px 0 0; }
 .vfw-meeting-planner { margin-top: 32px; padding-top: 28px; border-top: 3px solid #a72d3a; }
 .meeting-year { width: min(180px, 100%); }
 .vfw-meeting-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 20px; }
@@ -93,6 +96,7 @@ summary { cursor: pointer; font-weight: 600; padding: 5px; }
   .grid, .record, .vfw-meeting-grid { grid-template-columns: 1fr; }
   .event-date-adder { align-items: stretch; flex-direction: column; }
   .event-date-adder input { max-width: none; }
+  .event-delete { align-items: stretch; flex-direction: column; }
   header strong { font-size: 16px; }
   .header-actions { font-size: 14px; gap: 10px; flex-direction: column; align-items: flex-start; }
   .panel { padding: 20px; }

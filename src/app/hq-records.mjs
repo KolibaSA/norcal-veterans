@@ -1,5 +1,5 @@
 import { recordDefinitions, visibleRecord } from './record-definitions.mjs';
-import { saveRecord, listRecords, findRecord } from '../shared/server-records.mjs';
+import { deleteRecord, saveRecord, listRecords, findRecord } from '../shared/server-records.mjs';
 import { readJson, json } from '../shared/server-http.mjs';
 
 const definitionFor = kind => Object.hasOwn(recordDefinitions, kind) ? recordDefinitions[kind] : null;
@@ -21,12 +21,13 @@ export async function handleRecordRoute(req, env, user, grants, url = new URL(re
     return saveRecord(input, env, user, grants, definition);
   }
   const match = path.match(/^\/api\/hq\/records\/([^/]+)$/);
-  if (match && ['GET', 'PUT'].includes(req.method)) {
+  if (match && ['GET', 'PUT', 'DELETE'].includes(req.method)) {
     const record = await findRecord(env, user, grants, match[1], req.method === 'PUT' ? 'write' : 'read');
     if (!record) return fail('Record unavailable.', 404);
     if (req.method === 'GET') return json(visibleRecord(record));
     const definition = definitionFor(record.kind);
     if (!definition) return fail('Choose a valid section and status.');
+    if (req.method === 'DELETE') return deleteRecord(await readJson(req), env, user, grants, definition, record);
     return saveRecord(await readJson(req), env, user, grants, definition, record);
   }
   return null;
