@@ -186,7 +186,7 @@ test('submission desk and unknown mutation routes stay separate',async()=>{
  assert.equal((await worker.fetch(new Request('https://test/missing'))).status,404);
 });
 test('all deliverable routes/assets respond with expected content and headers',async()=>{
- for(const url of ['/','/mcl-yolo','/about','/resources','/for-organizations','/data.json','/styles.css','/app.js','/og.png','/favicon.svg','/norcal-hero-table.png','/norcal-hero-seals.png','/american-legion-background.png','/health']){const r=await worker.fetch(new Request('https://test'+url));assert.equal(r.status,200,url);}
+ for(const url of ['/','/mcl-yolo','/about','/resources','/for-organizations','/data.json','/styles.css','/app.js','/og.png','/favicon.svg','/norcal-hero-table.png','/norcal-hero-seals.png','/american-legion-background.png','/why-norcal-background.png','/why-veterans-find.png','/why-organizations-share.png','/why-organizations-coordinate.png','/health']){const r=await worker.fetch(new Request('https://test'+url));assert.equal(r.status,200,url);}
  const image=await worker.fetch(new Request('https://test/og.png'));const bytes=new Uint8Array(await image.arrayBuffer());assert.equal(bytes[0],137);assert.equal(bytes[1],80);
  const main=await worker.fetch(new Request('https://test/'));assert.ok(main.headers.get('Content-Security-Policy').includes("form-action 'self'"));
 });

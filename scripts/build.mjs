@@ -21,7 +21,7 @@ const assets={};
 for(const [name,type] of [['styles.css','text/css; charset=utf-8'],['app.js','application/javascript; charset=utf-8'],['hq.js','application/javascript; charset=utf-8'],['favicon.svg','image/svg+xml']]){
  const bytes=await fs.readFile(path.join(root,'public',name));assets['/'+name]={type,base64:bytes.toString('base64')};
 }
-for(const [name,type] of [['ysv-logo.png','image/png'],['og.png','image/png'],['norcal-hero-table.png','image/png'],['norcal-hero-seals.png','image/png'],['american-legion-background.png','image/png']]){
+for(const [name,type] of [['ysv-logo.png','image/png'],['og.png','image/png'],['norcal-hero-table.png','image/png'],['norcal-hero-seals.png','image/png'],['american-legion-background.png','image/png'],['why-norcal-background.png','image/png'],['why-veterans-find.png','image/png'],['why-organizations-share.png','image/png'],['why-organizations-coordinate.png','image/png']]){
  const bytes=(await fs.readFile(path.join(root,'public',name)));assets['/'+name]={type,base64:bytes.toString('base64')};
 }
 const usedLogoPaths=new Set(Object.values(brandLogos).map(logo=>logo.src));

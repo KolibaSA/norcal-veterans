@@ -19,7 +19,7 @@ const norcalWorker = {
       url.pathname = '/yolo-solano';
       return new Response(null, { status: 302, headers: { Location: url.href, 'Cache-Control': 'no-store' } });
     }
-    if (['GET','HEAD'].includes(request.method) && (/^\/(?:logos|published-assets|assets)\//.test(path) || ['/styles.css','/app.js','/favicon.svg','/ysv-logo.png','/og.png','/norcal-hero-table.png','/norcal-hero-seals.png','/american-legion-background.png'].includes(path))) {
+    if (['GET','HEAD'].includes(request.method) && (/^\/(?:logos|published-assets|assets)\//.test(path) || ['/styles.css','/app.js','/favicon.svg','/ysv-logo.png','/og.png','/norcal-hero-table.png','/norcal-hero-seals.png','/american-legion-background.png','/why-norcal-background.png','/why-veterans-find.png','/why-organizations-share.png','/why-organizations-coordinate.png'].includes(path))) {
       const asset = await env.ASSETS.fetch(request);
       return new Response(asset.body, { status: asset.status, headers: { ...Object.fromEntries(asset.headers), ...securityHeaders, 'Cache-Control': 'public, max-age=300' } });
     }
