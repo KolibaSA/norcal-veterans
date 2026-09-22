@@ -211,17 +211,26 @@ dd a{display:inline-block;margin-top:8px}
 .events-page .event-card-occurrences>b{color:var(--ink);font-size:10px;letter-spacing:.045em;text-transform:uppercase}
 .events-page .event-card-occurrences>span{display:flex;gap:5px;flex-wrap:wrap}
 .events-page .event-card-occurrences time{padding:4px 7px;border:1px solid #d1dce8;border-radius:999px;background:#f4f7fa;color:#304a68;font-weight:760;white-space:nowrap}
+.events-page .event-card-meeting-times{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px;color:#405771;font-size:11px;line-height:1.25}
+.events-page .event-card-meeting-times>b{color:var(--ink);font-size:10px;letter-spacing:.045em;text-transform:uppercase}
+.events-page .event-card-meeting-times>span{display:flex;gap:5px;flex-wrap:wrap}.events-page .event-card-meeting-times>span>span{padding:4px 7px;border:1px solid #d1dce8;border-radius:999px;background:#f4f7fa;color:#304a68;white-space:nowrap}
 .events-page .event-card-summary{margin:10px 0 0;color:#405771;font-size:14px;line-height:1.4}
 .events-page .event-card-summary strong{color:var(--ink)}
 .events-page .event-card-backdrop{position:relative;z-index:0;align-self:stretch;height:calc(100% + 24px);margin:-12px 0 -12px -115px;overflow:hidden;background:radial-gradient(circle at 92% 28%,#355373 0,#112c4c 34%,#071a33 72%);box-shadow:inset 0 4px #b51f36;transition:filter .25s ease,transform .35s ease}
 .events-page .event-card:hover .event-card-backdrop,.events-page .event-card:focus-within .event-card-backdrop{filter:saturate(1.12) brightness(1.06);transform:scale(1.025)}
 .events-page .event-card-backdrop::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#fff 0,rgba(255,255,255,.96) 15%,rgba(255,255,255,.46) 43%,transparent 68%),repeating-linear-gradient(120deg,transparent 0 55px,rgba(255,255,255,.035) 55px 56px)}
 .events-page .event-card-backdrop>span{position:absolute;right:16px;bottom:-21px;color:rgba(255,255,255,.18);font-family:var(--display);font-size:clamp(70px,8vw,128px);font-weight:900;line-height:1;white-space:nowrap}
+.events-page .event-card-theme--vfw{background:radial-gradient(circle at 92% 28%,#355373 0,#112c4c 34%,#071a33 72%);box-shadow:inset 0 4px #b51f36}
 .events-page .event-card-theme--mcl{background:radial-gradient(circle at 90% 26%,#a64d4d 0,#651e2b 34%,#3b1019 72%);box-shadow:inset 0 4px #d3aa4b}
 .events-page .event-card-theme--mcl>span{color:rgba(244,218,151,.2)}
 .events-page .event-card-theme--legion{background:radial-gradient(circle at 88% 24%,#285a86 0,#0d477c 35%,#071b32 72%);box-shadow:inset 0 4px #b21e32}
-.events-page .event-card-theme--toys{background:radial-gradient(circle at 90% 22%,#315f91 0,#123c68 38%,#071d38 75%);box-shadow:inset 0 4px #c9273d}
+.events-page .event-card-theme--toys{background:radial-gradient(circle at 90% 22%,#3e8057 0,#1d5638 38%,#123724 75%);box-shadow:inset 0 4px #f0cf4f}
 .events-page .event-card-theme--vbc{background:radial-gradient(circle at 90% 22%,#805c25 0,#3c342c 38%,#17283e 75%);box-shadow:inset 0 4px #d5a84a}
+.events-page .event-card-theme--dav{background:radial-gradient(circle at 90% 22%,#576d80 0,#34495c 38%,#1c2936 75%);box-shadow:inset 0 4px #d8a42e}
+.events-page .event-card-theme--county{background:radial-gradient(circle at 90% 22%,#367d86 0,#19596a 38%,#123b57 75%);box-shadow:inset 0 4px #64c4c8}
+.events-page .event-card-theme--equine{background:radial-gradient(circle at 90% 22%,#6d8061 0,#405a42 38%,#263c2b 75%);box-shadow:inset 0 4px #c99154}
+.events-page .event-card-theme--remembrance{background:radial-gradient(circle at 90% 22%,#60715f 0,#354d3d 38%,#23352a 75%);box-shadow:inset 0 4px #caa660}
+.events-page .event-card-theme--nonprofit{background:radial-gradient(circle at 90% 22%,#536d91 0,#354f76 38%,#252e56 75%);box-shadow:inset 0 4px #6fc4bd}
 .events-page .event-card--has-actions .event-card-backdrop>span{right:190px}
 .events-page .event-card-actions{position:absolute;z-index:4;right:16px;bottom:14px;display:flex;flex-wrap:nowrap;gap:5px;align-items:center;pointer-events:auto}
 .events-page .event-card-action{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 9px;border:1px solid rgba(255,255,255,.8);border-radius:8px;background:#fff;color:#12345d!important;box-shadow:0 4px 14px rgba(3,18,37,.2);font-size:9px;font-weight:880;letter-spacing:.04em;line-height:1;text-transform:uppercase;white-space:nowrap}
@@ -595,56 +604,6 @@ details[open]>summary{margin-bottom:10px}
 
 .organization-card-date{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--line);font-family:var(--display);font-size:clamp(1.6rem,4vw,2.1rem);font-weight:850;line-height:1.15;color:var(--blue)}
 .organization-card-day{flex-shrink:0;font-size:clamp(2.2rem,6vw,3rem);color:var(--red);font-variant-numeric:tabular-nums}
-
-/* VFW Post 8151 pilot: presentation-only event card treatment. */
-.vfw-profile #upcoming-events .vfw-event-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:24px}
-.vfw-profile #upcoming-events .vfw-event-grid>.vfw-public-event-card{grid-column:1/-1}
-.vfw-profile #upcoming-events .vfw-event-grid>.event-card{grid-column:span 3}
-.vfw-profile #upcoming-events .vfw-event-grid>.vfw-meeting-card{grid-column:span 2}
-.vfw-profile #upcoming-events .vfw-meeting-card{gap:0;overflow:hidden;padding:20px;border:1px solid #cad6e2;border-top:5px solid var(--profile-accent,#c51f32);border-radius:13px;background:#fff;box-shadow:0 7px 22px rgba(15,35,58,.08)}
-.vfw-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding-bottom:1.15rem;border-bottom:1px solid #d7e0e9}
-.vfw-meeting-card .vfw-card-header{gap:.7rem;padding-bottom:.8rem}
-.vfw-card-badge{display:inline-flex;align-items:center;gap:.45rem;margin-top:.15rem;padding:.55rem .8rem;border-radius:999px;background:#e8eff8;color:var(--profile-deep,#061f3b);font-size:.73rem;font-weight:800;line-height:1;white-space:nowrap}
-.vfw-meeting-card .vfw-card-badge{gap:.35rem;padding:.43rem .62rem;font-size:.65rem}
-.vfw-card-badge-community{background:#f7e9ec;color:#8f2032}
-.vfw-card-badge svg{width:1.2rem;height:1.2rem;fill:currentColor}
-.vfw-meeting-card .vfw-card-badge svg{width:1rem;height:1rem}
-.vfw-profile #upcoming-events .organization-card-date{display:grid;justify-items:start;gap:.25rem;margin:0;padding:0;border:0;color:#607188;font-size:.82rem;font-weight:850;line-height:1}
-.vfw-profile #upcoming-events .organization-card-date>span:first-child{text-transform:uppercase;letter-spacing:.14em}
-.vfw-profile #upcoming-events .organization-card-day{font-size:2.9rem;line-height:.85;color:var(--profile-deep,#061f3b)}
-.vfw-profile #upcoming-events .vfw-meeting-card .organization-card-date{font-size:.75rem}
-.vfw-profile #upcoming-events .vfw-meeting-card .organization-card-day{font-size:2.3rem}
-.vfw-profile #upcoming-events .event-card h3{margin-top:1.25rem;color:var(--profile-deep,#061f3b);font-size:clamp(1.65rem,2.6vw,2rem);font-weight:850;line-height:1.08;letter-spacing:-.04em;text-transform:capitalize}
-.vfw-profile #upcoming-events .vfw-meeting-card h3{margin-top:.85rem;font-size:clamp(1.35rem,1.7vw,1.58rem);line-height:1.1;letter-spacing:-.03em}
-.vfw-profile #upcoming-events .event-card h3 a{color:inherit;font-size:inherit}
-.vfw-card-facts{display:grid;gap:.55rem;margin-top:1rem}
-.vfw-meeting-card .vfw-card-facts{gap:.42rem;margin-top:.75rem}
-.vfw-card-fact{display:flex;align-items:flex-start;gap:.7rem;margin:0;color:#607188;font-size:.88rem;line-height:1.45}
-.vfw-meeting-card .vfw-card-fact{gap:.5rem;font-size:.79rem;line-height:1.4}
-.vfw-card-icon{flex:0 0 1.2rem;width:1.2rem;height:1.2rem;margin-top:.05rem}
-.vfw-meeting-card .vfw-card-icon{flex-basis:1rem;width:1rem;height:1rem}
-.vfw-card-calendar{fill:none;stroke:#526982;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.vfw-card-pin{fill:var(--profile-accent,#c51f32);stroke:none}.vfw-card-pin circle{fill:#fff}
-.vfw-profile #upcoming-events .annual-meeting-times{gap:0;margin:1.1rem 0 0;border-top:1px solid #d7e0e9}
-.vfw-profile #upcoming-events .vfw-meeting-card .annual-meeting-times{margin-top:.8rem}
-.vfw-profile #upcoming-events .annual-meeting-times div{grid-template-columns:5.7rem 1fr;gap:.85rem;padding:.65rem 0;border-bottom:1px solid #d7e0e9}
-.vfw-profile #upcoming-events .vfw-meeting-card .annual-meeting-times div{grid-template-columns:4.85rem 1fr;gap:.55rem;padding:.45rem 0}
-.vfw-profile #upcoming-events .annual-meeting-times div:last-child{border-bottom:0}
-.vfw-profile #upcoming-events .annual-meeting-times dt{padding-right:.85rem;border-right:1px solid #d7e0e9;color:var(--profile-deep,#061f3b);font-size:.9rem;font-weight:850;font-variant-numeric:tabular-nums}
-.vfw-profile #upcoming-events .vfw-meeting-card .annual-meeting-times dt{padding-right:.55rem;font-size:.8rem}
-.vfw-profile #upcoming-events .annual-meeting-times dd{color:var(--profile-deep,#061f3b);font-size:.9rem;font-weight:400}
-.vfw-profile #upcoming-events .vfw-meeting-card .annual-meeting-times dd{font-size:.8rem}
-.vfw-card-description{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:4;margin:1.1rem 0 0!important;padding-top:1rem;border-top:1px solid #d7e0e9;color:#607188!important;font-size:.85rem;line-height:1.55}
-.vfw-meeting-card .vfw-card-description{margin-top:.8rem!important;padding-top:.75rem;font-size:.79rem;line-height:1.45}
-.vfw-card-confirmation{margin-top:.35rem;color:#607188;font-size:.82rem;line-height:1.45}
-.vfw-meeting-card .vfw-card-confirmation{font-size:.76rem;line-height:1.4}
-.vfw-card-attendance{display:grid;gap:.2rem;margin:.8rem 0 0!important;padding:.75rem .85rem;border-radius:8px;background:#f2f5f9;color:#607188!important;font-size:.8rem!important;line-height:1.4}
-.vfw-card-attendance strong{color:var(--profile-deep,#061f3b);font-size:.7rem;letter-spacing:.07em;text-transform:uppercase}
-.vfw-card-attendance span{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}
-.vfw-card-link{width:100%;margin-top:auto;padding-top:1rem;border-top:1px solid #d7e0e9;font-size:.85rem;font-weight:800}
-.vfw-card-link span{font-size:1rem}
-@media(max-width:1000px){.vfw-profile #upcoming-events .vfw-event-grid>.event-card{grid-column:span 3}}
-@media(max-width:700px){.vfw-profile #upcoming-events .vfw-event-grid>.event-card{grid-column:1/-1}.vfw-profile #upcoming-events .vfw-meeting-card{padding:22px}.vfw-card-badge{font-size:.68rem}.vfw-profile #upcoming-events .event-card h3{font-size:1.7rem}}
 
 .detail-page{--profile-primary:#174b97;--profile-deep:#102b52;--profile-accent:#c5263c;--profile-accent-text:#fff;--profile-page:#f3f5f8;--profile-panel:#fff;--profile-panel-alt:#eef3fa;--profile-line:#d7dde6;--profile-mark:rgba(255,255,255,.08);--profile-hero:radial-gradient(circle at 84% 28%,#315c83 0,#17446d 30%,#0b2949 68%);position:relative;background:var(--profile-page);box-shadow:0 0 0 100vmax var(--profile-page);clip-path:inset(0 -100vmax)}
 html:has(.detail-page),body:has(.detail-page){overflow-x:clip}

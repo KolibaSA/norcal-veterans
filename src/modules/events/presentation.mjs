@@ -49,7 +49,7 @@ function organizationMark(organization){
 }
 function organizationTheme(organization){
  const type=organization?.organization_type||'';
- if(type==='VFW')return 'vfw';if(type==='American Legion')return 'legion';if(type==='Marine Corps League')return 'mcl';if(type==='Toys for Tots')return 'toys';if(type==='Veterans Beer Club')return 'vbc';return 'community';
+ if(type==='VFW')return 'vfw';if(type==='American Legion')return 'legion';if(type==='Marine Corps League')return 'mcl';if(type==='Toys for Tots')return 'toys';if(type==='Veterans Beer Club')return 'vbc';if(type==='DAV')return 'dav';if(type==='County Veterans Office')return 'county';if(type==='Equine program provider')return 'equine';if(type==='Veteran remembrance program')return 'remembrance';if(type==='Veterans nonprofit')return 'nonprofit';return 'community';
 }
 function compactEventTitle(title,organization){
  let output=String(title||'').trim(),name=String(organization?.verified_name||'').trim();
@@ -62,6 +62,7 @@ function eventTime(v){
  const start=eventTimeFormat.format(new Date(v.start_at));
  return v.end_at?`${start} – ${eventTimeFormat.format(new Date(v.end_at))}`:start;
 }
+const meetingTimeLabel=value=>{const [hour,minute]=value.split(':').map(Number);return `${hour%12||12}:${String(minute).padStart(2,'0')} ${hour<12?'AM':'PM'}`;};
 function compactOccurrenceDays(occurrences){
  const months=new Set(occurrences.map(event=>eventMonthShort.format(new Date(event.start_at))));
  const values=occurrences.map(event=>months.size===1?eventDayFormat.format(new Date(event.start_at)):`${eventMonthShort.format(new Date(event.start_at))} ${eventDayFormat.format(new Date(event.start_at))}`);
@@ -80,11 +81,12 @@ export function publicEventCard(v,organizations=[],occurrences=eventOccurrences(
  const image=v.image_url&&visual!=='poppy'?`<img src="${pe(v.image_url)}" alt="${pe(title)} event image" width="320" height="320" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:`<span class="event-card-fallback" aria-hidden="true">${icons[visual]}</span>`;
  const dateBlock=multi?`<div class="event-card-date event-card-date--multi"><span>${new Set(occurrences.map(event=>eventMonthShort.format(new Date(event.start_at)))).size===1?pe(eventMonthShort.format(new Date(v.start_at))):'DATES'}</span><strong>${pe(compactOccurrenceDays(occurrences))}</strong><em>MULTI-DAY EVENT</em></div>`:`<time class="event-card-date" datetime="${pe(v.date_only?pacificDayKey(v.start_at):v.start_at)}"><span>${pe(eventMonthShort.format(new Date(v.start_at)))}</span><strong>${pe(eventDayFormat.format(new Date(v.start_at)))}</strong></time>`;
  const dates=multi?`<div class="event-card-occurrences"><b>Event Dates:</b><span>${occurrences.map(event=>`<time datetime="${pe(event.date_only?pacificDayKey(event.start_at):event.start_at)}">${pe(eventChipFormat.format(new Date(event.start_at)))}</time>`).join('')}</span></div>`:'';
+ const meetingTimes=Array.isArray(v.meeting_times)&&v.meeting_times.length?`<div class="event-card-meeting-times"><b>Meeting times:</b><span>${v.meeting_times.map(entry=>`<span><strong>${pe(meetingTimeLabel(entry.time))}</strong> ${pe(entry.label)}</span>`).join('')}</span></div>`:'';
  const actions=showActions?[v.volunteer_enabled&&v.volunteer_url?`<a class="event-card-action event-card-action--volunteer" href="${pe(v.volunteer_url)}">Volunteer Now</a>`:'',v.donate_enabled&&v.donate_url?`<a class="event-card-action event-card-action--donate" href="${pe(v.donate_url)}">Donate Now</a>`:'',v.tickets_enabled&&v.tickets_url?`<a class="event-card-action event-card-action--tickets" href="${pe(v.tickets_url)}">Buy Tickets</a>`:''].filter(Boolean).join(''):'';
  return `<article class="event-card event-card--public event-card--${visual}${actions?' event-card--has-actions':''}">
   <div class="event-card-media">${image}</div>
   ${dateBlock}
-  <div class="event-card-content"><div class="event-card-title-row"><h2>${pe(title)}</h2>${hostBadge}</div>${participants}${dates}<p class="event-card-summary"><strong>${pe(multi?occurrenceTime(occurrences):eventTime(v))}</strong><span aria-hidden="true"> · </span>${pe(v.venue)}</p></div>
+  <div class="event-card-content"><div class="event-card-title-row"><h2>${pe(title)}</h2>${hostBadge}</div>${participants}${dates}${meetingTimes}<p class="event-card-summary"><strong>${pe(multi?occurrenceTime(occurrences):eventTime(v))}</strong><span aria-hidden="true"> · </span>${pe(v.venue)}</p></div>
   <div class="event-card-backdrop event-card-theme--${organizationTheme(host)}" aria-hidden="true"><span>${pe(organizationMark(host))}</span></div>
   ${actions?`<div class="event-card-actions">${actions}</div>`:''}
   <a class="event-card-hit-area" href="/events/${pe(v.id)}" aria-label="View details for ${pe(title)}"><span class="sr-only">View details for ${pe(title)}</span></a>
