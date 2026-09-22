@@ -74,12 +74,13 @@ test('all organization templates and the shared Events page use the themed share
     const empty = render(url, records, []).html;
     assert.match(empty, /No upcoming events are currently published/);
     assert.doesNotMatch(empty, /class="panel month-calendar"|id="annual-meetings"/);
-    const assigned = {...event, id:'assigned-event', title:'Assigned event', organization_id:record.id, start_at:'2099-01-01T18:00:00-08:00'};
+    const assigned = {...event, id:'assigned-event', title:'Assigned event', organization_id:record.id, start_at:'2099-01-01T18:00:00-08:00',volunteer_enabled:true,volunteer_url:'https://example.org/volunteer',donate_enabled:true,donate_url:'https://example.org/donate',tickets_enabled:true,tickets_url:'https://example.org/tickets'};
     const populated = render(url, records, [assigned, {...assigned, id:'other-event', title:'Other organization event', organization_id:'other'}]).html;
     assert.ok(populated.includes('href="/events/assigned-event"'));
     assert.match(populated,new RegExp(`event-card-theme--${themes.get(record.organization_type)||'community'}`));
     assert.match(populated,/class="event-card event-card--public/);
     assert.ok(populated.includes(`class="event-card-host" href="/organizations/${record.id}"`));
+    for(const action of ['Volunteer Now','Donate Now','Buy Tickets'])assert.match(populated,new RegExp(`>${action}<`));
     assert.doesNotMatch(populated, /Other organization event/);
   }
   assert.match(render(new URL('https://site.test/mcl-yolo'), records, []).html, /id="upcoming-events"/);

@@ -37,8 +37,7 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
   const groups = groupedOccurrences(upcoming, organizationId);
   const cards = groups.map(occurrences => {
     const event = combinedEvent(occurrences);
-    const showActions = organizationId === 'vfw-ca-8151' && event.kind !== 'Organization meeting';
-    return publicEventCard(event, organizations, occurrences, {showActions});
+    return publicEventCard(event, organizations, occurrences);
   }).join('');
   return `<section id="upcoming-events" class="events-page organization-events" aria-labelledby="upcoming-events-title">
     <h2 id="upcoming-events-title">Upcoming events</h2>

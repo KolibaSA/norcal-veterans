@@ -72,7 +72,7 @@ function occurrenceTime(occurrences){
  const values=occurrences.map(event=>eventTime(event));
  return occurrences.every(event=>event.date_only)?'Time TBD':values.every(value=>value===values[0])?values[0]:'Times vary';
 }
-export function publicEventCard(v,organizations=[],occurrences=eventOccurrences(v),{showActions=false}={}){
+export function publicEventCard(v,organizations=[],occurrences=eventOccurrences(v)){
  occurrences=[...occurrences].sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at));
  const multi=occurrences.length>1;
  const host=organizations.find(organization=>organization.id===v.organization_id),visual=eventVisual(v),title=compactEventTitle(v.title,host),accepted=(v.accepted_organization_ids||[]).map(id=>organizations.find(organization=>organization.id===id)).filter(organization=>organization&&organization.id!==host?.id),shown=accepted.slice(0,2),remaining=accepted.length-shown.length;
@@ -82,7 +82,7 @@ export function publicEventCard(v,organizations=[],occurrences=eventOccurrences(
  const dateBlock=multi?`<div class="event-card-date event-card-date--multi"><span>${new Set(occurrences.map(event=>eventMonthShort.format(new Date(event.start_at)))).size===1?pe(eventMonthShort.format(new Date(v.start_at))):'DATES'}</span><strong>${pe(compactOccurrenceDays(occurrences))}</strong><em>MULTI-DAY EVENT</em></div>`:`<time class="event-card-date" datetime="${pe(v.date_only?pacificDayKey(v.start_at):v.start_at)}"><span>${pe(eventMonthShort.format(new Date(v.start_at)))}</span><strong>${pe(eventDayFormat.format(new Date(v.start_at)))}</strong></time>`;
  const dates=multi?`<div class="event-card-occurrences"><b>Event Dates:</b><span>${occurrences.map(event=>`<time datetime="${pe(event.date_only?pacificDayKey(event.start_at):event.start_at)}">${pe(eventChipFormat.format(new Date(event.start_at)))}</time>`).join('')}</span></div>`:'';
  const meetingTimes=Array.isArray(v.meeting_times)&&v.meeting_times.length?`<div class="event-card-meeting-times"><b>Meeting times:</b><span>${v.meeting_times.map(entry=>`<span><strong>${pe(meetingTimeLabel(entry.time))}</strong> ${pe(entry.label)}</span>`).join('')}</span></div>`:'';
- const actions=showActions?[v.volunteer_enabled&&v.volunteer_url?`<a class="event-card-action event-card-action--volunteer" href="${pe(v.volunteer_url)}">Volunteer Now</a>`:'',v.donate_enabled&&v.donate_url?`<a class="event-card-action event-card-action--donate" href="${pe(v.donate_url)}">Donate Now</a>`:'',v.tickets_enabled&&v.tickets_url?`<a class="event-card-action event-card-action--tickets" href="${pe(v.tickets_url)}">Buy Tickets</a>`:''].filter(Boolean).join(''):'';
+ const actions=[v.volunteer_enabled&&v.volunteer_url?`<a class="event-card-action event-card-action--volunteer" href="${pe(v.volunteer_url)}">Volunteer Now</a>`:'',v.donate_enabled&&v.donate_url?`<a class="event-card-action event-card-action--donate" href="${pe(v.donate_url)}">Donate Now</a>`:'',v.tickets_enabled&&v.tickets_url?`<a class="event-card-action event-card-action--tickets" href="${pe(v.tickets_url)}">Buy Tickets</a>`:''].filter(Boolean).join('');
  return `<article class="event-card event-card--public event-card--${visual}${actions?' event-card--has-actions':''}">
   <div class="event-card-media">${image}</div>
   ${dateBlock}

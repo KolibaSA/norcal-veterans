@@ -41,7 +41,7 @@ test('events page groups compact cards by month and identifies hosts and accepte
   const base={description:'A deliberately omitted card description.',venue:'Grocery Outlet, Davis, CA',status:'published',kind:'Community event',county:'Yolo',city:'Davis',audience:'Community members welcome.'};
   const html=eventsPagePublic(new URL('https://test/events'),[
     {...base,id:'poppy',title:'VFW Post 8151 Buddy Poppy Fundraiser',start_at:'2099-09-16T18:00:00-07:00',organization_id:'vfw-ca-8151',accepted_organization_ids:['legion-ca-77','mcl-yolo'],image_url:'https://images.example.org/not-a-poppy.jpg',volunteer_enabled:true,volunteer_url:'https://example.org/volunteer'},
-    {...base,id:'train',title:'Halloween Train',start_at:'2099-10-31T11:00:00-07:00',organization_id:'legion-ca-77',image_url:'https://images.example.org/train.jpg'}
+    {...base,id:'train',title:'Halloween Train',start_at:'2099-10-31T11:00:00-07:00',organization_id:'legion-ca-77',image_url:'https://images.example.org/train.jpg',volunteer_enabled:true,volunteer_url:'https://example.org/volunteer',donate_enabled:true,donate_url:'https://example.org/donate',tickets_enabled:true,tickets_url:'https://example.org/tickets'}
   ],organizations);
   assert.match(html,/September 2099/);assert.match(html,/October 2099/);
   assert.match(html,/class="event-card-media"><span class="event-card-fallback"/);
@@ -49,7 +49,9 @@ test('events page groups compact cards by month and identifies hosts and accepte
   assert.match(html,/<h2>Buddy Poppy Fundraiser<\/h2>/);assert.doesNotMatch(html,/<h2><a[^>]*>Buddy Poppy Fundraiser<\/a>/);
   assert.match(html,/class="event-card-hit-area" href="\/events\/poppy"/);assert.match(html,/event-card--poppy/);
   assert.doesNotMatch(html,/>Details\s*</);
-  assert.doesNotMatch(html,/Volunteer Now|event-card-actions/);
+  assert.match(html,/href="https:\/\/example\.org\/volunteer"[^>]*>Volunteer Now/);
+  assert.match(html,/href="https:\/\/example\.org\/donate"[^>]*>Donate Now/);
+  assert.match(html,/href="https:\/\/example\.org\/tickets"[^>]*>Buy Tickets/);
   assert.match(html,/viewBox="0 0 64 64"/);assert.match(html,/circle cx="32" cy="29" r="3\.5"/);
   assert.doesNotMatch(html,/not-a-poppy\.jpg/);
   assert.match(html,/Dixon VFW Post 8151/);assert.match(html,/Yolo American Legion Post 77/);assert.match(html,/Marine Corps League - Yolo County Detachment 627/);
