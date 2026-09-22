@@ -5,6 +5,13 @@
               <div class="grid">
                 <div><label for="start">Starts (Pacific time)</label><input id="start" type="datetime-local"></div>
                 <div><label for="end">Ends (Pacific time, optional)</label><input id="end" type="datetime-local"></div>
+                <div class="event-date-series">
+                  <label for="additionalDate">Additional event dates (optional)</label>
+                  <p class="small muted">Add each extra date once. It will use the same time, location, event details, and action links.</p>
+                  <div class="event-date-adder"><input id="additionalDate" type="date"><button id="addEventDate" type="button" class="secondary">Add date</button></div>
+                  <input id="additionalDates" type="hidden">
+                  <div id="additionalDateList" class="event-date-list" aria-live="polite"></div>
+                </div>
                 <div><label for="venue">Venue</label><input id="venue" maxlength="500"></div>
                 <div><label for="eventCity">City</label><input id="eventCity" maxlength="120"></div>
                 <div><label for="eventCounty">County</label><input id="eventCounty" list="countyOptions" maxlength="120"></div>

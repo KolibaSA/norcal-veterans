@@ -1122,6 +1122,15 @@ function sanitizePublicEvent(record2) {
   out.start_at = start;
   out.date_only = record2.date_only === true;
   out.end_at = out.date_only ? null : end;
+  const rawOccurrences = Array.isArray(record2.occurrences) ? record2.occurrences : Array.isArray(record2.additional_occurrences) ? record2.additional_occurrences : [];
+  const occurrences = [{ start_at: out.start_at, end_at: out.end_at }];
+  for (const occurrence of rawOccurrences.slice(0, 31)) {
+    const occurrenceStart = publicInstant(occurrence?.start_at), occurrenceEnd = occurrence?.end_at ? publicInstant(occurrence.end_at) : null;
+    if (!occurrenceStart || occurrence?.end_at && !occurrenceEnd || occurrenceEnd && Date.parse(occurrenceEnd) < Date.parse(occurrenceStart)) continue;
+    if (!occurrences.some((item) => item.start_at === occurrenceStart && item.end_at === occurrenceEnd)) occurrences.push({ start_at: occurrenceStart, end_at: out.date_only ? null : occurrenceEnd });
+  }
+  occurrences.sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at));
+  out.occurrences = occurrences;
   const meetingTimes = Array.isArray(record2.meeting_times) ? record2.meeting_times.slice(0, 3).filter((entry) => entry && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(entry.time) && typeof entry.label === "string" && entry.label.trim()).map((entry) => ({ time: entry.time, label: publicText(entry.label, 100) })) : [];
   if (out.kind === "Organization meeting" && meetingTimes.length) out.meeting_times = meetingTimes;
   out.source_url = publicURL2(record2.source_url);
@@ -1143,7 +1152,17 @@ var publicDate = (s) => new Intl.DateTimeFormat("en-US", { dateStyle: "full", ti
 var publicEventDate = (v) => v.date_only ? new Intl.DateTimeFormat("en-US", { dateStyle: "full", timeZone: "America/Los_Angeles" }).format(new Date(v.start_at)) + " · Time to be confirmed" : publicDate(v.start_at);
 var pacificDayKey = (s) => new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Los_Angeles" }).format(new Date(s));
 var isVfw8151Meeting = (v) => v.kind === "Organization meeting" && v.organization_id === "vfw-ca-8151";
-var upcomingEvents = (events, now = Date.now()) => events.map(sanitizePublicEvent).filter((v) => v && v.status === "published" && (v.date_only ? pacificDayKey(v.start_at) >= pacificDayKey(now) : Date.parse(v.end_at || v.start_at) + (!v.end_at ? 864e5 : 0) >= now)).sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at));
+function eventOccurrences(v) {
+  const schedule = Array.isArray(v?.occurrences) && v.occurrences.length ? v.occurrences : [{ start_at: v?.start_at, end_at: v?.end_at || null }];
+  return schedule.map((occurrence) => ({ ...v, start_at: occurrence.start_at, end_at: occurrence.end_at || null, occurrences: void 0 })).sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at));
+}
+var occurrenceIsUpcoming = (v, now) => v.date_only ? pacificDayKey(v.start_at) >= pacificDayKey(now) : Date.parse(v.end_at || v.start_at) + (!v.end_at ? 864e5 : 0) >= now;
+var upcomingEvents = (events, now = Date.now()) => events.map(sanitizePublicEvent).filter((v) => v && v.status === "published").map((v) => {
+  const occurrences = eventOccurrences(v).filter((occurrence) => occurrenceIsUpcoming(occurrence, now));
+  if (!occurrences.length) return null;
+  const first = occurrences[0];
+  return { ...v, start_at: first.start_at, end_at: first.end_at, occurrences: occurrences.map(({ start_at, end_at }) => ({ start_at, end_at })) };
+}).filter(Boolean).sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at));
 function eventReview(v) {
   if (v.source_kind === "project_team") return `<span class="label">Project team update</span><h2>Check before you go.</h2><p>${pe(v.source_note || "Event details supplied by the project team.")}</p><p>${v.source_checked && v.source_url ? "Supporting source reviewed " + pe(v.source_checked) + "." : "Independent source verification is pending."}</p>`;
   if (v.source_checked && v.source_url) return `<span class="label">Published source checked</span><h2>Check before you go.</h2><p>Source reviewed ${pe(v.source_checked)}. This listing has not been directly confirmed with the organizer.</p>`;
@@ -1207,7 +1226,7 @@ function occurrenceTime(occurrences) {
   const values = occurrences.map((event) => eventTime(event));
   return occurrences.every((event) => event.date_only) ? "Time TBD" : values.every((value) => value === values[0]) ? values[0] : "Times vary";
 }
-function publicEventCard(v, organizations = [], occurrences = [v], { showActions = false } = {}) {
+function publicEventCard(v, organizations = [], occurrences = eventOccurrences(v), { showActions = false } = {}) {
   occurrences = [...occurrences].sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at));
   const multi = occurrences.length > 1;
   const host = organizations.find((organization) => organization.id === v.organization_id), visual = eventVisual(v), title = compactEventTitle(v.title, host), accepted = (v.accepted_organization_ids || []).map((id) => organizations.find((organization) => organization.id === id)).filter((organization) => organization && organization.id !== host?.id), shown = accepted.slice(0, 2), remaining = accepted.length - shown.length;
@@ -1245,8 +1264,9 @@ function eventsPagePublic(url, events, organizations = []) {
   return shell("Community events | Yolo Solano Veterans", "Find published veteran community events, remembrance ceremonies and volunteer opportunities in Yolo and Solano counties.", `<section class="wrap about-page events-page"><span class="eyebrow">MAKE TIME FOR COMMUNITY</span><h1>Show up.<br><em>Connect. Give back.</em></h1><p class="intro">Published local events and opportunities to serve across Yolo and Solano counties.</p><section class="panel"><span class="eyebrow">REMEMBER &amp; HONOR</span><h2>Memorial Day services</h2><p>Find services by city, with verified past schedules and 2027 details to be confirmed.</p><a class="button outline" href="/memorial-day">Explore the city-by-city guide →</a></section><form class="panel inline-form" method="get"><label for="event-city">Explore by city</label><select id="event-city" name="city">${eventCityOptions(city)}</select><button class="button">Show events</button><a href="/events.ics">Download calendar ↓</a></form><p class="results-note">${upcoming.length} upcoming listings · Pacific time. Open each listing for its source and verification status; confirm schedule, accessibility and attendance rules with the host. Calendar downloads are a snapshot and do not refresh automatically.</p>${listing}<div class="partner-strip panel"><h2>Have something to share?</h2><p>Send the public details and organizer’s source. A review comes before publication.</p><a class="button light" href="/for-organizations?kind=event">Propose an event →</a></div></section>`, { path: "/events" });
 }
 function eventDetail(v, organizations = []) {
-  const host = organizations.find((r) => r.id === v.organization_id), past = !upcomingEvents([v]).length;
-  return shell(`${v.title} | Yolo Solano Veterans`, v.description, `<section class="wrap detail-page"><a class="back" href="/events">← All events</a><div class="profile-heading"><span class="eyebrow">${pe(v.kind)} · ${pe(v.county)} COUNTY</span><h1>${pe(v.title)}</h1>${past ? '<span class="label amber">Past event</span>' : ""}<p>${pe(v.description)}</p></div><div class="profile-grid"><section class="panel"><h2>Plan your visit</h2><dl><div><dt>When</dt><dd>${pe(publicEventDate(v))}${!v.date_only && v.end_at ? "<br>Ends " + pe(publicDate(v.end_at)) : ""}</dd></div><div><dt>Where</dt><dd>${pe(v.venue)}<br><a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(v.venue)}" target="_blank" rel="noopener noreferrer">Open venue in Maps ↗</a></dd></div><div><dt>Who can attend?</dt><dd>${pe(v.audience)}</dd></div><div><dt>Organizer</dt><dd>${pe(v.organizer)}${host ? `<br><a href="/organizations/${host.id}">View related organization →</a>` : ""}</dd></div></dl>${v.time_note ? `<p class="small-note">${pe(v.time_note)}</p>` : ""}<div class="profile-actions">${v.source_url ? `<a class="button" href="${pe(v.source_url)}" target="_blank" rel="noopener noreferrer">${v.source_kind === "project_team" ? "Organizer website" : "Organizer details / registration"} ↗</a>` : ""}<a class="button outline" href="/events.ics?event=${pe(v.id)}">Add to calendar ↓</a></div></section><aside class="panel">${eventReview(v)}<p>Follow the organizer’s latest instructions for registration, accessibility, weather changes and cancellations.</p><a href="/for-organizations?kind=event">Suggest a correction →</a></aside></div></section>`, { path: "/events/" + v.id, detail: true });
+  const current = upcomingEvents([v])[0], event = current || sanitizePublicEvent(v) || v, occurrences = eventOccurrences(event), host = organizations.find((r) => r.id === event.organization_id), past = !current;
+  const when = occurrences.length === 1 ? `${pe(publicEventDate(occurrences[0]))}${!event.date_only && occurrences[0].end_at ? "<br>Ends " + pe(publicDate(occurrences[0].end_at)) : ""}` : `<ul class="event-detail-dates">${occurrences.map((occurrence) => `<li><time datetime="${pe(event.date_only ? pacificDayKey(occurrence.start_at) : occurrence.start_at)}">${pe(publicEventDate(occurrence))}${!event.date_only && occurrence.end_at ? " – " + pe(eventTimeFormat.format(new Date(occurrence.end_at))) : ""}</time></li>`).join("")}</ul>`;
+  return shell(`${event.title} | Yolo Solano Veterans`, event.description, `<section class="wrap detail-page"><a class="back" href="/events">← All events</a><div class="profile-heading"><span class="eyebrow">${pe(event.kind)} · ${pe(event.county)} COUNTY</span><h1>${pe(event.title)}</h1>${past ? '<span class="label amber">Past event</span>' : ""}<p>${pe(event.description)}</p></div><div class="profile-grid"><section class="panel"><h2>Plan your visit</h2><dl><div><dt>When</dt><dd>${when}</dd></div><div><dt>Where</dt><dd>${pe(event.venue)}<br><a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(event.venue)}" target="_blank" rel="noopener noreferrer">Open venue in Maps ↗</a></dd></div><div><dt>Who can attend?</dt><dd>${pe(event.audience)}</dd></div><div><dt>Organizer</dt><dd>${pe(event.organizer)}${host ? `<br><a href="/organizations/${host.id}">View related organization →</a>` : ""}</dd></div></dl>${event.time_note ? `<p class="small-note">${pe(event.time_note)}</p>` : ""}<div class="profile-actions">${event.source_url ? `<a class="button" href="${pe(event.source_url)}" target="_blank" rel="noopener noreferrer">${event.source_kind === "project_team" ? "Organizer website" : "Organizer details / registration"} ↗</a>` : ""}<a class="button outline" href="/events.ics?event=${pe(event.id)}">Add to calendar ↓</a></div></section><aside class="panel">${eventReview(event)}<p>Follow the organizer’s latest instructions for registration, accessibility, weather changes and cancellations.</p><a href="/for-organizations?kind=event">Suggest a correction →</a></aside></div></section>`, { path: "/events/" + event.id, detail: true });
 }
 var icsEscape = (s) => String(s || "").replaceAll("\\", "\\\\").replace(/\r?\n/g, "\\n").replaceAll(";", "\\;").replaceAll(",", "\\,");
 var utc = (s) => new Date(s).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
@@ -1272,8 +1292,11 @@ function eventCalendar(events) {
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Yolo Solano Veterans//Community Calendar//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Yolo Solano Veterans"];
   for (const v of events) {
     if (v.status !== "published") continue;
-    const day = pacificDayKey(v.start_at), nextDay = new Date(Date.parse(day + "T00:00:00Z") + 864e5).toISOString().slice(0, 10), schedule = v.date_only ? ["DTSTART;VALUE=DATE:" + day.replaceAll("-", ""), "DTEND;VALUE=DATE:" + nextDay.replaceAll("-", "")] : ["DTSTART:" + utc(v.start_at), ...v.end_at ? ["DTEND:" + utc(v.end_at)] : []], note = (v.date_only ? "Time to be confirmed. This calendar entry reserves the date; event hours have not been announced.\n" : "") + v.description + "\n" + v.audience + (v.source_kind === "project_team" ? "\n" + (v.source_note || "Details supplied by the project team.") : "") + (v.source_url ? "\nConfirm latest details: " + v.source_url : "");
-    lines.push("BEGIN:VEVENT", "UID:" + icsEscape(v.id) + "@yolo-county-veterans", "DTSTAMP:" + stamp, ...schedule, "SUMMARY:" + icsEscape(v.title + (v.date_only ? " — Time to be confirmed" : "")), "DESCRIPTION:" + icsEscape(note), "LOCATION:" + icsEscape(v.venue), ...!isVfw8151Meeting(v) ? ["URL:" + origin + "/events/" + encodeURIComponent(v.id)] : [], "END:VEVENT");
+    const occurrences = eventOccurrences(v);
+    for (const occurrence of occurrences) {
+      const day = pacificDayKey(occurrence.start_at), nextDay = new Date(Date.parse(day + "T00:00:00Z") + 864e5).toISOString().slice(0, 10), schedule = v.date_only ? ["DTSTART;VALUE=DATE:" + day.replaceAll("-", ""), "DTEND;VALUE=DATE:" + nextDay.replaceAll("-", "")] : ["DTSTART:" + utc(occurrence.start_at), ...occurrence.end_at ? ["DTEND:" + utc(occurrence.end_at)] : []], note = (v.date_only ? "Time to be confirmed. This calendar entry reserves the date; event hours have not been announced.\n" : "") + v.description + "\n" + v.audience + (v.source_kind === "project_team" ? "\n" + (v.source_note || "Details supplied by the project team.") : "") + (v.source_url ? "\nConfirm latest details: " + v.source_url : ""), uid = occurrences.length > 1 ? `${v.id}-${day}` : v.id;
+      lines.push("BEGIN:VEVENT", "UID:" + icsEscape(uid) + "@yolo-county-veterans", "DTSTAMP:" + stamp, ...schedule, "SUMMARY:" + icsEscape(v.title + (v.date_only ? " — Time to be confirmed" : "")), "DESCRIPTION:" + icsEscape(note), "LOCATION:" + icsEscape(v.venue), ...!isVfw8151Meeting(v) ? ["URL:" + origin + "/events/" + encodeURIComponent(v.id)] : [], "END:VEVENT");
+    }
   }
   lines.push("END:VCALENDAR");
   return lines.map(foldICS).join("\r\n") + "\r\n";
@@ -1299,11 +1322,11 @@ function organizationUpcomingEvents(events, organizationId, now = Date.now(), or
     }
     const key = [event.title, event.organization_id, event.venue, event.city, event.county].map((value) => String(value || "").trim().toLowerCase()).join("\0");
     const existing = communityGroups.get(key);
-    if (existing) existing.push(event);
+    const schedule = eventOccurrences(event);
+    if (existing) existing.push(...schedule);
     else {
-      const group = [event];
-      communityGroups.set(key, group);
-      grouped.push(group);
+      communityGroups.set(key, schedule);
+      grouped.push(schedule);
     }
   }
   const cards = grouped.map((occurrences) => {
@@ -1316,6 +1339,7 @@ function organizationUpcomingEvents(events, organizationId, now = Date.now(), or
       return `<div class="events-page vfw-public-event-card">${publicEventCard(cardEvent, [host, ...organizations.filter((organization) => organization.id !== organizationId)], occurrences, { showActions: true })}</div>`;
     }
     const date = new Date(event.start_at);
+    const schedule = eventOccurrences(event);
     const dateHeader = `<time class="organization-card-date" datetime="${escapeHtml(event.start_at)}" aria-label="${escapeHtml(dateFormat.format(date))}"><span>${escapeHtml(monthFormat.format(date))}</span><span class="organization-card-day">${escapeHtml(dayFormat.format(date))}</span></time>`;
     const times = event.meeting_times?.length ? `<dl class="annual-meeting-times">${event.meeting_times.map((entry) => `<div><dt>${escapeHtml(wallTime(entry.time))}</dt><dd>${escapeHtml(entry.label)}</dd></div>`).join("")}</dl>` : `<p class="event-time">${event.date_only ? "Time to be confirmed" : escapeHtml(timeFormat.format(new Date(event.start_at)))}${!event.date_only && event.end_at ? ` – ${escapeHtml(timeFormat.format(new Date(event.end_at)))}` : ""}</p>`;
     if (vfw8151Event) {
@@ -1342,6 +1366,7 @@ function organizationUpcomingEvents(events, organizationId, now = Date.now(), or
       <h3><a href="/events/${escapeHtml(event.id)}">${escapeHtml(event.title)}</a></h3>
       <time datetime="${escapeHtml(event.start_at)}">${escapeHtml(dateFormat.format(new Date(event.start_at)))}</time>
       ${times}
+      ${schedule.length > 1 ? `<p><strong>Event dates:</strong> ${schedule.map((occurrence) => escapeHtml(dateFormat.format(new Date(occurrence.start_at)))).join(" · ")}</p>` : ""}
       ${event.venue ? `<p>${escapeHtml(event.venue)}</p>` : ""}
       ${event.description ? `<p>${escapeHtml(event.description)}</p>` : ""}
       ${event.time_note ? `<p class="small-note">${escapeHtml(event.time_note)}</p>` : ""}
@@ -1614,6 +1639,8 @@ function organizationLinks(record2) {
 
 // src/modules/events/domain.mjs
 var timeZone = "America/Los_Angeles";
+var dayMilliseconds = 864e5;
+var shiftDate = (date, days) => new Date(Date.parse(date + "T00:00:00Z") + days * dayMilliseconds).toISOString().slice(0, 10);
 function validateEvent(input, options = {}) {
   return validatePayload(input, options, (p, { previousPayload: previous = null }) => {
     validatePublicContent(p, previous);
@@ -1629,6 +1656,22 @@ function validateEvent(input, options = {}) {
       p.end_at = canonicalInstant(p.end_at);
       if (Date.parse(p.end_at) < Date.parse(p.start_at)) invalid("The event end must be on or after its start.");
     } else p.end_at = null;
+    const additionalDates = Object.hasOwn(p, "additional_dates") ? p.additional_dates : Array.isArray(previous?.additional_occurrences) ? previous.additional_occurrences.map((occurrence) => pacificLocal(occurrence.start_at).slice(0, 10)) : [];
+    if (!Array.isArray(additionalDates) || additionalDates.length > 30) invalid("Add no more than 30 additional event dates.");
+    const primaryLocal = pacificLocal(p.start_at), primaryDate = primaryLocal.slice(0, 10);
+    const dates = [...new Set(additionalDates.map(canonicalDate))].sort();
+    if (dates.some((date) => date <= primaryDate)) invalid("Every additional event date must be after the first event date.");
+    const previousOccurrences = new Map((Array.isArray(previous?.additional_occurrences) ? previous.additional_occurrences : []).filter((occurrence) => object(occurrence) && present(occurrence.start_at)).map((occurrence) => [pacificLocal(occurrence.start_at).slice(0, 10), occurrence]));
+    const endLocal = p.end_at ? pacificLocal(p.end_at) : null;
+    const endDayOffset = endLocal ? Math.round((Date.parse(endLocal.slice(0, 10) + "T00:00:00Z") - Date.parse(primaryDate + "T00:00:00Z")) / dayMilliseconds) : 0;
+    p.additional_occurrences = dates.map((date) => {
+      const prior = previousOccurrences.get(date);
+      const start_at = p.date_only ? pacificToInstant(date, { dateOnly: true, previousInstant: prior?.start_at }) : pacificToInstant(`${date}T${primaryLocal.slice(11)}`, { previousInstant: prior?.start_at });
+      const end_at = !p.date_only && endLocal ? pacificToInstant(`${shiftDate(date, endDayOffset)}T${endLocal.slice(11)}`, { previousInstant: prior?.end_at }) : null;
+      if (end_at && Date.parse(end_at) < Date.parse(start_at)) invalid("Every event occurrence must end on or after it starts.");
+      return { start_at, end_at };
+    });
+    delete p.additional_dates;
     delete p.starts_local;
     delete p.ends_local;
     text(p.venue, "Public event venue", 1e3);

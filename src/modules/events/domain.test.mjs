@@ -30,3 +30,16 @@ test('Events validates optional volunteer and donation actions', () => {
   assert.throws(()=>validateEvent({...base,volunteer_enabled:'yes'}),/volunteer option must be true or false/);
   assert.throws(()=>validateEvent({...base,donate_url:'http://example.org/donate'}),/valid HTTPS donation URL/);
 });
+
+test('Events validates and derives additional occurrences from the first date and time', () => {
+  const timed=validateEvent({starts_local:'2026-11-07T10:00',ends_local:'2026-11-07T12:00',additional_dates:['2026-11-11','2026-11-08'],venue:'Public hall'});
+  assert.deepEqual(timed.additional_occurrences,[
+    {start_at:'2026-11-08T18:00:00.000Z',end_at:'2026-11-08T20:00:00.000Z'},
+    {start_at:'2026-11-11T18:00:00.000Z',end_at:'2026-11-11T20:00:00.000Z'}
+  ]);
+  assert.equal(timed.additional_dates,undefined);
+  const dayOnly=validateEvent({starts_local:'2026-11-07',date_only:true,additional_dates:['2026-11-08'],venue:'Public hall'});
+  assert.deepEqual(dayOnly.additional_occurrences,[{start_at:'2026-11-08T08:00:00.000Z',end_at:null}]);
+  assert.throws(()=>validateEvent({starts_local:'2026-11-07',date_only:true,additional_dates:['2026-11-07'],venue:'Public hall'}),/after the first event date/);
+  assert.throws(()=>validateEvent({starts_local:'2026-11-07',date_only:true,additional_dates:['2026-02-30'],venue:'Public hall'}),/does not exist/);
+});

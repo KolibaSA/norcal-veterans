@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createFeature, eventFields, eventPayload, pacificInput, updateDateFields } from './browser.mjs';
+import { createFeature, eventDateList, eventFields, eventPayload, pacificInput, updateDateFields } from './browser.mjs';
 import { controls } from '../../shared/browser-test-support.mjs';
 
 test('event form preserves Pacific day boundaries and unknown payload evidence', () => {
@@ -34,4 +34,14 @@ test('event editor enables required controls only while its feature is active', 
   assert.equal($('start').required, true); assert.equal($('venue').required, true);
   controller.resetEditor();
   assert.equal($('start').required, false); assert.equal($('venue').required, false);
+});
+
+test('event form stores sorted additional dates on one event record', () => {
+  const fields = eventFields({payload:{start_at:'2026-11-07T18:00:00-08:00',additional_occurrences:[
+    {start_at:'2026-11-11T18:00:00-08:00',end_at:null},{start_at:'2026-11-08T18:00:00-08:00',end_at:null}
+  ]}});
+  assert.equal(fields.additionalDates,'2026-11-08,2026-11-11');
+  const payload=eventPayload({...fields,additionalDate:'2026-11-15',recordTitle:'Fundraiser',recordBody:'Details',venue:'Public hall'});
+  assert.deepEqual(payload.additional_dates,['2026-11-08','2026-11-11','2026-11-15']);
+  assert.deepEqual(eventDateList('2026-11-11,2026-11-08,2026-11-11,not-a-date'),['2026-11-08','2026-11-11']);
 });

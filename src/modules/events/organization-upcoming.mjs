@@ -1,5 +1,5 @@
 import {escapeHtml as h} from '../../shared/public-shell.mjs';
-import {publicEventCard,upcomingEvents} from './presentation.mjs';
+import {eventOccurrences,publicEventCard,upcomingEvents} from './presentation.mjs';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {dateStyle: 'full', timeZone: 'America/Los_Angeles'});
 const timeFormat = new Intl.DateTimeFormat('en-US', {hour: 'numeric', minute: '2-digit', timeZone: 'America/Los_Angeles'});
@@ -18,7 +18,8 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
     if(organizationId!=='vfw-ca-8151'||event.kind==='Organization meeting'){grouped.push([event]);continue;}
     const key=[event.title,event.organization_id,event.venue,event.city,event.county].map(value=>String(value||'').trim().toLowerCase()).join('\u0000');
     const existing=communityGroups.get(key);
-    if(existing)existing.push(event);else{const group=[event];communityGroups.set(key,group);grouped.push(group);}
+    const schedule=eventOccurrences(event);
+    if(existing)existing.push(...schedule);else{communityGroups.set(key,schedule);grouped.push(schedule);}
   }
   const cards = grouped.map(occurrences => {
     const event=occurrences[0];
@@ -30,6 +31,7 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
       return `<div class="events-page vfw-public-event-card">${publicEventCard(cardEvent,[host,...organizations.filter(organization=>organization.id!==organizationId)],occurrences,{showActions:true})}</div>`;
     }
     const date = new Date(event.start_at);
+    const schedule = eventOccurrences(event);
     const dateHeader = `<time class="organization-card-date" datetime="${h(event.start_at)}" aria-label="${h(dateFormat.format(date))}"><span>${h(monthFormat.format(date))}</span><span class="organization-card-day">${h(dayFormat.format(date))}</span></time>`;
     const times = event.meeting_times?.length
       ? `<dl class="annual-meeting-times">${event.meeting_times.map(entry => `<div><dt>${h(wallTime(entry.time))}</dt><dd>${h(entry.label)}</dd></div>`).join('')}</dl>`
@@ -62,6 +64,7 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
       <h3><a href="/events/${h(event.id)}">${h(event.title)}</a></h3>
       <time datetime="${h(event.start_at)}">${h(dateFormat.format(new Date(event.start_at)))}</time>
       ${times}
+      ${schedule.length>1?`<p><strong>Event dates:</strong> ${schedule.map(occurrence=>h(dateFormat.format(new Date(occurrence.start_at)))).join(' · ')}</p>`:''}
       ${event.venue ? `<p>${h(event.venue)}</p>` : ''}
       ${event.description ? `<p>${h(event.description)}</p>` : ''}
       ${event.time_note ? `<p class="small-note">${h(event.time_note)}</p>` : ''}

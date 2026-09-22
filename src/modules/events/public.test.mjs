@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {eventDetail,eventCalendar,eventsPagePublic,sanitizePublicEvent} from './public.mjs';
+import {eventDetail,eventCalendar,eventsPagePublic,sanitizePublicEvent,upcomingEvents} from './public.mjs';
 test('event detail works independently with optional supplied organization choices',()=>{
   const event=sanitizePublicEvent({id:'synthetic-event',title:'Synthetic event',description:'Synthetic content',
     start_at:'2030-01-15T18:00:00-08:00',venue:'Synthetic public hall',status:'published',organization_id:'synthetic-host'});
@@ -54,4 +54,20 @@ test('events page groups compact cards by month and identifies hosts and accepte
   assert.match(html,/Dixon VFW Post 8151/);assert.match(html,/Yolo American Legion Post 77/);assert.match(html,/Marine Corps League - Yolo County Detachment 627/);
   assert.match(html,/event-card-theme--vfw/);assert.match(html,/>8151<\/span>/);
   assert.doesNotMatch(html,/deliberately omitted card description/);
+});
+
+test('one event record renders, prunes, details, and exports multiple dates',()=>{
+  const event={id:'multi',title:'Multi-date fundraiser',description:'One event record.',date_only:true,start_at:'2026-11-07T08:00:00Z',additional_occurrences:[
+    {start_at:'2026-11-11T08:00:00Z',end_at:null},{start_at:'2026-11-08T08:00:00Z',end_at:null}
+  ],venue:'Public hall',status:'published',kind:'Community event',city:'Dixon',county:'Solano'};
+  const page=eventsPagePublic(new URL('https://test/events'),[event]);
+  assert.match(page,/<strong>7, 8 &amp; 11<\/strong>/);assert.match(page,/MULTI-DAY EVENT/);
+  for(const value of ['Sat, Nov 7','Sun, Nov 8','Wed, Nov 11'])assert.match(page,new RegExp(value));
+  const pruned=upcomingEvents([event],Date.parse('2026-11-08T20:00:00Z'))[0];
+  assert.deepEqual(pruned.occurrences.map(occurrence=>occurrence.start_at),['2026-11-08T08:00:00.000Z','2026-11-11T08:00:00.000Z']);
+  const single=upcomingEvents([event],Date.parse('2026-11-09T20:00:00Z'))[0];
+  assert.equal(single.occurrences.length,1);assert.equal(single.start_at,'2026-11-11T08:00:00.000Z');
+  const detail=eventDetail(event);assert.equal((detail.match(/<li><time/g)||[]).length,3);
+  const calendar=eventCalendar([event]);assert.equal((calendar.match(/BEGIN:VEVENT/g)||[]).length,3);
+  for(const day of ['20261107','20261108','20261111'])assert.match(calendar,new RegExp(`DTSTART;VALUE=DATE:${day}`));
 });

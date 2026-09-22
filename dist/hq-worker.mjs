@@ -1275,6 +1275,8 @@ This assignment permits editing this organization’s own public profile only. I
 
 // src/modules/events/domain.mjs
 var timeZone = "America/Los_Angeles";
+var dayMilliseconds = 864e5;
+var shiftDate = (date, days) => new Date(Date.parse(date + "T00:00:00Z") + days * dayMilliseconds).toISOString().slice(0, 10);
 function validateEvent(input, options = {}) {
   return validatePayload(input, options, (p, { previousPayload: previous = null }) => {
     validatePublicContent(p, previous);
@@ -1290,6 +1292,22 @@ function validateEvent(input, options = {}) {
       p.end_at = canonicalInstant(p.end_at);
       if (Date.parse(p.end_at) < Date.parse(p.start_at)) invalid("The event end must be on or after its start.");
     } else p.end_at = null;
+    const additionalDates = Object.hasOwn(p, "additional_dates") ? p.additional_dates : Array.isArray(previous?.additional_occurrences) ? previous.additional_occurrences.map((occurrence) => pacificLocal(occurrence.start_at).slice(0, 10)) : [];
+    if (!Array.isArray(additionalDates) || additionalDates.length > 30) invalid("Add no more than 30 additional event dates.");
+    const primaryLocal = pacificLocal(p.start_at), primaryDate = primaryLocal.slice(0, 10);
+    const dates = [...new Set(additionalDates.map(canonicalDate))].sort();
+    if (dates.some((date) => date <= primaryDate)) invalid("Every additional event date must be after the first event date.");
+    const previousOccurrences = new Map((Array.isArray(previous?.additional_occurrences) ? previous.additional_occurrences : []).filter((occurrence) => object(occurrence) && present(occurrence.start_at)).map((occurrence) => [pacificLocal(occurrence.start_at).slice(0, 10), occurrence]));
+    const endLocal = p.end_at ? pacificLocal(p.end_at) : null;
+    const endDayOffset = endLocal ? Math.round((Date.parse(endLocal.slice(0, 10) + "T00:00:00Z") - Date.parse(primaryDate + "T00:00:00Z")) / dayMilliseconds) : 0;
+    p.additional_occurrences = dates.map((date) => {
+      const prior = previousOccurrences.get(date);
+      const start_at = p.date_only ? pacificToInstant(date, { dateOnly: true, previousInstant: prior?.start_at }) : pacificToInstant(`${date}T${primaryLocal.slice(11)}`, { previousInstant: prior?.start_at });
+      const end_at = !p.date_only && endLocal ? pacificToInstant(`${shiftDate(date, endDayOffset)}T${endLocal.slice(11)}`, { previousInstant: prior?.end_at }) : null;
+      if (end_at && Date.parse(end_at) < Date.parse(start_at)) invalid("Every event occurrence must end on or after it starts.");
+      return { start_at, end_at };
+    });
+    delete p.additional_dates;
     delete p.starts_local;
     delete p.ends_local;
     text(p.venue, "Public event venue", 1e3);

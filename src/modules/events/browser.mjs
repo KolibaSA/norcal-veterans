@@ -12,12 +12,36 @@ export function pacificInput(value, dateOnly = false) {
   return dateOnly ? day : `${day}T${parts.hour}:${parts.minute}`;
 }
 
+const eventDatePattern = /^\d{4}-\d{2}-\d{2}$/;
+export function eventDateList(value) {
+  const values = Array.isArray(value) ? value : String(value || '').split(',');
+  return [...new Set(values.map(item => String(item).trim()).filter(item => eventDatePattern.test(item)))].sort();
+}
+const eventDateLabel = value => new Intl.DateTimeFormat('en-US', {
+  weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC'
+}).format(new Date(value + 'T12:00:00Z'));
+function renderAdditionalDates($) {
+  const dates = eventDateList($('additionalDates').value);
+  $('additionalDates').value = dates.join(',');
+  $('additionalDateList').innerHTML = dates.length
+    ? dates.map(date => `<span class="event-date-chip"><time datetime="${date}">${eventDateLabel(date)}</time><button type="button" class="secondary" data-remove-event-date="${date}" aria-label="Remove ${eventDateLabel(date)}">Remove</button></span>`).join('')
+    : '<span class="small muted">No additional dates added.</span>';
+  $('additionalDateList').querySelectorAll('[data-remove-event-date]').forEach(button => {
+    button.onclick = () => {
+      $('additionalDates').value = dates.filter(date => date !== button.dataset.removeEventDate).join(',');
+      renderAdditionalDates($);
+    };
+  });
+}
 
 export function eventFields(record = {}) {
   const p = record.payload ?? {}, dayOnly = p.date_only === true;
+  const additionalDates = (Array.isArray(p.additional_occurrences) ? p.additional_occurrences : [])
+    .map(occurrence => pacificInput(occurrence?.start_at, true)).filter(Boolean);
   return {
     dateOnly: dayOnly, start: p.starts_local ?? pacificInput(p.start_at, dayOnly),
     end: p.ends_local ?? pacificInput(p.end_at, dayOnly), venue: p.venue ?? '', eventCity: p.city ?? '',
+    additionalDate: '', additionalDates: eventDateList(additionalDates).join(','),
     eventCounty: p.county ?? '', eventKind: p.kind ?? '', organizer: p.organizer ?? '', audience: p.audience ?? '',
     eventImage: p.image_url ?? '',
     eventVolunteer: p.volunteer_enabled === true, volunteerUrl: p.volunteer_url ?? '',
@@ -32,6 +56,7 @@ export function eventPayload(fields, previous = {}) {
     Object.assign(p, {
       title: fields.recordTitle, description: fields.recordBody, starts_local: fields.start,
       ends_local: fields.dateOnly ? '' : fields.end, date_only: !!fields.dateOnly,
+      additional_dates: eventDateList([...eventDateList(fields.additionalDates), fields.additionalDate]),
       venue: fields.venue, city: fields.eventCity, county: fields.eventCounty,
       kind: fields.eventKind || 'Community event', organizer: fields.organizer, audience: fields.audience,
       image_url: fields.eventImage,
@@ -60,9 +85,20 @@ export function createFeature() {
       $('end').disabled = !!values.dateOnly;
       $('start').required = true; $('venue').required = true;
     },
-    connect({ $ }) {
+    connect({ $, message }) {
       $('dateOnly').onchange = () => updateDateFields($);
-      return { resetEditor() { $('start').required = false; $('venue').required = false; } };
+      $('addEventDate').onclick = () => {
+        const date = $('additionalDate').value, firstDate = $('start').value.slice(0, 10);
+        if (!date) return $('additionalDate').focus();
+        if (firstDate && date <= firstDate) return message('Choose an additional date after the first event date.', true);
+        $('additionalDates').value = eventDateList([...eventDateList($('additionalDates').value), date]).join(',');
+        $('additionalDate').value = '';
+        renderAdditionalDates($);
+      };
+      return {
+        editorOpened() { renderAdditionalDates($); },
+        resetEditor() { $('start').required = false; $('venue').required = false; $('additionalDate').value = ''; }
+      };
     }
   });
 }

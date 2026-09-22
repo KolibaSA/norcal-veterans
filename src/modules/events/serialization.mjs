@@ -13,6 +13,15 @@ export function sanitizePublicEvent(record){
  if(!out.id||!out.title||!out.venue)return null;
  out.kind ||= 'Community event';
  out.start_at=start;out.date_only=record.date_only===true;out.end_at=out.date_only?null:end;
+ const rawOccurrences=Array.isArray(record.occurrences)?record.occurrences:Array.isArray(record.additional_occurrences)?record.additional_occurrences:[];
+ const occurrences=[{start_at:out.start_at,end_at:out.end_at}];
+ for(const occurrence of rawOccurrences.slice(0,31)){
+  const occurrenceStart=publicInstant(occurrence?.start_at),occurrenceEnd=occurrence?.end_at?publicInstant(occurrence.end_at):null;
+  if(!occurrenceStart||(occurrence?.end_at&&!occurrenceEnd)||(occurrenceEnd&&Date.parse(occurrenceEnd)<Date.parse(occurrenceStart)))continue;
+  if(!occurrences.some(item=>item.start_at===occurrenceStart&&item.end_at===occurrenceEnd))occurrences.push({start_at:occurrenceStart,end_at:out.date_only?null:occurrenceEnd});
+ }
+ occurrences.sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at));
+ out.occurrences=occurrences;
  const meetingTimes=Array.isArray(record.meeting_times)?record.meeting_times.slice(0,3).filter(entry=>entry&&/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(entry.time)&&typeof entry.label==='string'&&entry.label.trim()).map(entry=>({time:entry.time,label:publicText(entry.label,100)})):[];
  if(out.kind==='Organization meeting'&&meetingTimes.length)out.meeting_times=meetingTimes;
  out.source_url=publicURL(record.source_url);out.source_checked=out.source_url?privacyReviewDate(record.source_checked):null;
