@@ -32,8 +32,9 @@ test('event editor enables required controls only while its feature is active', 
   const controller = feature.connect({ $ });
   feature.configureEditor({ $, values: { dateOnly: true } });
   assert.equal($('start').required, true); assert.equal($('venue').required, true);
+  assert.equal($('additionalDate').required, false);
   controller.resetEditor();
-  assert.equal($('start').required, false); assert.equal($('venue').required, false);
+  assert.equal($('start').required, false); assert.equal($('venue').required, false); assert.equal($('additionalDate').required, false);
 });
 
 test('event form stores sorted additional dates on one event record', () => {
@@ -42,7 +43,7 @@ test('event form stores sorted additional dates on one event record', () => {
   ]}});
   assert.equal(fields.additionalDates,'2026-11-08,2026-11-11');
   const payload=eventPayload({...fields,additionalDate:'2026-11-15',recordTitle:'Fundraiser',recordBody:'Details',venue:'Public hall'});
-  assert.deepEqual(payload.additional_dates,['2026-11-08','2026-11-11','2026-11-15']);
+  assert.deepEqual(payload.additional_dates,['2026-11-08','2026-11-11']);
   assert.deepEqual(eventDateList('2026-11-11,2026-11-08,2026-11-11,not-a-date'),['2026-11-08','2026-11-11']);
 });
 

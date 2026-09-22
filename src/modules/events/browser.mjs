@@ -56,7 +56,7 @@ export function eventPayload(fields, previous = {}) {
     Object.assign(p, {
       title: fields.recordTitle, description: fields.recordBody, starts_local: fields.start,
       ends_local: fields.dateOnly ? '' : fields.end, date_only: !!fields.dateOnly,
-      additional_dates: eventDateList([...eventDateList(fields.additionalDates), fields.additionalDate]),
+      additional_dates: eventDateList(fields.additionalDates),
       venue: fields.venue, city: fields.eventCity, county: fields.eventCounty,
       kind: fields.eventKind || 'Community event', organizer: fields.organizer, audience: fields.audience,
       image_url: fields.eventImage,
@@ -83,7 +83,7 @@ export function createFeature() {
       $('start').type = values.dateOnly ? 'date' : 'datetime-local';
       $('end').type = values.dateOnly ? 'date' : 'datetime-local';
       $('end').disabled = !!values.dateOnly;
-      $('start').required = true; $('venue').required = true;
+      $('start').required = true; $('venue').required = true; $('additionalDate').required = false;
     },
     connect(context) {
       const { $, message, api, loadSection } = context;
@@ -109,7 +109,7 @@ export function createFeature() {
       };
       return {
         editorOpened(record, { editable }) { renderAdditionalDates($); $('deleteEventSection').hidden = !record?.id || !editable; },
-        resetEditor() { $('start').required = false; $('venue').required = false; $('additionalDate').value = ''; $('deleteEventSection').hidden = true; }
+        resetEditor() { $('start').required = false; $('venue').required = false; $('additionalDate').required = false; $('additionalDate').value = ''; $('deleteEventSection').hidden = true; }
       };
     }
   });
