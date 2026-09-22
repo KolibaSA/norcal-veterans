@@ -64,7 +64,7 @@ test('VFW, Legion and MCL directory cards share the branded card design with fam
  assert.equal(page.status,200);
  for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
  for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
- assert.ok(page.html.includes('/styles.css?v=why-norcal-20260921-1'));
+ assert.ok(page.html.includes('/styles.css?v=why-norcal-visual-20260921-2'));
  assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','.vfw-profile .profile-brand-logo{object-fit:cover}','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
@@ -121,7 +121,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=why-norcal-20260921-1'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=why-norcal-visual-20260921-2'),r.id);
   assert.ok(page.html.includes('/app.js?v=profiles-20260913-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }
@@ -138,6 +138,7 @@ test('homepage renders the responsive Why NorCalVeterans cards and contact pop-u
  assert.ok(purposeIndex>=0&&purposeIndex<eventsIndex);
  for(const phrase of ['WHY NORCALVETERANS','Veterans Find. Organizations Share. Organizations Coordinate.','Veterans Find','Organizations Share','Organizations Coordinate','sterling.koliba@gmail.com','popovertarget="norcal-contact"'])assert.ok(page.html.includes(phrase),phrase);
  assert.equal((page.html.match(/class="regional-purpose-card"/g)||[]).length,3);
+ assert.equal((page.html.match(/regional-purpose-scene regional-purpose-scene--/g)||[]).length,3);
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.regional-purpose-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))','.regional-purpose-grid{grid-template-columns:1fr}','.regional-contact-popover::backdrop'])assert.ok(styles.includes(phrase),phrase);
 });
