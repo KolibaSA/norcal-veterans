@@ -2,6 +2,8 @@
 
 HQ organization field mapping, public contact/address/service-area editing, source/confirmation evidence, organization scope options and lifecycle.
 
+Relationship editing uses `relationshipType` and the searchable `affiliatedWith` datalist. The saved parent value is an existing organization ID, not a display name; independent organizations clear that parent field.
+
 When the opened record is exactly `vfw-ca-8151`, `editor.html` also reveals the twelve-card meeting planner. `meeting-plans.mjs` maps its fixed month/time controls into the organization payload; all other organization records receive blank hidden planner fields and preserve their existing payload unchanged.
 
 `browser.mjs` exports `createFeature()`, `organizationFields(record)`, `organizationPayload(fields, previous)` and `loadScopeOptions(api, select)`. `editor.html` owns organization markup.

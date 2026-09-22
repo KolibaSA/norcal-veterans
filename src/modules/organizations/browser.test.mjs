@@ -17,6 +17,15 @@ test('organization editing retains evidence and private imported data without in
   assert.notEqual(result.imported, record.payload.imported);
 });
 
+test('organization relationships save and reopen using the parent organization ID', () => {
+  const fields = createFeature().fields({ payload: { relationship_type: 'auxiliary', affiliated_with_id: 'legion-ca-208' } });
+  assert.equal(fields.relationshipType, 'auxiliary'); assert.equal(fields.affiliatedWith, 'legion-ca-208');
+  const result = organizationPayload({ ...fields, relationshipType: 'sons', affiliatedWith: 'legion-ca-208' }, {});
+  assert.equal(result.relationship_type, 'sons'); assert.equal(result.affiliated_with_id, 'legion-ca-208');
+  const independent = organizationPayload({ ...fields, relationshipType: 'independent', affiliatedWith: 'legion-ca-208' }, result);
+  assert.equal(independent.relationship_type, 'independent'); assert.equal(independent.affiliated_with_id, null);
+});
+
 test('organization scope choices use escaped public labels and their existing stable IDs', async () => {
   const { $ } = controls(), paths = [];
   await loadScopeOptions(async path => { paths.push(path); return [{ id: 'org-"x', title: '<Example>' }]; }, $('org'));

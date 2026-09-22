@@ -4,6 +4,8 @@
 
 Owns organization profiles and editing, categories/location, service area, public contacts, evidence and publication validation. Owned rows: `records(kind=organization)` with existing IDs and organization scope; this module also reads the static source catalog.
 
+Organization payloads may identify an `independent`, `auxiliary`, or `sons` relationship. Non-independent records store their parent in `affiliated_with_id` using the parent's stable organization ID. They remain full organization records and public profiles; the public directory adapter hides them from its default card list and links them from the parent card.
+
 The VFW Post 8151 profile additionally owns its scoped `meeting_plans` payload. Its HQ editor exposes twelve monthly cards with up to three labeled times. Public meeting events are derived from that plan with stable IDs, replacing matching legacy meeting-event rows while leaving every other organization unchanged.
 
 `domain.mjs` exports `validateOrganization`, `organizationMetadata` and the record contract. `public.mjs` owns the typed public serializer. Shared validation supplies bounded values and provenance checks, not organization-specific business rules. Preserve historical evidence/address exceptions while requiring evidence for new claims; never treat stored private fields as public.

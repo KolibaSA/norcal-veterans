@@ -16,6 +16,14 @@ test('Organizations source evidence cannot impersonate a reviewer or invent sour
   assert.deepEqual(validateOrganization(stored, { previousPayload: stored }), stored);
 });
 
+test('Organizations validate ID-backed affiliation relationships', () => {
+  const affiliate = { relationship_type: 'auxiliary', affiliated_with_id: 'legion-ca-208' };
+  assert.deepEqual(validateOrganization(affiliate), affiliate);
+  assert.throws(() => validateOrganization({ relationship_type: 'auxiliary' }), /existing organization/);
+  assert.throws(() => validateOrganization({ relationship_type: 'independent', affiliated_with_id: 'legion-ca-208' }), /Independent organizations/);
+  assert.throws(() => validateOrganization({ relationship_type: 'chapter', affiliated_with_id: 'legion-ca-208' }), /Independent Organization/);
+});
+
 test('Post 8151 meeting plans require valid monthly dates and ordered labeled times', () => {
   const meeting = { month: 1, date: '2027-01-21', title: 'January meeting', notes: '',
     time_1: '18:00', label_1: 'Social hour', time_2: '19:00', label_2: 'Post meeting', time_3: '20:00', label_3: 'Social time' };

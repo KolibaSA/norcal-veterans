@@ -64,10 +64,22 @@ test('VFW, Legion and MCL directory cards share the branded card design with fam
  assert.equal(page.status,200);
  for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
  for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
- assert.ok(page.html.includes('/styles.css?v=event-cards-20260921-1'));
+ assert.ok(page.html.includes('/styles.css?v=organization-affiliations-20260921-1'));
  assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','.vfw-profile .profile-brand-logo{object-fit:cover}','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
+});
+test('directory nests affiliated organizations under the parent card without changing either profile route',()=>{
+ const parent={...records.find(record=>record.id==='legion-ca-208'),relationship_type:'independent',affiliated_with_id:null};
+ const auxiliary={...structuredClone(parent),id:'legion-ca-208-auxiliary',verified_name:'American Legion Auxiliary Unit 208',relationship_type:'auxiliary',affiliated_with_id:parent.id};
+ const sons={...structuredClone(parent),id:'legion-ca-208-sons',verified_name:'Sons of the American Legion Squadron 208',relationship_type:'sons',affiliated_with_id:parent.id};
+ const page=render(new URL('https://test/yolo-solano'),[parent,auxiliary,sons]);
+ assert.equal((page.html.match(/class="logo-tile /g)||[]).length,1,'affiliates must not render as separate default directory cards');
+ assert.match(page.html,new RegExp(`class="organization-card-main-link" href="/organizations/${parent.id}"`));
+ assert.match(page.html,new RegExp(`class="organization-affiliation-link" href="/organizations/${auxiliary.id}"[^>]*>Auxiliary</a>`));
+ assert.match(page.html,new RegExp(`class="organization-affiliation-link" href="/organizations/${sons.id}"[^>]*>Sons</a>`));
+ assert.match(page.html,/organization-brand-location[\s\S]*Dixon, CA[\s\S]*organization-affiliation-links/);
+ assert.equal(render(new URL('https://test/organizations/'+auxiliary.id),[parent,auxiliary,sons]).status,200);
 });
 test('invalid, empty and injection input stays safe',()=>{
  const p=render(new URL('https://test/?q='+encodeURIComponent('<script>alert(1)</script>')));assert.ok(!p.html.includes('<script>alert(1)</script>'));assert.ok(p.html.includes('No matching organizations'));
@@ -109,7 +121,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=event-cards-20260921-1'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=organization-affiliations-20260921-1'),r.id);
   assert.ok(page.html.includes('/app.js?v=profiles-20260913-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }

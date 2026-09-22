@@ -28,6 +28,10 @@ export function sanitizePublicRecord(record){
  const out={};
  for(const name of ['id','verified_name','organization_type','entity_kind','city','location_county','hours','meeting_schedule','timezone','audience','eligibility','referral_notes','partnership_notes','member_information','verification_method','confidence'])out[name]=publicText(record?.[name],name==='member_information'?20000:4000);
  out.organization_type ||= 'Other veteran organization';
+ const relationshipType=contentMetadata.relationshipTypes.includes(record?.relationship_type)?record.relationship_type:'independent';
+ const affiliatedWith=publicText(record?.affiliated_with_id,120);
+ out.relationship_type=relationshipType!=='independent'&&/^[-_a-zA-Z0-9]{1,120}$/.test(affiliatedWith)?relationshipType:'independent';
+ out.affiliated_with_id=out.relationship_type==='independent'?null:affiliatedWith;
  for(const name of ['service_categories','source_ids','missing_data_flags'])out[name]=publicStrings(record?.[name]);
  const area=record?.service_area;
  out.service_area=isObject(area)?{counties:publicStrings(area.counties),cities:publicStrings(area.cities),notes:publicText(area.notes,4000)}:null;

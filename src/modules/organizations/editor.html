@@ -4,6 +4,8 @@
                 <div><label for="city">City</label><input id="city" maxlength="120"></div>
                 <div><label for="county">Location county</label><input id="county" list="countyOptions" maxlength="120"></div>
                 <div><label for="type">Organization type</label><input id="type" list="typeOptions" maxlength="120"></div>
+                <div><label for="relationshipType">Relationship Type</label><select id="relationshipType"><option value="independent">Independent Organization</option><option value="auxiliary">Auxiliary</option><option value="sons">Sons</option></select></div>
+                <div id="affiliatedWithField" hidden><label for="affiliatedWith">Affiliated With</label><input id="affiliatedWith" list="affiliatedOrganizationOptions" maxlength="120" autocomplete="off" placeholder="Search organizations"><datalist id="affiliatedOrganizationOptions"></datalist></div>
                 <div><label for="website">Public website</label><input id="website" type="url" maxlength="2000" placeholder="https://"></div>
                 <div><label for="phone">Public phone</label><input id="phone" type="tel" maxlength="80"></div>
                 <div><label for="publicEmail">Public email</label><input id="publicEmail" type="email" maxlength="250"></div>

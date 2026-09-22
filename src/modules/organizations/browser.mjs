@@ -7,6 +7,7 @@ export function organizationFields(record = {}) {
   const p = record.payload ?? {};
   return {
     city: p.city ?? '', county: p.location_county ?? '', type: p.organization_type ?? '',
+    relationshipType: p.relationship_type ?? 'independent', affiliatedWith: p.affiliated_with_id ?? '',
     website: p.public_contacts?.website ?? '', phone: p.public_contacts?.phone ?? '', publicEmail: p.public_contacts?.email ?? '',
     address: p.address?.text ?? '', addressType: p.address?.type ?? '', mapEligible: p.address?.map_eligible === true,
     serviceCounties: joined(p.service_area?.counties), serviceCities: joined(p.service_area?.cities),
@@ -22,6 +23,8 @@ export function organizationPayload(fields, previous = {}) {
     Object.assign(p, {
       verified_name: fields.recordTitle, member_information: fields.recordBody,
       city: fields.city, location_county: fields.county, organization_type: fields.type,
+      relationship_type: fields.relationshipType || 'independent',
+      affiliated_with_id: fields.relationshipType && fields.relationshipType !== 'independent' ? fields.affiliatedWith || null : null,
       public_contacts: { ...p.public_contacts, website: fields.website, phone: fields.phone, email: fields.publicEmail },
       address: fields.address ? { ...p.address, text: fields.address, type: fields.addressType, map_eligible: fields.mapEligible && fields.addressType !== 'mailing' } : null,
       service_area: { ...p.service_area, counties: splitList(fields.serviceCounties), cities: splitList(fields.serviceCities), notes: fields.serviceNotes },
@@ -44,10 +47,17 @@ export function createFeature() {
     fields: organizationFields, payload: organizationPayload,
     saveLabel: record => record.id === VFW_8151_ID ? 'Save profile and meeting schedule' : 'Save item',
     savedMessage: value => value.organization_id === VFW_8151_ID ? 'VFW Post 8151 profile and meeting schedule published.' : 'Saved.',
-    configureEditor({ $, record }) {
+    configureEditor({ $, record, values }) {
       const postPlanner = record.id === VFW_8151_ID;
       $('vfwMeetingPlanner').hidden = !postPlanner;
       $('meetingPlanYear').required = postPlanner;
+      const organizations = JSON.parse($('org').dataset.organizationOptions || '[]').filter(option => option.id !== record.id);
+      $('affiliatedOrganizationOptions').innerHTML = organizations.map(option => '<option value="' + esc(option.id) + '" label="' + esc(option.title) + '"></option>').join('');
+      const independent = values.relationshipType === 'independent';
+      $('affiliatedWithField').hidden = independent;
+      $('affiliatedWith').required = !independent;
+      const validParent = independent || organizations.some(option => option.id === values.affiliatedWith);
+      $('affiliatedWith').setCustomValidity?.(validParent ? '' : 'Choose an existing organization.');
       const priorAddressType = record.payload?.address?.type;
       if (priorAddressType && !Array.from($('addressType').options).some(option => option.value === priorAddressType)) {
         $('addressType').add(new Option(label(priorAddressType) + ' (existing; not a verified public venue)', priorAddressType));
@@ -56,6 +66,17 @@ export function createFeature() {
     },
     connect(context) {
       const { $ } = context;
+      const updateRelationship = () => {
+        const independent = $('relationshipType').value === 'independent';
+        $('affiliatedWithField').hidden = independent;
+        $('affiliatedWith').required = !independent;
+        if (independent) $('affiliatedWith').value = '';
+        const options = JSON.parse($('org').dataset.organizationOptions || '[]');
+        const valid = independent || options.some(option => option.id === $('affiliatedWith').value && option.id !== context.editing?.id);
+        $('affiliatedWith').setCustomValidity?.(valid ? '' : 'Choose an existing organization.');
+      };
+      $('relationshipType').onchange = updateRelationship;
+      $('affiliatedWith').oninput = updateRelationship;
       $('addressType').onchange = () => { if ($('addressType').value === 'mailing') $('mapEligible').checked = false; };
       $('meetingPlanYear').onchange = () => {
         const record = context.editing;

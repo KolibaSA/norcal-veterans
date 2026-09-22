@@ -6,6 +6,7 @@ import { validateMeetingPlans } from './meeting-plans.mjs';
 
 export const organizationMetadata = Object.freeze({
   organizationTypes: ['VFW', 'American Legion', 'Marine Corps League', 'Veterans Beer Club', 'Toys for Tots', 'DAV', 'County Veterans Office', 'Equine program provider', 'Veteran remembrance program', 'Veterans nonprofit', 'Other veteran organization'],
+  relationshipTypes: ['independent', 'auxiliary', 'sons'],
   counties: ['Yolo', 'Solano'],
   addressTypes: ['meeting_venue', 'service_office', 'program_venue', 'mailing']
 });
@@ -13,6 +14,12 @@ export const organizationMetadata = Object.freeze({
 export function validateOrganization(input, options = {}) {
   return validatePayload(input, options, (p, { previousPayload: previous = null, status = 'draft', isNew = false }) => {
     validatePublicContent(p, previous);
+    const relationshipType = p.relationship_type ?? 'independent';
+    if (!organizationMetadata.relationshipTypes.includes(relationshipType)) invalid('Choose Independent Organization, Auxiliary, or Sons.');
+    text(p.affiliated_with_id, 'Affiliated organization ID', 120);
+    if (relationshipType !== 'independent' && !/^[-_a-zA-Z0-9]{1,120}$/.test(p.affiliated_with_id || '')) invalid('Choose an existing organization to affiliate with.');
+    if (relationshipType === 'independent' && present(p.affiliated_with_id)) invalid('Independent organizations cannot have an affiliated organization.');
+    if (p.id && p.affiliated_with_id === p.id) invalid('An organization cannot be affiliated with itself.');
     for (const name of ['service_categories', 'source_ids', 'missing_data_flags']) strings(p[name], name);
     if (p.source_ids?.some(id => !sources.some(source => source.id === id)) && JSON.stringify(p.source_ids) !== JSON.stringify(previous?.source_ids)) invalid('Choose existing source references or add a public review source URL.');
     shape(p.service_area, 'Service area');
