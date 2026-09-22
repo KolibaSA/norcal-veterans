@@ -46,7 +46,7 @@ test('organization cards standardize Pacific month and day without changing shar
 test('Post 8151 groups future community occurrences by event and location', () => {
   const occurrence=(id,day,venue,city,extra={})=>({id,title:`Buddy Poppy Fundraiser — ${city}`,description:'Poppy distribution.',date_only:true,start_at:`2026-11-${String(day).padStart(2,'0')}T08:00:00Z`,venue,status:'published',organization_id:'vfw-ca-8151',kind:'Community event',city,county:'Solano',...extra});
   const events=[7,8,11].flatMap(day=>[
-    occurrence(`dixon-${day}`,day,'Safeway, 1235 Stratford Avenue, Dixon, CA 95620','Dixon',day===7?{volunteer_enabled:true,volunteer_url:'https://example.org/volunteer',donate_enabled:true,donate_url:'https://example.org/donate'}:{}),
+    occurrence(`dixon-${day}`,day,'Safeway, 1235 Stratford Avenue, Dixon, CA 95620','Dixon',day===7?{volunteer_enabled:true,volunteer_url:'https://example.org/volunteer',donate_enabled:true,donate_url:'https://example.org/donate',tickets_enabled:true,tickets_url:'https://example.org/tickets'}:{}),
     occurrence(`davis-${day}`,day,'Grocery Outlet, 1800 East 8th Street, Davis, CA 95616','Davis')
   ]);
   const html=organizationUpcomingEvents(events,'vfw-ca-8151',Date.parse('2026-11-06T20:00:00Z'));
@@ -59,6 +59,7 @@ test('Post 8151 groups future community occurrences by event and location', () =
   assert.match(html,/MULTI-DAY EVENT/);assert.match(html,/Event Dates:/);assert.match(html,/Time TBD/);
   assert.match(html,/href="https:\/\/example\.org\/volunteer"[^>]*>Volunteer Now/);
   assert.match(html,/href="https:\/\/example\.org\/donate"[^>]*>Donate Now/);
+  assert.match(html,/href="https:\/\/example\.org\/tickets"[^>]*>Buy Tickets/);
   const pruned=organizationUpcomingEvents(events,'vfw-ca-8151',Date.parse('2026-11-08T20:00:00Z'));
   assert.equal((pruned.match(/<strong>8 &amp; 11<\/strong>/g)||[]).length,2);assert.doesNotMatch(pruned,/Sat, Nov 7/);
   const single=organizationUpcomingEvents(events,'vfw-ca-8151',Date.parse('2026-11-09T20:00:00Z'));

@@ -27,7 +27,7 @@ export function organizationUpcomingEvents(events, organizationId, now = Date.no
     const listedMeeting = vfw8151Event && event.kind === 'Organization meeting';
     if (vfw8151Event && !listedMeeting) {
       const host=organizations.find(organization=>organization.id===organizationId)||{id:organizationId,verified_name:'Dixon VFW Post 8151',organization_type:'VFW'};
-      const cardEvent={...event,accepted_organization_ids:[...new Set(occurrences.flatMap(item=>item.accepted_organization_ids||[]))],volunteer_enabled:occurrences.some(item=>item.volunteer_enabled&&item.volunteer_url),volunteer_url:occurrences.find(item=>item.volunteer_enabled&&item.volunteer_url)?.volunteer_url||'',donate_enabled:occurrences.some(item=>item.donate_enabled&&item.donate_url),donate_url:occurrences.find(item=>item.donate_enabled&&item.donate_url)?.donate_url||''};
+      const cardEvent={...event,accepted_organization_ids:[...new Set(occurrences.flatMap(item=>item.accepted_organization_ids||[]))],volunteer_enabled:occurrences.some(item=>item.volunteer_enabled&&item.volunteer_url),volunteer_url:occurrences.find(item=>item.volunteer_enabled&&item.volunteer_url)?.volunteer_url||'',donate_enabled:occurrences.some(item=>item.donate_enabled&&item.donate_url),donate_url:occurrences.find(item=>item.donate_enabled&&item.donate_url)?.donate_url||'',tickets_enabled:occurrences.some(item=>item.tickets_enabled&&item.tickets_url),tickets_url:occurrences.find(item=>item.tickets_enabled&&item.tickets_url)?.tickets_url||''};
       return `<div class="events-page vfw-public-event-card">${publicEventCard(cardEvent,[host,...organizations.filter(organization=>organization.id!==organizationId)],occurrences,{showActions:true})}</div>`;
     }
     const date = new Date(event.start_at);

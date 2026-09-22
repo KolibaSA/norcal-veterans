@@ -46,6 +46,7 @@ export function eventFields(record = {}) {
     eventImage: p.image_url ?? '',
     eventVolunteer: p.volunteer_enabled === true, volunteerUrl: p.volunteer_url ?? '',
     eventDonate: p.donate_enabled === true, donateUrl: p.donate_url ?? '',
+    eventTickets: p.tickets_enabled === true, ticketsUrl: p.tickets_url ?? '',
     source: p.source_url ?? '', sourceChecked: p.source_checked?.slice(0, 10) ?? '', timeNote: p.time_note ?? '',
     sourceKind: p.source_kind ?? '', sourceNote: p.source_note ?? '', reviewNotes: p.review_notes ?? ''
   };
@@ -62,6 +63,7 @@ export function eventPayload(fields, previous = {}) {
       image_url: fields.eventImage,
       volunteer_enabled: !!fields.eventVolunteer, volunteer_url: fields.volunteerUrl,
       donate_enabled: !!fields.eventDonate, donate_url: fields.donateUrl,
+      tickets_enabled: !!fields.eventTickets, tickets_url: fields.ticketsUrl,
       source_url: fields.source, source_checked: fields.sourceChecked || null, time_note: fields.timeNote,
       source_kind: fields.sourceKind, source_note: fields.sourceNote, review_notes: fields.reviewNotes
     });

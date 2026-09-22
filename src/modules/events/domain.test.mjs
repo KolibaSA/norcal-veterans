@@ -23,12 +23,13 @@ test('Events accepts only safe HTTPS event image URLs', () => {
   assert.throws(()=>validateEvent({...base,image_url:'http://images.example.org/event.jpg'}),/valid HTTPS event image URL/);
 });
 
-test('Events validates optional volunteer and donation actions', () => {
+test('Events validates optional volunteer, donation and ticket actions', () => {
   const base={start_at:'2030-01-15T18:00:00-08:00',venue:'Public hall'};
-  const event=validateEvent({...base,volunteer_enabled:true,volunteer_url:'https://example.org/volunteer',donate_enabled:true,donate_url:'https://example.org/donate'});
-  assert.equal(event.volunteer_url,'https://example.org/volunteer');assert.equal(event.donate_url,'https://example.org/donate');
+  const event=validateEvent({...base,volunteer_enabled:true,volunteer_url:'https://example.org/volunteer',donate_enabled:true,donate_url:'https://example.org/donate',tickets_enabled:true,tickets_url:'https://example.org/tickets'});
+  assert.equal(event.volunteer_url,'https://example.org/volunteer');assert.equal(event.donate_url,'https://example.org/donate');assert.equal(event.tickets_url,'https://example.org/tickets');
   assert.throws(()=>validateEvent({...base,volunteer_enabled:'yes'}),/volunteer option must be true or false/);
   assert.throws(()=>validateEvent({...base,donate_url:'http://example.org/donate'}),/valid HTTPS donation URL/);
+  assert.throws(()=>validateEvent({...base,tickets_url:'http://example.org/tickets'}),/valid HTTPS ticket purchase URL/);
 });
 
 test('Events validates and derives additional occurrences from the first date and time', () => {

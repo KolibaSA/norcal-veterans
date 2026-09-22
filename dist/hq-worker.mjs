@@ -1321,7 +1321,7 @@ function validateEvent(input, options = {}) {
       }
       if (image.protocol !== "https:" || image.username || image.password) invalid("Enter a valid HTTPS event image URL.");
     }
-    for (const [enabledName, urlName, label] of [["volunteer_enabled", "volunteer_url", "volunteer"], ["donate_enabled", "donate_url", "donation"]]) {
+    for (const [enabledName, urlName, label] of [["volunteer_enabled", "volunteer_url", "volunteer"], ["donate_enabled", "donate_url", "donation"], ["tickets_enabled", "tickets_url", "ticket purchase"]]) {
       if (p[enabledName] !== void 0 && typeof p[enabledName] !== "boolean") invalid(`${label} option must be true or false.`);
       if (present(p[urlName])) {
         let action;
