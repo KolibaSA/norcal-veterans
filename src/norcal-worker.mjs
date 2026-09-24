@@ -47,7 +47,7 @@ const norcalWorker = {
       return localPage(head ? '' : page.html, page.status);
     } catch {
       console.error(JSON.stringify({event:'public_request_failed',request_id:crypto.randomUUID(),operation:'public_render'}));
-      return responseHTML(shell('Temporarily unavailable | NorCal Veterans', 'Please try again soon.', '<section class="wrap"><h1>Please try again in a few minutes.</h1></section>'), 503, true);
+      return localPage(shell('Temporarily unavailable | NorCal Veterans', 'Please try again soon.', '<section class="wrap"><h1>Please try again in a few minutes.</h1></section>'), 503, true);
     }
   }
 };
@@ -79,5 +79,6 @@ function localPage(html, status = 200, privatePage = false) {
     .replaceAll('Organization editor →', 'Organization headquarters →')
     .replaceAll('Open the organization editor →', 'Open organization headquarters →')
     .replaceAll('Designated representatives can also use their organization editor.', 'Assigned administrators can maintain descriptions and contact details in the private headquarters.')
-    .replace('after Aaron or Sterling approves their access', 'after the platform owner approves their access'), status, privatePage);
+    .replace('after Aaron or Sterling approves their access', 'after the platform owner approves their access')
+    .replace(/<a\b[^>]*\bhref="\/hq(?:[/?#][^"]*)?"[^>]*>[\s\S]*?<\/a>/g, ''), status, privatePage);
 }

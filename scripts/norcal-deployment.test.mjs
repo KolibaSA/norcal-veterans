@@ -32,12 +32,13 @@ function setup() {
 test('replacement renders the existing published directory, events and profiles without private data',async()=>{
   const env=setup();
   try {
-    for(const path of ['/regions','/yolo-solano','/events','/resources','/share','/about','/for-organizations','/data.json','/events.ics',...records.map(r=>'/organizations/'+r.id)]) {
+    for(const path of ['/regions','/yolo-solano','/events','/events/'+seedEvents[0].id,'/resources','/share','/about','/for-organizations','/mcl-yolo','/data.json','/events.ics',...records.map(r=>'/organizations/'+r.id)]) {
       const response=await worker.fetch(new Request('https://www.norcalveterans.org'+path),env);
       assert.equal(response.status,200,path);
       const text=await response.text();
       assert.doesNotMatch(text,/PRIVATE_SENTINEL|DRAFT_SENTINEL/);
       assert.doesNotMatch(text,/yolo-county-veterans-hq\.smartzgraphics/);
+      assert.doesNotMatch(text,/<a\b[^>]*href="\/hq(?:[/?#]|")/,path);
     }
     const root=await worker.fetch(new Request('https://www.norcalveterans.org/?place=Davis'),env);
     assert.equal(root.status,302);
@@ -49,6 +50,9 @@ test('replacement renders the existing published directory, events and profiles 
     assert.match(homeHtml,/ysv-logo\.png\?v=logo-20260913-1/);
     const denied=await worker.fetch(new Request('https://www.norcalveterans.org/hq'),env);
     assert.equal(denied.status,503);
+    const unavailable=await worker.fetch(new Request('https://www.norcalveterans.org/events'),{});
+    assert.equal(unavailable.status,503);
+    assert.doesNotMatch(await unavailable.text(),/<a\b[^>]*href="\/hq(?:[/?#]|")/);
   } finally {env.sqlite.close();}
 });
 
@@ -105,7 +109,7 @@ test('public profiles direct contributions to review instead of unavailable phot
       assert.match(html,/Suggest a profile update/);
       assert.match(html,/href="\/for-organizations\?org=/);
       assert.doesNotMatch(html,/href="\/hq\?org=|Add photos →|Add or update officer profiles|can add photos, create albums|can add public photos, officer profiles/);
-      if(path==='/mcl-yolo')assert.match(html,/href="\/hq\?tab=organization"/);
+      if(path==='/mcl-yolo')assert.doesNotMatch(html,/href="\/hq\?tab=organization"/);
     }
   } finally {env.sqlite.close();}
 });
