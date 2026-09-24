@@ -6,6 +6,7 @@ test('event detail works independently with optional supplied organization choic
     start_at:'2030-01-15T18:00:00-08:00',venue:'Synthetic public hall',status:'published',organization_id:'synthetic-host',tickets_enabled:true,tickets_url:'https://example.org/tickets'});
   const standalone=eventDetail(event);
   assert.match(standalone,/Synthetic event/);assert.doesNotMatch(standalone,/View related organization/);
+  assert.match(standalone,/class="wrap detail-page event-detail-page"/);
   assert.doesNotMatch(standalone,/Buy Tickets/);
   assert.match(eventDetail(event,[{id:'synthetic-host'}]),/href="\/organizations\/synthetic-host"/);
 });
