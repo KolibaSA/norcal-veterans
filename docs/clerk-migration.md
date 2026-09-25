@@ -2,7 +2,7 @@
 
 ## Current state
 
-The release configuration uses Clerk. The basic email-code flow passed in staging. Production migration 0006 and the live secret are prepared; the connected build and Access-route cutover are the remaining release actions. Exact deployment evidence is recorded privately under `.data/clerk-migration/`; do not infer completed live acceptance from configuration alone.
+Published September 24, 2026 (September 25 UTC): commit `ef8852e`, successful connected build `5285def8-3899-47e3-a209-6da1cf44a64b`, Worker `9369f8ba-7a76-43b2-aeb3-5a31f37b5ffb`. Both bare/www HQ routes now use Clerk. The old Access application was renamed to rollback standby and moved to `__retired-access/hq` and `__retired-access/api/hq` paths, preserving policies. Live sign-in renders without console errors; unsigned private API requests return 401. The owner invitation was sent; actual owner invitation acceptance and authenticated production use still require the owner's action. No editor invitations were sent in this release.
 
 The dedicated NorCalVeterans Clerk development and production instances are created. Production DNS, TLS and email-domain verification completed. After production rejected paid MFA capabilities, the owner explicitly chose basic free features with no MFA on September 24, 2026. Both environments now use invitation-only email-code sign-in, immutable verified primary email, and no MFA. No plan upgrade or purchase is authorized. Existing server-side assignments and identity binding protections remain unchanged.
 
@@ -23,10 +23,12 @@ Required runtime settings: `HQ_AUTH_PROVIDER`, `CLERK_PUBLISHABLE_KEY`, `CLERK_A
 - Local: focused access/authentication tests passed, including unsigned/invalid token denial, wrong issuer/origin, pending sessions, impersonation, grant/session revocation, account rebinding denial, scoped save/reopen and cross-organization denial. Required build passed 273 tests.
 - Existing public-shell snapshot, approved public-contact and unified-card assertions were stale relative to checked-in public behavior. Assertions were reconciled; no public renderer or event-card runtime was changed. The pre-existing VFW generated meeting-card detail-link/page mismatch is outside this migration and remains unchanged.
 - Staging: additive migration applied; Worker version `ed69ff74-4f13-4fed-945e-082fdda33cdb` deployed. Health/login assets return 200, unsigned HQ redirects to sign-in, unsigned private API returns 401. Synthetic user completed email-code and authenticator MFA, opened scoped HQ, saved its assigned draft organization, reloaded and verified the saved text, and signed out back to sign-in. Browser reported no console errors during the saved/reopened flow. The development-only test account is disabled after acceptance; synthetic history remains in staging.
-- Production: DNS/TLS/mail verified; additive migration applied with 59 records, 5 grants and 98 revisions preserved at preflight. Live secret prepared. Owner invitation/sign-in and cutover verification remain release actions.
+- Production: DNS/TLS/mail verified; additive migration applied with 59 records, 5 grants and 98 revisions unchanged afterward, and clean integrity/foreign-key checks. Bare/www sign-in pages return 200, unsigned HQ redirects to Clerk sign-in, private API returns 401, homepage/Events return 200. Production owner sign-in remains unverified until invitation acceptance.
 - Basic-flow follow-up: synthetic staging account signed in with email code only, without MFA. Request-agent automation deleted at the owner's request; Requests and history preserved, agent CLI retired, and HQ agent-health UI/polling disabled. The required final build passed 274 tests.
 
-## Remaining release sequence
+## Release and recovery checklist
+
+Deployment and gate cutover are complete. The remaining user action is accepting the owner invitation and checking signed-in production use before inviting editors. The sequence below documents this release for recovery; do not repeat completed steps.
 
 1. Owner selected email-code sign-in without MFA. Confirm the basic flow in staging before cutover.
 2. Staging existing-user save/reopen and sign-out checks are complete. Verify production invitation acceptance with the owner before inviting real editors; the existing-user check did not exercise new-user enrollment.
