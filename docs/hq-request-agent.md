@@ -1,4 +1,6 @@
-# NorCal HQ request agent
+# NorCal HQ request agent (retired)
+
+Retired September 24, 2026 at the owner's request. Its Codex automation is deleted, `HQ_REQUEST_AGENT_ENABLED=false`, the agent status panel/polling is hidden, and the CLI refuses to execute. Requests, comments, revisions and past execution history remain intact in HQ for manual tracking. Do not restart it based on the historical instructions below. The policy/transport library and regression fixtures remain solely for history/recovery compatibility.
 
 Chris requested a five-minute check of the NorCal Veterans HQ Requests queue on September 12, 2026. The Codex heartbeat `norcal-hq-request-agent` is attached to the existing Chat Automation task. When enabled, it processes at most one eligible platform-admin request per run and saves its result in that request's activity history. Inspect the automation's current status; this document does not imply that a schedule paused for maintenance has been reenabled.
 

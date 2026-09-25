@@ -9,10 +9,13 @@
     "run_worker_first": true
   },
   "vars": {
+    "HQ_AUTH_PROVIDER": "clerk",
+    "CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsubm9yY2FsdmV0ZXJhbnMub3JnJA",
+    "CLERK_ALLOWED_ORIGINS": "https://www.norcalveterans.org,https://norcalveterans.org",
     "OWNER_EMAIL": "sterling.koliba@gmail.com",
     "ACCESS_TEAM_DOMAIN": "frosty-lake-fcde.cloudflareaccess.com",
     "ACCESS_AUD": "ccb0ed2e0d61574737f9f0a8203496497a77238cb13e8101d602b0ca36b750ce",
-    "HQ_REQUEST_AGENT_ENABLED": "true"
+    "HQ_REQUEST_AGENT_ENABLED": "false"
   },
   "observability": {
     "enabled": true,

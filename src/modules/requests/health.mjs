@@ -15,6 +15,7 @@ export function connectHealth(context) {
   const { $, api, permitLeave, openRecord, itemURL } = context;
   async function loadHealth() {
     if (context.tab !== 'request') return;
+    if (context.me.processorConnected === false) { $('processor').hidden = true; return; }
     if (!isPlatformAdmin(context.me)) {
       $('processor').textContent = 'Executable requests are managed by the platform owner and Super Admins. Your assignment controls which project records you can edit.';
       return;
@@ -31,9 +32,9 @@ export function connectHealth(context) {
 
 
   return {
-    sectionChanged() { $('processor').hidden = context.tab !== 'request'; },
+    sectionChanged() { $('processor').hidden = context.tab !== 'request' || context.me.processorConnected === false; },
     sectionLoaded() { if (context.tab === 'request') void loadHealth(); },
-    initialized() { window.setInterval(() => { if (!document.hidden && context.tab === 'request') void loadHealth(); }, 60000); },
+    initialized() { if (context.me.processorConnected !== false) window.setInterval(() => { if (!document.hidden && context.tab === 'request') void loadHealth(); }, 60000); },
     loadHealth
   };
 }

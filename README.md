@@ -9,7 +9,7 @@ One project, one repository, and one Cloudflare Worker serve the public website 
 
 `wrangler.jsonc` deploys `src/norcal-worker.mjs` to the existing `norcal-veterans` Worker. Public pages and the embedded `worker/legacy` HQ share the dedicated NorCal D1 database. There is no dependency on the separate multi-project Headquarters service. The September 12 direction supersedes the proposed shared-HQ migration.
 
-HQ manages requests, project work, public submissions, organization profiles, events, coordination, reusable copy, global Super Admin and scoped assignments, audit history, and a private database export. Cloudflare Access protects the private routes; the Worker independently verifies signed identity and enforces record permissions on every request. Cloudflare Access admission remains separate from HQ role assignments. The NorCal HQ request agent checks queued owner and currently authorized Super Admin requests every five minutes while its computer is awake and Codex is running, then saves results back to HQ. See [request agent operations](docs/hq-request-agent.md). File storage remains unconfigured.
+HQ manages requests, project work, public submissions, organization profiles, events, coordination, reusable copy, global Super Admin and scoped assignments, audit history, and a private database export. The Clerk release uses invitation-only email-code sign-in without MFA, as explicitly selected by the owner; the Worker verifies identity and enforces record permissions on every request. HQ assignments remain separate from Clerk admission. The request agent was retired on September 24, 2026; Requests and history remain for manual tracking. See [Clerk release status](docs/clerk-migration.md) for verified deployment state. File storage remains unconfigured.
 
 Public submissions enter a private review queue. Only published organizations and events appear publicly. Existing IDs, records, domains, and the Yolo-Solano launch redirect are preserved.
 
@@ -31,9 +31,11 @@ The [AI Working Guide](docs/AI-WORKING-GUIDE.md) and [project lessons log](docs/
 
 ## Super Admin access
 
-In HQ, open Organization & region access, enter an email, select **Super Admin**, and save. No region or organization is required. This grants full HQ access, including publishing, Requests, access management and exports; it does not change the Cloudflare Access sign-in policy. The configured owner keeps permanent access. No new person is granted access as part of this feature release.
+In HQ, open Organization & region access, enter an email, select **Super Admin**, and save. No region or organization is required. This grants full HQ access, including publishing, Requests, access management and exports. In Clerk mode, use Send invitation for a person who has not registered. Invitations do not grant permissions on their own. The configured owner keeps permanent access.
 
 ## Recent milestones and verification context
+
+September 24, 2026: the Clerk migration is implemented and verified in isolated staging. The owner selected basic email-code authentication without MFA and requested retirement of the scheduled agent while preserving Requests/history. See [Clerk migration status and runbook](docs/clerk-migration.md) for exact publication and acceptance evidence; do not infer deployment from local code.
 
 Recorded September 12, 2026; these are completed changes, not a new work queue. Use Git history and current checks when a task depends on present deployment or runtime state.
 

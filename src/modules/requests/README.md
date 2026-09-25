@@ -1,5 +1,7 @@
 # Requests
 
+September 24, 2026: the scheduled agent is retired. HQ Requests and all stored history remain for manual tracking. The CLI entry refuses execution; Node policy/transport files are retained as recovery and regression references, not an active service. With `processorConnected=false`, browser agent-health UI/polling is disabled and the editor describes manual tracking.
+
 Owns platform-owner and Super Admin work instructions, exact-revision approvals, execution locking, comments, immutable runs/results, reconciliation and Agent Health. Owned data: `records(kind=request)`, `request_runs`, `request_entries`, `hq_agent_health`, related audit and revisions; the Node adapter also owns ignored local claims.
 
 - `server.mjs`: `handleRequestRoute(req, env, user)` handles `/api/hq/requests/:id/{history,comments,reconcile}` and `/api/hq/agent-health`; returns a Response or null. Identity must already be verified. Platform-admin privilege, same-origin writes and bounded JSON are enforced here.

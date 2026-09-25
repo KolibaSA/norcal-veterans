@@ -7,7 +7,7 @@ Public site: https://www.norcalveterans.org/yolo-solano
 Private HQ: https://www.norcalveterans.org/hq
 Region selector: https://www.norcalveterans.org/regions
 
-Both root domains temporarily redirect to Yolo-Solano. Existing Cloudflare Access owner allowlist and MFA remain unchanged. The Worker independently validates signed identity and assignments; alternate URLs fail closed without identity.
+Both root domains temporarily redirect to Yolo-Solano. The Clerk release uses invitation-only email-code login without MFA by explicit owner choice. The Worker independently validates signed identity and assignments; alternate URLs fail closed without identity. Keep the old Access gate until the Clerk Worker is deployed; see the migration runbook for release state.
 
 ## Build and test gate
 Use Node 24 and the existing locked dependencies. `.node-version` pins the build to that major version using [Cloudflare's supported version override](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/#overriding-default-versions):
@@ -22,6 +22,8 @@ The connected Cloudflare production build runs `npm run build`, then `npx wrangl
 `test:active` runs the NorCal Worker, embedded HQ, queue, content and recovery tests. The full suite additionally preserves imported application regressions. Imported deployment configuration is archived as `fixtures/imported/wrangler.hq.jsonc.txt`; its source modules and flat `dist` outputs are regression fixtures, not production entry points.
 
 ## Isolated staging
+
+September 24 Clerk migration: staging uses a dedicated Clerk development instance and synthetic account. Follow [the Clerk runbook](clerk-migration.md) for current verification, the owner's no-MFA decision, additive migration and coordinated rollback. Do not deploy staging keys or its synthetic data to production.
 Use `wrangler.staging.jsonc`, Worker `norcal-veterans-staging`, and its separate D1 database. It has no production domain routes. Its public responses carry noindex/noarchive and the staging header. Use synthetic records, not private production copies.
 
 ```sh
@@ -64,6 +66,6 @@ This restores the existing file in memory, checks integrity and migrations, opti
 Code rollback does not require restoring data: the migrations are additive. Before this hardening release, production version was `65828571-6e05-4e44-8552-e53f766834dd` and GitHub commit `d61e90c`. If rolling back code, pause the new agent and reconcile GitHub so its next build does not undo the rollback. Never restore production data merely to roll back code.
 
 ## Operations
-The request agent remains local and checks every five minutes while this computer is awake and Codex is running. HQ shows the last observed poll, current request and errors, with results in separate activity history. See [request agent operations](hq-request-agent.md). File uploads remain disabled.
+The request agent was retired at the owner's request on September 24. Its schedule is deleted and the CLI no longer executes; Requests and past activity/history remain. Do not reenable it during release or rollback. See [historical request agent operations](hq-request-agent.md). File uploads remain disabled.
 
 Worker logs are enabled. Application diagnostics include an operation, status and correlation ID, never request bodies, identities, credentials or raw SQL errors. Public health verifies database availability. Public content uses typed validation and a shared serializer; unverified content is labeled accurately.

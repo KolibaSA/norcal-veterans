@@ -5,6 +5,9 @@ import {dataset} from '../src/data.mjs';
 import {brandLogos} from '../src/logos.mjs';
 import {bundleJavaScript,expandHeadquartersMarkup,expandHeadquartersStyles} from './build-support.mjs';
 const root=path.resolve(import.meta.dirname,'..');
+const clerkPageScript = await bundleJavaScript({entryPoints:['src/app/clerk-page.mjs']});
+await fs.mkdir(path.join(root,'public/assets'),{recursive:true});
+await fs.writeFile(path.join(root,'public/assets/hq-auth.js'),clerkPageScript);
 // The embedded NorCal HQ is served as a module; keep it generated from its HTML source.
 const [hqSource,hqStyleSource,hqScript]=await Promise.all([
  fs.readFile(path.join(root,'worker/legacy/hq.html'),'utf8'),

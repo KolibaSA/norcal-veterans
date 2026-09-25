@@ -1,6 +1,9 @@
 import { isPlatformAdmin } from './permissions.mjs';
+import { verifyClerkIdentity } from './clerk-auth.mjs';
 const bytes=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
-export async function verifyIdentity(request,env){
+export async function verifyIdentity(request,env,responseContext={}){
+ if(env.HQ_AUTH_PROVIDER==='clerk')return verifyClerkIdentity(request,env,responseContext);
+ if(env.HQ_AUTH_PROVIDER && env.HQ_AUTH_PROVIDER!=='access')throw new Error('AUTH_NOT_CONFIGURED');
  if(!env.ACCESS_TEAM_DOMAIN||!env.ACCESS_AUD||!env.OWNER_EMAIL)throw new Error('AUTH_NOT_CONFIGURED');
  const issuer='https://'+env.ACCESS_TEAM_DOMAIN;
  if(!/^[a-z0-9-]+\.cloudflareaccess\.com$/.test(env.ACCESS_TEAM_DOMAIN))throw new Error('AUTH_NOT_CONFIGURED');

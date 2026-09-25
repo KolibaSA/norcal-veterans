@@ -8,6 +8,8 @@ Owns administrator assignment form state. Role-required scope choices are presen
 
 Dependencies: Injected HTTP/message/section refresh interface and shared escaped labels. Other features use common authorization interfaces and need not inspect this administration screen.
 
+When `me.invitationsEnabled` is true, an assignment has a Send invitation action. It calls the grant-specific invitation endpoint and shows the returned status. It does not modify scope or grant authority; the server still requires current platform-admin permission.
+
 Focused checks: `node scripts/run-tests.mjs --module access`. Browser coverage: non-owner denial before fetch, selected-scope payload, escaped assignment labels and stale section response. Wider release checks remain required before publication.
 
 For routine changes, start here and in this module. Read the shared browser contract only when the change affects a shared editor/navigation behavior. Other modules are entered through their supported runtime entry point, never a private controller.

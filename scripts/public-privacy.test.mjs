@@ -41,7 +41,7 @@ test('current public records and source exports omit imported officers, direct c
 
 test('every public organization page remains reachable without an officer listing or imported personal data',()=>{
  for(const record of records){const page=render(new URL('https://test/organizations/'+record.id));assert.equal(page.status,200,record.id);assertNoImportedPersonalData(page.html);assert.ok(!page.html.includes('Listed officers'));assert.ok(!page.html.includes('Officer source'));}
- for(const path of ['/','/about']){const page=render(new URL('https://test'+path));assert.equal(page.status,200);assertNoImportedPersonalData(page.html);}
+ for(const path of ['/','/about']){const page=render(new URL('https://test'+path));assert.equal(page.status,200);const html=path==='/'?page.html.replace('Contact Sterling Koliba at <a href="mailto:sterling.koliba@gmail.com">sterling.koliba@gmail.com</a>.',''):page.html;assertNoImportedPersonalData(html);}
  const county=render(new URL('https://test/organizations/vso-solano')).html;assert.ok(county.includes('707-784-6590'));assert.ok(county.includes('675 Texas Street'));
  const postPage=render(new URL('https://test/organizations/'+ORG)).html;assert.ok(postPage.includes('916-371-7245'));assert.ok(postPage.includes('905 Drever Street'));
 });

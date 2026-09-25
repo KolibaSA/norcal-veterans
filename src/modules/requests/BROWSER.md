@@ -2,6 +2,8 @@
 
 Request editing permissions, queue authorization labels and statuses; activity history, comments, interrupted-run reconciliation, and agent health.
 
+The agent is retired. In the deployed configuration `processorConnected=false` suppresses agent-health UI and polling; Requests, activity and historical-run reconciliation remain. The editor explains manual tracking rather than promising automatic execution.
+
 `browser.mjs` exports `createFeature()`, `connectRequests(context)` and the compatibility health/permission helpers. `activity.mjs` and `health.mjs` are private controllers; their markup is `activity.html`, `editor.html` and `health.html`.
 
 The record form owns title/body/scope/status. Activity keeps its own last history response and unsaved comment/reconciliation inputs. It sends the refreshed exact version/status/run ID and never puts executable instructions in a comment or reconciliation body.

@@ -1,11 +1,31 @@
 import { isPlatformAdmin } from '../../shared/permissions.mjs';
 import { json, readJson, field } from '../../shared/server-http.mjs';
 import { statement as stmt, rows as list } from '../../shared/server-storage.mjs';
+import { clerkClient } from '../../shared/clerk-auth.mjs';
 const fail = (message, status = 400) => json({ error: message }, status);
 
 export async function handleAccessRoute(req, env, user, path) {
   if (!['GET', 'HEAD'].includes(req.method) && req.headers.get('Origin') !== new URL(req.url).origin) return fail('Request origin rejected.', 403);
   if (!isPlatformAdmin(user)) return fail('Only the platform owner or a Super Admin manages access.', 403);
+  const invite = path.match(/^\/api\/hq\/access\/([^/]+)\/invite$/);
+  if (invite && req.method === 'POST') {
+    if (env.HQ_AUTH_PROVIDER !== 'clerk') return fail('Invitations are not configured.', 503);
+    const grant = await stmt(env, 'SELECT * FROM grants WHERE id=?', invite[1]).first();
+    if (!grant) return fail('This assignment no longer exists.', 404);
+    const recent = await stmt(env, "SELECT id FROM audit WHERE action='invite' AND record_id=? AND created_at>? LIMIT 1", grant.id, new Date(Date.now() - 60000).toISOString()).first();
+    if (recent) return fail('An invitation was just sent. Please wait a minute before trying again.', 429);
+    const client = clerkClient(env);
+    try {
+      const existing = await client.users.getUserList({ emailAddress: [grant.email], limit: 1 });
+      if (existing.data.length) return json({ status: 'registered', message: 'This person already has an account and can sign in to HQ.' });
+      const pending = await client.invitations.getInvitationList({ query: grant.email, status: 'pending', limit: 100 });
+      if (pending.data.some(item => item.emailAddress.toLowerCase() === grant.email.toLowerCase())) return json({ status: 'pending', message: 'An invitation is already pending. Ask the person to check spam or junk.' });
+      // Permissions are always resolved from grants, never invitation metadata.
+      await client.invitations.createInvitation({ emailAddress: grant.email, redirectUrl: new URL('/hq/sign-up', req.url).href, expiresInDays: 7 });
+    } catch { return fail('The invitation could not be sent. The assignment is saved; please try again later.', 502); }
+    await stmt(env, 'INSERT INTO audit(id,actor,action,record_id,created_at) VALUES(?,?,?,?,?)', crypto.randomUUID(), user.email, 'invite', grant.id, new Date().toISOString()).run();
+    return json({ status: 'invited', message: 'Invitation sent. Ask the person to check spam or junk if it does not arrive.' });
+  }
   if (path === '/api/hq/access' && req.method === 'GET') return json(await list(env, 'SELECT * FROM grants ORDER BY email'));
   if (path === '/api/hq/access' && req.method === 'POST') {
     const x = await readJson(req), email = field(x.email, 'Email', 250, true).toLowerCase();

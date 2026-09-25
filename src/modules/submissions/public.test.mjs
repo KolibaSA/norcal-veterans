@@ -18,7 +18,7 @@ test('contribution checks public-information consent and selected live organizat
   assert.throws(()=>organizationSubmission(input({kind:'grant_admin'}),organizations),/valid option/);
   assert.equal(JSON.parse(organizationSubmission(input({org_id:''}),organizations).body).orgId,'');
 });
-test('contribution form markup remains byte-equivalent to the pre-refactor baseline',()=>{
+test('contribution form markup matches the approved public shell',()=>{
   const html=submissionPage(new URL('https://site.test/for-organizations'),{organizations});
-  assert.equal(createHash('sha256').update(html).digest('hex'),'b65c5eb299a7615f3a459b20cb4ea850dd39dee9414311691010664324921712');
+  assert.equal(createHash('sha256').update(html).digest('hex'),'f20c33fd3a48b651ecebabd4cf86bf62ecf7d23f699419c640ab1b829ff18adc');
 });

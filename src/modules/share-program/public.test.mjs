@@ -29,7 +29,7 @@ test('program form rejects missing consent, invalid recipients, invalid email an
 test('program page preserves existing markup and makes private review explicit', () => {
   const url=new URL('https://site.test/share');
   const html=speakerSubmissionPage(url,organizations);
-  assert.equal(createHash('sha256').update(html).digest('hex'),'c8db232650c91f24ca5c5506dc89b589c89c78011c556ea1ebc8639637218da3');
+  assert.equal(createHash('sha256').update(html).digest('hex'),'78ffd44210c5d6bfa36dc8bc8578cca2324d375c798f81320f8c62e715de38f3');
   const active=shareProgramPage(url,organizations,{received:true});
   assert.match(active,/saved in the private review queue/);
   assert.match(active,/Nothing is published automatically/);

@@ -98,7 +98,10 @@ export function createFeature() {
     allowStatus: (status, record) => status !== 'in_progress' || record.status === 'in_progress',
     saveLabel: record => record.status === 'queued' ? 'Save and queue request' : 'Save item',
     savedMessage: record => record.status === 'queued' ? 'Request saved and queued.' : 'Saved.',
-    notice: (_me, record, editable) => !editable
+    notice: (me, record, editable) => me.processorConnected === false
+      ? record.status === 'in_progress' ? 'This request has a retained execution record. Review its history and reconcile the run before changing these instructions.'
+        : 'Requests are tracked manually. The automated request agent has been removed; existing comments and history are preserved.'
+      : !editable
       ? record.status === 'in_progress' ? 'The agent is processing these instructions. Add a comment below, or reconcile the run before changing the instructions.'
         : 'Executable requests are managed by the platform owner and Super Admins.'
       : 'Saving this request as queued authorizes the agent to process these instructions. Comments and results appear separately below.',

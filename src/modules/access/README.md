@@ -9,3 +9,5 @@ Identity verification and permission enforcement used by all other modules live 
 Private HTTP handlers receive the shell's verified identity and current grants. `worker/legacy/index.mjs` authenticates every HQ request and checks write origins before dispatch. Shared infrastructure supplies bounded JSON, authorization, D1 transactions, optimistic versions, immutable audit/history and generic record serialization.
 
 See [BROWSER.md](./BROWSER.md) for browser entry points, editor state, markup, actions and focused UI checks.
+
+Clerk mode adds `POST /api/hq/access/:id/invite`: platform admins may invite an existing assigned email, with duplicate/pending-user handling, a short resend throttle and an audit entry. Assignment creation does not automatically send mail. Invitations contain no role metadata, and accepting one cannot create or expand a grant. `/api/hq/me.invitationsEnabled` enables the invitation controls only in Clerk mode. Production remains on Access during the staged migration; see [status and release procedure](../../../docs/clerk-migration.md).

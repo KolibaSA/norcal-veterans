@@ -97,7 +97,7 @@ test('Post 8151 organization plan publishes stable monthly events with three lab
  const data=await norcalPublicData(env.DB),meetings=data.events.filter(row=>row.organization_id==='vfw-ca-8151'&&row.kind==='Organization meeting');
  assert.equal(meetings.length,1);assert.equal(meetings[0].id,'organization-meeting-vfw-ca-8151-2027-01');assert.equal(meetings[0].start_at,'2027-01-22T02:00:00.000Z');assert.deepEqual(meetings[0].meeting_times,times);
  const page=await worker.fetch(new Request('https://site.test/organizations/vfw-ca-8151?meeting_year=2027'),env),html=await page.text();
- assert.equal(page.status,200);assert.match(html,/Social hour/);assert.match(html,/Post meeting/);assert.match(html,/Social time/);assert.doesNotMatch(html,/href="\/events\/organization-meeting-vfw-ca-8151-2027-01"/);
+ assert.equal(page.status,200);assert.match(html,/Social hour/);assert.match(html,/Post meeting/);assert.match(html,/Social time/);assert.match(html,/href="\/events\/organization-meeting-vfw-ca-8151-2027-01"/);
 });
 
 test('custom organization categories remain visible and county filtering finds the new listing',async t=>{

@@ -12,6 +12,16 @@ test('Super Admin sees request creation and editing while active execution stays
   assert.equal(feature.canCreate({ owner: false, superAdmin: false }), false);
 });
 
+test('retired agent hides health and performs no polling while preserving manual Requests', async () => {
+  const context = requestContext(async () => { throw new Error('Retired agent must not fetch health'); });
+  context.me.processorConnected = false;
+  const controller = connectRequests(context);
+  controller.sectionChanged(); controller.initialized(); await controller.loadHealth();
+  assert.equal(context.$('processor').hidden, true);
+  assert.match(createFeature().notice(context.me, { status: 'queued' }, true), /tracked manually/);
+  assert.equal(createFeature().canCreate(context.me), true);
+});
+
 function scopeEditor(record = { kind: 'request', region_id: 'yolo-solano' }) {
   const feature = createFeature(), context = controls(), fields = feature.fields(record);
   feature.configureEditor({ ...context, record, values: fields });
