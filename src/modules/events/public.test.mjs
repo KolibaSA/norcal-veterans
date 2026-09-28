@@ -60,6 +60,18 @@ test('events page groups compact cards by month and identifies hosts and accepte
   assert.doesNotMatch(html,/deliberately omitted card description/);
 });
 
+test('a card shows two participants and links to a detail page listing every participant',()=>{
+  const organizations=['host','first','second','third'].map(id=>({id,verified_name:id+' organization'}));
+  const event={id:'many-participants',title:'Community event',description:'All partners listed.',
+    start_at:'2099-09-16T18:00:00-07:00',venue:'Public hall',status:'published',kind:'Community event',
+    organization_id:'host',accepted_organization_ids:['first','second','third']};
+  const card=eventsPagePublic(new URL('https://test/events'),[event],organizations);
+  assert.match(card,/Going:.*first organization.*second organization.*href="\/events\/many-participants">\+1 more/s);
+  assert.doesNotMatch(card,/third organization/);
+  const detail=eventDetail(event,organizations);
+  assert.match(detail,/Organizations going.*first organization.*second organization.*third organization/s);
+});
+
 test('one event record renders, prunes, details, and exports multiple dates',()=>{
   const event={id:'multi',title:'Multi-date fundraiser',description:'One event record.',date_only:true,start_at:'2026-11-07T08:00:00Z',additional_occurrences:[
     {start_at:'2026-11-11T08:00:00Z',end_at:null},{start_at:'2026-11-08T08:00:00Z',end_at:null}

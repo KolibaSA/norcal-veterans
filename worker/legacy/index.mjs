@@ -7,6 +7,7 @@ import headquarters, { scriptHash } from './hq-template.mjs';
 import { publicPayload } from './public.mjs';
 import { contentMetadata } from '../../src/app/content-metadata.mjs';
 import { handleRecordRoute } from '../../src/app/hq-records.mjs';
+import { handleInvitationRoute } from '../../src/modules/events/server.mjs';
 import { handleRequestRoute } from '../../src/modules/requests/server.mjs';
 import { handleAccessRoute } from '../../src/modules/access/server.mjs';
 import { handleHistoryRoute } from '../../src/modules/history/server.mjs';
@@ -31,6 +32,13 @@ async function headquartersRequest(req, env, responseContext) {
             const payload = publicPayload(record);
             if (payload) output.push({ id: record.id, kind: record.kind, payload });
           } catch { logFailure(requestId, 'public_record_omitted', 422); }
+        }
+        const invitationTable = await env.DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='organization_event_invitations'").first();
+        if (invitationTable) {
+          const accepted = await list(env, "SELECT event_id,recipient_org_id FROM organization_event_invitations WHERE status='accepted' ORDER BY decision_at,created_at,id");
+          for (const item of output.filter(item => item.kind === 'event')) {
+            item.payload.accepted_organization_ids = [...new Set(accepted.filter(row => row.event_id === item.id).map(row => row.recipient_org_id))];
+          }
         }
         return json(output);
       }
@@ -74,6 +82,8 @@ async function headquartersRequest(req, env, responseContext) {
       if (requestRoute) return requestRoute;
       const recordRoute = await handleRecordRoute(req, env, user, grants, url);
       if (recordRoute) return recordRoute;
+      const invitationRoute = await handleInvitationRoute(req, env, user, grants, url);
+      if (invitationRoute) return invitationRoute;
       const historyRoute = await handleHistoryRoute(req, env, user, grants, path);
       if (historyRoute) return historyRoute;
       if (path === '/api/hq/access' || path.startsWith('/api/hq/access/')) return await handleAccessRoute(req, env, user, path);

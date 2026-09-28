@@ -2,6 +2,8 @@
 
 Owns private coordination records: `records(kind=coordination)` with draft, active and archived states. Organization ID links are bounded data references, not imports of the Organizations editor.
 
+The Coordination screen also displays the signed-in person's scoped event invitation inbox from the Events module's supported HTTP endpoint. This is a view of the event-owned invitation status, not a second copy in coordination records. Recipients may respond Going or Declined there; generic coordination records retain their existing lifecycle.
+
 Run `npm run test:module -- coordination`. Shared record persistence and assignment enforcement are covered by `scripts/norcal-api.test.mjs` and `scripts/legacy-security.test.mjs`.
 
 `domain.mjs` exports `recordDefinition` (record kind, allowed statuses and `validate(input, options)`). `src/app/record-definitions.mjs` registers it and supplies mandatory credential sanitization; `src/app/hq-records.mjs` preserves `/api/hq/records` and `/api/hq/records/:id`. There is no feature-specific query hidden in that dispatcher.

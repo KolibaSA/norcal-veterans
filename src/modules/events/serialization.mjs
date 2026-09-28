@@ -1,4 +1,4 @@
-import {publicText,publicStrings,publicURL,privacyReviewDate,publicInstant} from '../../shared/public-privacy.mjs';
+import {publicText,publicURL,privacyReviewDate,publicInstant} from '../../shared/public-privacy.mjs';
 export function publicEventRecord(row, payload) {
   return sanitizePublicEvent({ ...payload, id: row.id, title: row.title, description: row.body,
     status: row.status, organization_id: row.organization_id || payload.organization_id || null });
@@ -29,7 +29,8 @@ export function sanitizePublicEvent(record){
  out.volunteer_enabled=record.volunteer_enabled===true;out.volunteer_url=out.volunteer_enabled?publicURL(record.volunteer_url):'';
  out.donate_enabled=record.donate_enabled===true;out.donate_url=out.donate_enabled?publicURL(record.donate_url):'';
  out.tickets_enabled=record.tickets_enabled===true;out.tickets_url=out.tickets_enabled?publicURL(record.tickets_url):'';
- out.accepted_organization_ids=publicStrings(record.accepted_organization_ids).slice(0,24);
+ out.accepted_organization_ids=Array.isArray(record.accepted_organization_ids)
+  ?record.accepted_organization_ids.filter(id=>typeof id==='string'&&/^[-_a-zA-Z0-9]{1,120}$/.test(id)):[];
  out.source_kind=['public_source','project_team'].includes(record.source_kind)?record.source_kind:'public_source';
  out.status=['published','draft','archived'].includes(record.status)?record.status:'draft';
  return out;

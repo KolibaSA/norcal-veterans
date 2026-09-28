@@ -8,6 +8,8 @@ Owns event payload fields and preserves unknown imported fields. Pacific time us
 
 An editable saved event shows a destructive Delete event control with explicit confirmation. New events and records the current user cannot edit do not show it. Successful deletion returns to the Events list; the server independently rechecks scope, publication permission and optimistic version.
 
+The saved event editor also shows the module-owned invitation section, outside the generic event fieldset so invitation actions remain available to authorized hosts even when the published event body is read-only. It lists same-region published organizations, existing invitation statuses, and host withdrawal controls. Owner/Super Admin offline response buttons request a short confirmation note. The section remains hidden for new events and all other record editors.
+
 Dependencies: Shared record controls. The app initializes county choices through the Organizations supported lookup interface; routine event changes do not require opening organization editor code.
 
 Focused checks: `node scripts/run-tests.mjs --module events`. Browser coverage: winter/summer wall time, UTC day boundaries, payload preservation, additional-date sorting, date-only conversion and required-control cleanup. Wider release checks remain required before publication.

@@ -74,4 +74,8 @@ export function validateEvent(input, options = {}) {
   });
 }
 
-export const recordDefinition = Object.freeze({ kind: 'event', statuses: ['draft', 'published', 'archived'], validate: validateEvent, deleteEnabled: true });
+export const recordDefinition = Object.freeze({ kind: 'event', statuses: ['draft', 'published', 'archived'], validate: validateEvent,
+  // Invitation responses live in the server-owned invitation table. Generic
+  // event saves must never create or revive a public participation claim.
+  authorizePayload(payload) { delete payload.accepted_organization_ids; return payload; },
+  deleteEnabled: true });

@@ -94,6 +94,7 @@ async function createRecord(record) {
   return (await response.json()).id;
 }
 const organizationId = await createRecord({ kind: 'organization', title: 'Synthetic QA Veterans Network', body: 'Synthetic browser test information. This is not a real organization.', region_id: 'yolo-solano', status: 'published', payload: { organization_type: 'Veterans nonprofit', location_county: 'Solano', city: 'Dixon', service_categories: ['Synthetic QA'], public_contacts: { website: 'https://example.test/qa-organization', email: 'public-qa@example.test' }, address: { type: 'meeting_venue', text: 'Synthetic QA public hall', map_eligible: false } } });
+const partnerId = await createRecord({ kind: 'organization', title: 'Synthetic QA Partner Post', body: 'Synthetic invitation test organization.', region_id: 'yolo-solano', status: 'published', payload: { organization_type: 'Veterans nonprofit', location_county: 'Solano', city: 'Dixon' } });
 const eventId = await createRecord({ kind: 'event', title: 'Synthetic QA winter community event', body: 'Synthetic event for date, publication and calendar testing.', region_id: 'yolo-solano', organization_id: organizationId, status: 'published', payload: { starts_local: '2027-01-15T18:00', ends_local: '2027-01-15T20:00', date_only: false, venue: 'Synthetic QA public hall', city: 'Dixon', county: 'Solano', organizer: 'Synthetic QA Veterans Network' } });
 const requestId = await createRecord({ kind: 'request', title: 'Synthetic QA queued request', body: 'Synthetic task for exercising comments, revisions and queue display. This server never runs an agent.', region_id: 'yolo-solano', status: 'queued', payload: {} });
 const orphanId = 'synthetic-qa-orphan-request';
@@ -105,7 +106,7 @@ if (submissionResponse.status !== 201) throw new Error('Synthetic public submiss
 const submissionId = (await submissionResponse.json()).id;
 sqlite.prepare("INSERT INTO hq_agent_health(id,last_successful_check,current_request_id,queued,state,last_error,last_error_at,updated_at) VALUES(1,?,?,1,'blocked','Synthetic QA: interrupted request awaits owner reconciliation.',?,?)").run(now, orphanId, now, now);
 
-const ids = { organizationId, eventId, requestId, orphanId, submissionId };
+const ids = { organizationId, partnerId, eventId, requestId, orphanId, submissionId };
 const banner = '<aside role="status" style="padding:10px 4%;background:#fff4b8;color:#332700;border-bottom:2px solid #b88700;font:15px Arial,sans-serif"><strong>Synthetic QA — LOCAL ONLY.</strong> Automatic fixture sign-in; all records and identities are invented, all changes stay in memory, and no real request agent is running.</aside>';
 const server = createServer(async (incoming, outgoing) => {
   try {

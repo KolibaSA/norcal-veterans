@@ -52,7 +52,7 @@ test('event editor offers confirmed deletion only for an editable saved event', 
   const { $ }=controls(),record={id:'event-a',title:'Community event',version:4};
   let request,notice='',reloads=0;
   const originalWindow=globalThis.window;globalThis.window={confirm:()=>true};t.after(()=>{globalThis.window=originalWindow;});
-  const context={$,editing:record,message:value=>{notice=value;},loadSection:async()=>{reloads++;},api:async(path,options)=>{request={path,options};}};
+  const context={$,tab:'event',editing:record,message:value=>{notice=value;},loadSection:async()=>{reloads++;},api:async(path,options)=>{request={path,options};}};
   const controller=createFeature().connect(context);
   controller.editorOpened(record,{editable:true});assert.equal($('deleteEventSection').hidden,false);
   await $('deleteEvent').onclick();

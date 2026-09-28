@@ -13,8 +13,8 @@ test('Backup preserves the private logical schema and every recovery table in me
   assert.equal(response.headers.get('Cache-Control'), 'private, no-store');
   assert.match(response.headers.get('Content-Disposition'), /norcal-headquarters-backup.json/);
   const backup = await response.json();
-  assert.equal(backup.schema, 3);
-  for (const table of ['records', 'grants', 'audit', 'attachments', 'request_runs', 'request_entries', 'hq_agent_health', 'record_revisions']) assert.ok(Array.isArray(backup[table]), table);
+  assert.equal(backup.schema, 4);
+  for (const table of ['records', 'grants', 'audit', 'attachments', 'request_runs', 'request_entries', 'hq_agent_health', 'record_revisions', 'organization_event_invitations']) assert.ok(Array.isArray(backup[table]), table);
   assert.equal(JSON.parse(backup.records[0].payload).private_recovery_value, 'synthetic-only');
   assert.equal(backup.record_revisions.length, 1);
 });

@@ -13,9 +13,9 @@ The 13-feature extraction was completed in `b5f19cc` on September 12, 2026. This
 | Overview | [overview](src/modules/overview/README.md) | Summary screen and composition of feature summaries |
 | Project Work | [project-work](src/modules/project-work/README.md) | Task statuses, editor and record contract |
 | Public Submissions | [submissions](src/modules/submissions/README.md) | Review queue, readable submission details, draft preparation, public update form, protected intake storage |
-| Events | [events](src/modules/events/README.md) | Event editor, validation, Pacific dates, public serialization, event pages and calendars |
+| Events | [events](src/modules/events/README.md) | Event editor, invitations and authoritative attendance responses, validation, Pacific dates, public serialization, event pages and calendars |
 | Organization Profiles | [organizations](src/modules/organizations/README.md) | Profile editor, taxonomy, locations/service areas, validation, typed public serialization and scope choices |
-| Coordination | [coordination](src/modules/coordination/README.md) | Coordination editor, statuses and record contract |
+| Coordination | [coordination](src/modules/coordination/README.md) | Coordination editor, statuses and record contract; private event invitation inbox uses the Events API |
 | Ready-to-use Copy | [library](src/modules/library/README.md) | Copy-library editor, statuses and record contract |
 | Organization & Region Access | [access](src/modules/access/README.md) | Assignment administration UI and platform-admin grant/revoke endpoints |
 | Change History and Revisions | [history](src/modules/history/README.md) | Change log, immutable revision display and scoped history endpoints |

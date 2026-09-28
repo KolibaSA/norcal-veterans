@@ -141,8 +141,8 @@ test('owner backup exports every active table as one snapshot while all private 
   const env = makeEnv(t); await create(env);
   const response = await req(env, '/api/hq/export', owner);
   assert.equal(response.status, 200); assert.match(response.headers.get('Content-Disposition'), /attachment/);
-  const backup = await response.json(); assert.equal(backup.schema, 3);
-  for (const table of ['records', 'grants', 'audit', 'attachments', 'request_runs', 'request_entries', 'hq_agent_health', 'record_revisions']) assert.ok(Array.isArray(backup[table]), table);
+  const backup = await response.json(); assert.equal(backup.schema, 4);
+  for (const table of ['records', 'grants', 'audit', 'attachments', 'request_runs', 'request_entries', 'hq_agent_health', 'record_revisions', 'organization_event_invitations']) assert.ok(Array.isArray(backup[table]), table);
   assert.equal(backup.records.length, 1); assert.equal(backup.record_revisions.length, 1);
   await grant(env, 'editor@example.com');
   assert.equal((await req(env, '/api/hq/export', 'editor@example.com')).status, 403);

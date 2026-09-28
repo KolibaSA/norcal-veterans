@@ -1153,7 +1153,7 @@ function sanitizePublicEvent(record2) {
   out.donate_url = out.donate_enabled ? publicURL2(record2.donate_url) : "";
   out.tickets_enabled = record2.tickets_enabled === true;
   out.tickets_url = out.tickets_enabled ? publicURL2(record2.tickets_url) : "";
-  out.accepted_organization_ids = publicStrings(record2.accepted_organization_ids).slice(0, 24);
+  out.accepted_organization_ids = Array.isArray(record2.accepted_organization_ids) ? record2.accepted_organization_ids.filter((id) => typeof id === "string" && /^[-_a-zA-Z0-9]{1,120}$/.test(id)) : [];
   out.source_kind = ["public_source", "project_team"].includes(record2.source_kind) ? record2.source_kind : "public_source";
   out.status = ["published", "draft", "archived"].includes(record2.status) ? record2.status : "draft";
   return out;
@@ -1253,7 +1253,7 @@ function publicEventCard(v, organizations = [], occurrences = eventOccurrences(v
   const multi = occurrences.length > 1;
   const host = organizations.find((organization) => organization.id === v.organization_id), visual = eventVisual(v), title = compactEventTitle(v.title, host), accepted = (v.accepted_organization_ids || []).map((id) => organizations.find((organization) => organization.id === id)).filter((organization) => organization && organization.id !== host?.id), shown = accepted.slice(0, 2), remaining = accepted.length - shown.length;
   const hostName = host?.verified_name || v.organizer || "", hostBadge = host ? `<a class="event-card-host" href="/organizations/${pe(host.id)}">${pe(hostName)}</a>` : hostName ? `<span class="event-card-host">${pe(hostName)}</span>` : "";
-  const participants = shown.length ? `<p class="event-card-partners"><span>with</span> ${shown.map((organization) => `<a href="/organizations/${pe(organization.id)}">${pe(organization.verified_name)}</a>`).join(' <span aria-hidden="true">·</span> ')}${remaining ? ` <a href="/events/${pe(v.id)}">+${remaining} more</a>` : ""}</p>` : "";
+  const participants = shown.length ? `<p class="event-card-partners"><span>Going:</span> ${shown.map((organization) => `<a href="/organizations/${pe(organization.id)}">${pe(organization.verified_name)}</a>`).join(' <span aria-hidden="true">·</span> ')}${remaining ? ` <a href="/events/${pe(v.id)}">+${remaining} more</a>` : ""}</p>` : "";
   const image = v.image_url && visual !== "poppy" ? `<img src="${pe(v.image_url)}" alt="${pe(title)} event image" width="320" height="320" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : `<span class="event-card-fallback" aria-hidden="true">${icons[visual]}</span>`;
   const dateBlock = multi ? `<div class="event-card-date event-card-date--multi"><span>${new Set(occurrences.map((event) => eventMonthShort.format(new Date(event.start_at)))).size === 1 ? pe(eventMonthShort.format(new Date(v.start_at))) : "DATES"}</span><strong>${pe(compactOccurrenceDays(occurrences))}</strong><em>MULTI-DAY EVENT</em></div>` : `<time class="event-card-date" datetime="${pe(v.date_only ? pacificDayKey(v.start_at) : v.start_at)}"><span>${pe(eventMonthShort.format(new Date(v.start_at)))}</span><strong>${pe(eventDayFormat.format(new Date(v.start_at)))}</strong></time>`;
   const dates = multi ? `<div class="event-card-occurrences"><b>Event Dates:</b><span>${occurrences.map((event) => `<time datetime="${pe(event.date_only ? pacificDayKey(event.start_at) : event.start_at)}">${pe(eventChipFormat.format(new Date(event.start_at)))}</time>`).join("")}</span></div>` : "";
@@ -1288,8 +1288,10 @@ function eventsPagePublic(url, events, organizations = []) {
 }
 function eventDetail(v, organizations = []) {
   const current = upcomingEvents([v])[0], event = current || sanitizePublicEvent(v) || v, occurrences = eventOccurrences(event), host = organizations.find((r) => r.id === event.organization_id), past = !current;
+  const going = [...new Set(event.accepted_organization_ids || [])].map((id) => organizations.find((r) => r.id === id)).filter((r) => r && r.id !== host?.id);
+  const participants = going.length ? `<div><dt>Organizations going</dt><dd>${going.map((r) => `<a href="/organizations/${pe(r.id)}">${pe(r.verified_name)}</a>`).join("<br>")}</dd></div>` : "";
   const when = occurrences.length === 1 ? `${pe(publicEventDate(occurrences[0]))}${!event.date_only && occurrences[0].end_at ? "<br>Ends " + pe(publicDate(occurrences[0].end_at)) : ""}` : `<ul class="event-detail-dates">${occurrences.map((occurrence) => `<li><time datetime="${pe(event.date_only ? pacificDayKey(occurrence.start_at) : occurrence.start_at)}">${pe(publicEventDate(occurrence))}${!event.date_only && occurrence.end_at ? " – " + pe(eventTimeFormat.format(new Date(occurrence.end_at))) : ""}</time></li>`).join("")}</ul>`;
-  return shell(`${event.title} | Yolo Solano Veterans`, event.description, `<section class="wrap detail-page event-detail-page"><a class="back" href="/events">← All events</a><div class="profile-heading"><span class="eyebrow">${pe(event.kind)} · ${pe(event.county)} COUNTY</span><h1>${pe(event.title)}</h1>${past ? '<span class="label amber">Past event</span>' : ""}<p>${pe(event.description)}</p></div><div class="profile-grid"><section class="panel"><h2>Plan your visit</h2><dl><div><dt>When</dt><dd>${when}</dd></div><div><dt>Where</dt><dd>${pe(event.venue)}<br><a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(event.venue)}" target="_blank" rel="noopener noreferrer">Open venue in Maps ↗</a></dd></div><div><dt>Who can attend?</dt><dd>${pe(event.audience)}</dd></div><div><dt>Organizer</dt><dd>${pe(event.organizer)}${host ? `<br><a href="/organizations/${host.id}">View related organization →</a>` : ""}</dd></div></dl>${event.time_note ? `<p class="small-note">${pe(event.time_note)}</p>` : ""}<div class="profile-actions">${event.source_url ? `<a class="button" href="${pe(event.source_url)}" target="_blank" rel="noopener noreferrer">${event.source_kind === "project_team" ? "Organizer website" : "Organizer details / registration"} ↗</a>` : ""}<a class="button outline" href="/events.ics?event=${pe(event.id)}">Add to calendar ↓</a></div></section><aside class="panel">${eventReview(event)}<p>Follow the organizer’s latest instructions for registration, accessibility, weather changes and cancellations.</p><a href="/for-organizations?kind=event">Suggest a correction →</a></aside></div></section>`, { path: "/events/" + event.id, detail: true });
+  return shell(`${event.title} | Yolo Solano Veterans`, event.description, `<section class="wrap detail-page event-detail-page"><a class="back" href="/events">← All events</a><div class="profile-heading"><span class="eyebrow">${pe(event.kind)} · ${pe(event.county)} COUNTY</span><h1>${pe(event.title)}</h1>${past ? '<span class="label amber">Past event</span>' : ""}<p>${pe(event.description)}</p></div><div class="profile-grid"><section class="panel"><h2>Plan your visit</h2><dl><div><dt>When</dt><dd>${when}</dd></div><div><dt>Where</dt><dd>${pe(event.venue)}<br><a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(event.venue)}" target="_blank" rel="noopener noreferrer">Open venue in Maps ↗</a></dd></div><div><dt>Who can attend?</dt><dd>${pe(event.audience)}</dd></div><div><dt>Organizer</dt><dd>${pe(event.organizer)}${host ? `<br><a href="/organizations/${host.id}">View related organization →</a>` : ""}</dd></div>${participants}</dl>${event.time_note ? `<p class="small-note">${pe(event.time_note)}</p>` : ""}<div class="profile-actions">${event.source_url ? `<a class="button" href="${pe(event.source_url)}" target="_blank" rel="noopener noreferrer">${event.source_kind === "project_team" ? "Organizer website" : "Organizer details / registration"} ↗</a>` : ""}<a class="button outline" href="/events.ics?event=${pe(event.id)}">Add to calendar ↓</a></div></section><aside class="panel">${eventReview(event)}<p>Follow the organizer’s latest instructions for registration, accessibility, weather changes and cancellations.</p><a href="/for-organizations?kind=event">Suggest a correction →</a></aside></div></section>`, { path: "/events/" + event.id, detail: true });
 }
 var icsEscape = (s) => String(s || "").replaceAll("\\", "\\\\").replace(/\r?\n/g, "\\n").replaceAll(";", "\\;").replaceAll(",", "\\,");
 var utc = (s) => new Date(s).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
@@ -1704,7 +1706,18 @@ function validateEvent(input, options = {}) {
     }
   });
 }
-var recordDefinition2 = Object.freeze({ kind: "event", statuses: ["draft", "published", "archived"], validate: validateEvent, deleteEnabled: true });
+var recordDefinition2 = Object.freeze({
+  kind: "event",
+  statuses: ["draft", "published", "archived"],
+  validate: validateEvent,
+  // Invitation responses live in the server-owned invitation table. Generic
+  // event saves must never create or revive a public participation claim.
+  authorizePayload(payload) {
+    delete payload.accepted_organization_ids;
+    return payload;
+  },
+  deleteEnabled: true
+});
 
 // src/app/content-metadata.mjs
 var contentMetadata = Object.freeze({ timeZone, ...organizationMetadata });

@@ -1349,7 +1349,18 @@ function validateEvent(input, options = {}) {
     }
   });
 }
-var recordDefinition2 = Object.freeze({ kind: "event", statuses: ["draft", "published", "archived"], validate: validateEvent, deleteEnabled: true });
+var recordDefinition2 = Object.freeze({
+  kind: "event",
+  statuses: ["draft", "published", "archived"],
+  validate: validateEvent,
+  // Invitation responses live in the server-owned invitation table. Generic
+  // event saves must never create or revive a public participation claim.
+  authorizePayload(payload) {
+    delete payload.accepted_organization_ids;
+    return payload;
+  },
+  deleteEnabled: true
+});
 
 // src/app/content-metadata.mjs
 var contentMetadata = Object.freeze({ timeZone, ...organizationMetadata });

@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { verifyConfig, TARGET, wranglerQuery } from './norcal-hq-agent.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
-const tables = ['records','grants','audit','attachments','submission_limits','request_runs','request_entries','hq_agent_health','record_revisions'];
+const tables = ['records','grants','audit','attachments','submission_limits','request_runs','request_entries','hq_agent_health','record_revisions','organization_event_invitations'];
 
 export function verifySQLBackup(sql, { upgradeCheck = false } = {}) {
   const db = new DatabaseSync(':memory:');

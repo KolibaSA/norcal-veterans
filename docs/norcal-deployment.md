@@ -37,8 +37,11 @@ For authenticated browser acceptance with synthetic records, run `node scripts/n
 
 ## Additive database upgrade
 Only use `migrations/legacy`. The September 12 hardening adds:
+
 - `0002_request_runs.sql`: immutable execution snapshots, append-only results/comments and observed agent health.
 - `0003_record_revisions.sql`: a baseline of existing records and immutable revision history captured by transactional audits.
+
+Event invitations require additive `0007_event_invitations.sql` before publishing code that serves the invitation endpoint. It copies any existing accepted event partner IDs into the new authoritative table and leaves records/history intact. Apply and check it in isolated staging first. A code rollback can leave this table in place; its accepted rows retain the earlier card behavior. Verify invitation count, `PRAGMA foreign_key_check`, and public pending-versus-Going behavior after release.
 
 Pause the request agent for schema/code maintenance. Verify recovery and staging, apply the reviewed migrations, publish the tested code, confirm exact deployment and live integrity, then reenable the agent. Do not claim or replay real requests to test a release.
 

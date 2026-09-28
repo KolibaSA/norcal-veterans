@@ -1,4 +1,5 @@
 import { createRecordFeature } from '../../shared/browser-records.mjs';
+import { esc } from '../../shared/browser-ui.mjs';
 export function pacificInput(value, dateOnly = false) {
   if (!value) return '';
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return dateOnly ? value : value + 'T00:00';
@@ -89,6 +90,50 @@ export function createFeature() {
     },
     connect(context) {
       const { $, message, api, loadSection } = context;
+      let invitationEventId = null;
+      async function loadInvitations(eventId) {
+        if (!api || !eventId) return;
+        try {
+          const result = await api('event-invitations?event_id=' + encodeURIComponent(eventId));
+          if (invitationEventId !== eventId) return;
+          $('eventInviteControls').hidden = !result.can_invite;
+          const active = new Set(result.invitations.filter(item => ['pending','accepted'].includes(item.status)).map(item => item.recipient_org_id));
+          const choices = result.organizations.filter(org => !active.has(org.id));
+          $('eventInviteOrganization').innerHTML = '<option value="">Choose an organization</option>' +
+            choices.map(org => `<option value="${esc(org.id)}">${esc(org.title)}</option>`).join('');
+          $('eventInviteButton').disabled = !choices.length;
+          $('eventInviteList').innerHTML = result.invitations.length ? result.invitations.map(item =>
+            `<div class="event-invite-item"><span><strong>${esc(item.recipient_name)}</strong> · ${esc(item.status === 'accepted' ? 'Going' : item.status)}</span><span class="actions">` +
+            (item.can_respond && item.status !== 'withdrawn' ? `<button type="button" class="secondary" data-invite-response="accepted" data-invite-org="${esc(item.recipient_org_id)}" data-invite-version="${item.version}" data-invite-note="${item.requires_note}">Going</button><button type="button" class="secondary" data-invite-response="declined" data-invite-org="${esc(item.recipient_org_id)}" data-invite-version="${item.version}" data-invite-note="${item.requires_note}">Declined</button>` : '') +
+            (item.can_withdraw && item.status !== 'withdrawn' ? `<button type="button" class="secondary" data-invite-withdraw="${esc(item.recipient_org_id)}" data-invite-version="${item.version}">Withdraw</button>` : '') +
+            '</span></div>').join('') : '<p class="small muted">No organizations invited yet.</p>';
+          for (const button of $('eventInviteList').querySelectorAll('[data-invite-response],[data-invite-withdraw]')) button.onclick = async () => {
+            const recipient_org_id = button.dataset.inviteOrg || button.dataset.inviteWithdraw;
+            let note = '';
+            if (button.dataset.inviteNote === 'true') {
+              note = window.prompt('How did this organization confirm its response? Record a brief source note.') || '';
+              if (!note.trim()) return;
+            }
+            button.disabled = true;
+            try {
+              await api('event-invitations', { method: 'POST', body: JSON.stringify({ event_id: eventId, recipient_org_id,
+                action: button.dataset.inviteWithdraw ? 'withdraw' : 'respond', response: button.dataset.inviteResponse,
+                version: Number(button.dataset.inviteVersion), note }) });
+              message('Invitation updated.'); await loadInvitations(eventId);
+            } catch (cause) { message(cause.message, true); button.disabled = false; }
+          };
+        } catch (cause) { if (invitationEventId === eventId) $('eventInviteList').textContent = cause.message; }
+      }
+      $('eventInviteButton').onclick = async () => {
+        const eventId = invitationEventId, recipient_org_id = $('eventInviteOrganization').value;
+        if (!eventId || !recipient_org_id) return $('eventInviteOrganization').focus();
+        $('eventInviteButton').disabled = true;
+        try {
+          await api('event-invitations', { method: 'POST', body: JSON.stringify({ event_id: eventId, recipient_org_id, action: 'invite' }) });
+          message('Organization invited. The invitation remains private until it responds Going.');
+          await loadInvitations(eventId);
+        } catch (cause) { message(cause.message, true); $('eventInviteButton').disabled = false; }
+      };
       $('dateOnly').onchange = () => updateDateFields($);
       $('addEventDate').onclick = () => {
         const date = $('additionalDate').value, firstDate = $('start').value.slice(0, 10);
@@ -110,8 +155,14 @@ export function createFeature() {
         finally { $('deleteEvent').disabled = false; }
       };
       return {
-        editorOpened(record, { editable }) { renderAdditionalDates($); $('deleteEventSection').hidden = !record?.id || !editable; },
-        resetEditor() { $('start').required = false; $('venue').required = false; $('additionalDate').required = false; $('additionalDate').value = ''; $('deleteEventSection').hidden = true; }
+        editorOpened(record, { editable }) { if (context.tab !== 'event') return;
+          renderAdditionalDates($); $('deleteEventSection').hidden = !record?.id || !editable;
+          invitationEventId = record?.id || null; $('eventInvitations').hidden = !record?.id;
+          if (record?.id) { $('eventInviteList').textContent = 'Loading invitations…'; void loadInvitations(record.id); }
+        },
+        editorClosed() { invitationEventId = null; $('eventInvitations').hidden = true; },
+        resetEditor() { invitationEventId = null; $('eventInvitations').hidden = true;
+          $('start').required = false; $('venue').required = false; $('additionalDate').required = false; $('additionalDate').value = ''; $('deleteEventSection').hidden = true; }
       };
     }
   });
