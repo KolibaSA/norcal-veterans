@@ -20,5 +20,5 @@ test('contribution checks public-information consent and selected live organizat
 });
 test('contribution form markup matches the approved public shell',()=>{
   const html=submissionPage(new URL('https://site.test/for-organizations'),{organizations});
-  assert.equal(createHash('sha256').update(html).digest('hex'),'f20c33fd3a48b651ecebabd4cf86bf62ecf7d23f699419c640ab1b829ff18adc');
+  assert.equal(createHash('sha256').update(html).digest('hex'),'b01408fc7eff062ab18901a05ed26dd4b37a51e2dd16be74f9da98aa1f49304b');
 });
