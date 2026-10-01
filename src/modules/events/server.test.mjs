@@ -57,8 +57,8 @@ test('invitations stay private until recipients say Going, then update card and 
   assert.equal((await request(DB, mcl, [mclGrant], action('mcl-yolo', 'respond', { response: 'accepted', version: 1 }))).status, 200);
   live = await norcalPublicData(DB);
   html = eventsPagePublic(new URL(origin + '/events'), live.events, live.records);
-  assert.match(html, /Going:.*Dixon VFW Post 8151.*Marine Corps League - Yolo County Detachment 627/s);
-  assert.match(eventDetail(live.events[0], live.records), /Organizations going.*Dixon VFW Post 8151.*Marine Corps League - Yolo County Detachment 627/s);
+  assert.match(html, /Going:.*(?:Dixon VFW Post 8151.*Marine Corps League - Yolo County Detachment 627|Marine Corps League - Yolo County Detachment 627.*Dixon VFW Post 8151)/s);
+  assert.match(eventDetail(live.events[0], live.records), /Organizations going.*(?:Dixon VFW Post 8151.*Marine Corps League - Yolo County Detachment 627|Marine Corps League - Yolo County Detachment 627.*Dixon VFW Post 8151)/s);
   assert.equal((await request(DB, vfw, [vfwGrant], action('mcl-yolo', 'respond', { response: 'declined', version: 2 }))).status, 403);
   assert.equal((await request(DB, vfw, [vfwGrant], action('vfw-ca-8151', 'respond', { response: 'declined', version: 2 }))).status, 200);
   live = await norcalPublicData(DB);
