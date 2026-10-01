@@ -2,6 +2,7 @@ import {organizationMetadata as contentMetadata} from './domain.mjs';
 import {records} from '../../data.mjs';
 import {isRosterURL,isObject,publicText,publicStrings,publicURL,privacyReviewDate,publicInstant} from '../../shared/public-privacy.mjs';
 export { publicMeetingPlanEvents } from './meeting-plans.mjs';
+export { organizationSeo } from './seo.mjs';
 export function publicOrganizationRecord(row, payload) {
   return sanitizePublicRecord({ ...records.find(record => record.id === row.id), ...payload,
     id: row.id, verified_name: row.title, member_information: row.body });

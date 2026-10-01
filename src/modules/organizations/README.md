@@ -2,6 +2,8 @@
 
 `public.mjs` exposes `sanitizePublicRecord(payload)` and `sanitizePublicPhoto(photo)` for typed public output, `assertPublicProfilePrivacy(values)` for public-profile privacy checks, and `publicOrganizationRecord(row, payload)` for the existing published-record envelope with imported-source fallback. Invalid/private nested fields are excluded. The directory/profile renderer remains a public-site adapter in `src/site.mjs`; HQ field changes start in this module's `browser.mjs` and `domain.mjs`.
 
+`organizationSeo(record, ownLogo)` builds each published profile's local search description and `WebPage`/`Organization` JSON-LD from the same public record shown on the page. It identifies only organization-specific local artwork as that organization's logo. It omits uncertain website, phone, and address claims. The shared public shell serializes the graph safely in the document head; it does not make a directory listing an official organization website or claim affiliation.
+
 Owns organization profiles and editing, categories/location, service area, public contacts, evidence and publication validation. Owned rows: `records(kind=organization)` with existing IDs and organization scope; this module also reads the static source catalog.
 
 Organization payloads may identify an `independent`, `auxiliary`, or `sons` relationship. Non-independent records store their parent in `affiliated_with_id` using the parent's stable organization ID. They remain full organization records and public profiles; the public directory adapter hides them from its default card list and links them from the parent card.

@@ -1078,16 +1078,16 @@ function validateOrganization(input, options = {}) {
 }
 var recordDefinition = Object.freeze({ kind: "organization", statuses: ["draft", "published", "archived"], validate: validateOrganization, organizationId: (id) => id });
 
+// src/shared/public-shell.mjs
+var origin = "https://www.norcalveterans.org";
+var escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
 // src/modules/organizations/public.mjs
 function assertPublicProfilePrivacy(values) {
   if ([values.website, values.source_url].some(isRosterURL)) throw new Error("Use an organization website or public notice, not a roster or officer directory containing personal information.");
   const text2 = [values.member_information, values.meeting_schedule].filter(Boolean).join("\n");
   if (/\b(?:member(?:ship)?|post|officer)\s+rosters?\b|\b(?:home|residential|personal)\s+(?:address|phone|mobile|email)\b/i.test(text2)) throw new Error("Publish organization information only. Remove rosters and personal contact details.");
 }
-
-// src/shared/public-shell.mjs
-var origin = "https://www.norcalveterans.org";
-var escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
 // src/modules/events/presentation.mjs
 var eventMonthFormat = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "America/Los_Angeles" });

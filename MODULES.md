@@ -45,6 +45,7 @@ The boundary is the feature's responsibility, not just its folder. Keep feature-
 The current public directory/profile renderer remains in `src/site.mjs`; it is not needed for a Share a Program edit. Its common page shell was extracted to `src/shared/public-shell.mjs`. Imported application source and root migrations remain regression/recovery references; follow `wrangler.jsonc` to the active Worker and `migrations/legacy` to its schema.
 
 Public crawl discovery lives in `src/app/public-seo.mjs`; the active Worker serves `/robots.txt` and `/sitemap.xml`. The sitemap reads only the public serializer's published organizations and event-detail eligibility. Public page titles, descriptions and canonical links come from the shared shell and their page renderers.
+Organization profile descriptions and structured data come from the Organizations module's public SEO interface; the public shell only handles safe JSON-LD placement.
 
 **Example: investigate a Requests save failure**
 
