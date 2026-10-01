@@ -44,6 +44,8 @@ The boundary is the feature's responsibility, not just its folder. Keep feature-
 
 The current public directory/profile renderer remains in `src/site.mjs`; it is not needed for a Share a Program edit. Its common page shell was extracted to `src/shared/public-shell.mjs`. Imported application source and root migrations remain regression/recovery references; follow `wrangler.jsonc` to the active Worker and `migrations/legacy` to its schema.
 
+Public crawl discovery lives in `src/app/public-seo.mjs`; the active Worker serves `/robots.txt` and `/sitemap.xml`. The sitemap reads only the public serializer's published organizations and event-detail eligibility. Public page titles, descriptions and canonical links come from the shared shell and their page renderers.
+
 **Example: investigate a Requests save failure**
 
 Start with [Requests](src/modules/requests/README.md) and its browser contract. The request target (`website`, `headquarters`, or `decide`) is stored in `payload.target`; the API record kind remains `request`. The record save body must also include the selected `status`. The September 12 omission of that status was fixed in `c708f52` in `src/shared/browser-runtime.mjs`, with coverage in `src/shared/browser-runtime.test.mjs`.

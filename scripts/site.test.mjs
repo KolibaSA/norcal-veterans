@@ -167,8 +167,7 @@ test('Detachment 627 uses the simple profile with its branding and content',()=>
   assert.ok(!page.html.includes('class="org-site mcl-site"'));
   assert.ok(page.html.includes('href="https://www.mclnational.org/"'));
   assert.ok(page.html.includes('/hq?org=mcl-yolo#photos'));
-  const canonical=path==='/mcl-yolo'?'/mcl-yolo':'/organizations/mcl-yolo';
-  assert.ok(page.html.includes(`<link rel="canonical" href="https://www.norcalveterans.org${canonical}">`));
+  assert.ok(page.html.includes('<link rel="canonical" href="https://www.norcalveterans.org/organizations/mcl-yolo">'));
   assert.ok(!page.html.includes('mailto:'));
   assert.ok(!page.html.includes('tel:'));
  }

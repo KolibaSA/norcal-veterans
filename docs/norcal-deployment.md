@@ -9,6 +9,8 @@ Region selector: https://www.norcalveterans.org/regions
 
 Both root domains temporarily redirect to Yolo-Solano. The Clerk release uses invitation-only email-code login without MFA by explicit owner choice. The Worker independently validates signed identity and assignments; alternate URLs fail closed without identity. Keep the old Access gate until the Clerk Worker is deployed; see the migration runbook for release state.
 
+The canonical public host is `www.norcalveterans.org`. Public bare-domain paths redirect to it; the root redirect to `/yolo-solano` remains temporary. `/robots.txt` and `/sitemap.xml` are served by the Worker. The sitemap contains only public canonical routes and published organization/event detail pages; it excludes private HQ, drafts and event types without a public detail page. Check both endpoints, redirect targets and a sample of sitemap URLs in staging before the connected GitHub release.
+
 ## Build and test gate
 Use Node 24 and the existing locked dependencies. `.node-version` pins the build to that major version using [Cloudflare's supported version override](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/#overriding-default-versions):
 

@@ -35,6 +35,8 @@ In HQ, open Organization & region access, enter an email, select **Super Admin**
 
 ## Recent milestones and verification context
 
+September 30, 2026: the public SEO foundation adds canonical-host and duplicate-profile redirects, a robots file, and a sitemap generated from published pages with public detail routes. Existing page titles, descriptions, and canonical links remain in the shared public rendering path. Search Console property verification and sitemap submission are separate Google account tasks; check their status before claiming completion.
+
 September 24, 2026: the Clerk migration is implemented and verified in isolated staging. The owner selected basic email-code authentication without MFA and requested retirement of the scheduled agent while preserving Requests/history. See [Clerk migration status and runbook](docs/clerk-migration.md) for exact publication and acceptance evidence; do not infer deployment from local code.
 
 Recorded September 12, 2026; these are completed changes, not a new work queue. Use Git history and current checks when a task depends on present deployment or runtime state.

@@ -1,4 +1,5 @@
 import {norcalPublicData} from './app/public-content.mjs';
+import { publicSitemap, robotsText } from './app/public-seo.mjs';
 export {norcalPublicData};
 import legacy from '../worker/legacy/index.mjs';
 import { dataset, sources } from './data.mjs';
@@ -13,12 +14,23 @@ import { memorialServices } from './memorial-day.mjs';
 const norcalWorker = {
   async fetch(request, env, ctx) {
     const url = new URL(request.url), path = url.pathname, head = request.method === 'HEAD';
-    if (path === '/hq' || path.startsWith('/hq/') || path.startsWith('/api/')) return legacy.fetch(request, env, ctx);
-    if (path === '/organization' || path === '/photo-presence') return redirect('/hq');
-    if (path === '/' && ['www.norcalveterans.org', 'norcalveterans.org'].includes(url.hostname) && ['GET','HEAD'].includes(request.method)) {
+    const publicRead = ['GET','HEAD'].includes(request.method);
+    if (publicRead && path === '/' && ['www.norcalveterans.org', 'norcalveterans.org'].includes(url.hostname)) {
+      url.hostname = 'www.norcalveterans.org';
       url.pathname = '/yolo-solano';
       return new Response(null, { status: 302, headers: { Location: url.href, 'Cache-Control': 'no-store' } });
     }
+    if (publicRead && (url.hostname === 'norcalveterans.org' || path === '/mcl-yolo') &&
+      !(path === '/hq' || path.startsWith('/hq/') || path.startsWith('/api/'))) {
+      if (url.hostname === 'norcalveterans.org') url.hostname = 'www.norcalveterans.org';
+      if (path === '/mcl-yolo') url.pathname = '/organizations/mcl-yolo';
+      return new Response(null, { status: 301, headers: { Location: url.href, 'Cache-Control': 'no-store' } });
+    }
+    if (path === '/hq' || path.startsWith('/hq/') || path.startsWith('/api/')) return legacy.fetch(request, env, ctx);
+    if (path === '/organization' || path === '/photo-presence') return redirect('/hq');
+    if (path === '/robots.txt' && publicRead) return new Response(head ? null : robotsText(env.STAGING === 'true'), {
+      headers: { ...securityHeaders, 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=300' }
+    });
     if (['GET','HEAD'].includes(request.method) && (/^\/(?:logos|published-assets|assets)\//.test(path) || ['/styles.css','/app.js','/favicon.svg','/ysv-logo.png','/og.png','/norcal-hero-table.png','/norcal-hero-seals.png','/american-legion-background.png','/why-norcal-background.png','/why-veterans-find.png','/why-organizations-share.png','/why-organizations-coordinate.png'].includes(path))) {
       const asset = await env.ASSETS.fetch(request);
       return new Response(asset.body, { status: asset.status, headers: { ...Object.fromEntries(asset.headers), ...securityHeaders, 'Cache-Control': 'public, max-age=300' } });
@@ -33,6 +45,9 @@ const norcalWorker = {
     try {
       if (!['GET','HEAD'].includes(request.method) && !(request.method === 'POST' && ['/submit','/speaker-submissions'].includes(path))) return new Response('Method not allowed.', { status: 405 });
       const live = await norcalPublicData(env.DB);
+      if (path === '/sitemap.xml') return new Response(head ? null : publicSitemap(live), {
+        headers: { ...securityHeaders, 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=300' }
+      });
       if (request.method === 'POST') {
         try { return await submitPublicForm(request, env, live.records, (input, environment) => legacy.fetch(input, environment)); }
         catch (error) {

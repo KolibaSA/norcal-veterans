@@ -53,7 +53,7 @@
 - Report completed, pending, and blocked work accurately. Never describe a mockup, local folder, or planned integration as a live headquarters.
 
 ## Current launch routing
-- For now, www.norcalveterans.org and the bare domain open /yolo-solano. Use a temporary redirect so this can change when more regions launch.
+- For now, www.norcalveterans.org and the bare domain open /yolo-solano. Use a temporary redirect so this can change when more regions launch. Other public bare-domain paths redirect to the canonical www host.
 - The local home page also shows Yolo-Solano. The region selector remains at /regions.
 
 ## September 9 imported public design

@@ -32,7 +32,7 @@ function setup() {
 test('replacement renders the existing published directory, events and profiles without private data',async()=>{
   const env=setup();
   try {
-    for(const path of ['/regions','/yolo-solano','/events','/events/'+seedEvents[0].id,'/resources','/share','/about','/for-organizations','/mcl-yolo','/data.json','/events.ics',...records.map(r=>'/organizations/'+r.id)]) {
+    for(const path of ['/regions','/yolo-solano','/events','/events/'+seedEvents[0].id,'/resources','/share','/about','/for-organizations','/data.json','/events.ics',...records.map(r=>'/organizations/'+r.id)]) {
       const response=await worker.fetch(new Request('https://www.norcalveterans.org'+path),env);
       assert.equal(response.status,200,path);
       const text=await response.text();
@@ -101,7 +101,7 @@ test('HQ event assignments reach the matching organization calendar with legacy 
 test('public profiles direct contributions to review instead of unavailable photo and officer editors',async()=>{
   const env=setup();
   try {
-    for(const path of ['/organizations/'+records[0].id,'/mcl-yolo']){
+    for(const path of ['/organizations/'+records[0].id,'/organizations/mcl-yolo']){
       const response=await worker.fetch(new Request('https://www.norcalveterans.org'+path),env);
       assert.equal(response.status,200);
       const html=await response.text();
@@ -109,7 +109,7 @@ test('public profiles direct contributions to review instead of unavailable phot
       assert.match(html,/Suggest a profile update/);
       assert.match(html,/href="\/for-organizations\?org=/);
       assert.doesNotMatch(html,/href="\/hq\?org=|Add photos →|Add or update officer profiles|can add photos, create albums|can add public photos, officer profiles/);
-      if(path==='/mcl-yolo')assert.doesNotMatch(html,/href="\/hq\?tab=organization"/);
+      if(path==='/organizations/mcl-yolo')assert.doesNotMatch(html,/href="\/hq\?tab=organization"/);
     }
   } finally {env.sqlite.close();}
 });
