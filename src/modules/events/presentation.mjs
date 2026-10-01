@@ -21,6 +21,29 @@ function eventReview(v){
  if(v.source_checked&&v.source_url)return `<span class="label">Published source checked</span><h2>Check before you go.</h2><p>Source reviewed ${pe(v.source_checked)}. This listing has not been directly confirmed with the organizer.</p>`;
  return '<span class="label">Verification pending</span><h2>Check before you go.</h2><p>This published listing has no recorded source review. Confirm the details directly with the organizer.</p>';
 }
+function eventStructuredData(event,occurrences,host){
+ const url=origin+'/events/'+encodeURIComponent(event.id);
+ const location={ '@type':'Place', name:event.venue };
+ if(event.city)location.address={ '@type':'PostalAddress', addressLocality:event.city, addressRegion:'CA', addressCountry:'US' };
+ const occurrenceData=occurrence=>({
+  '@type':'Event',
+  name:event.title,
+  startDate:event.date_only?pacificDayKey(occurrence.start_at):occurrence.start_at,
+  ...(occurrence.end_at?{endDate:occurrence.end_at}:{}),
+  location,
+  url
+ });
+ const [first,...later]=occurrences;
+ return {
+  '@context':'https://schema.org',
+  ...occurrenceData(first),
+  '@id':url,
+  description:event.description,
+  ...(event.organizer?{organizer:{'@type':'Organization',name:event.organizer,...(host?{url:origin+'/organizations/'+encodeURIComponent(host.id)}:{})}}:{}),
+  ...(event.image_url?{image:event.image_url}:{}),
+  ...(later.length?{subEvent:later.map(occurrenceData)}:{})
+ };
+}
 const icons={
  calendar:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v3M17 2v3M3.5 9h17M5.5 4h13a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/></svg>',
  location:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
@@ -109,7 +132,7 @@ export function eventDetail(v,organizations=[]){
  const going=[...new Set(event.accepted_organization_ids||[])].map(id=>organizations.find(r=>r.id===id)).filter(r=>r&&r.id!==host?.id);
  const participants=going.length?`<div><dt>Organizations going</dt><dd>${going.map(r=>`<a href="/organizations/${pe(r.id)}">${pe(r.verified_name)}</a>`).join('<br>')}</dd></div>`:'';
  const when=occurrences.length===1?`${pe(publicEventDate(occurrences[0]))}${!event.date_only&&occurrences[0].end_at?'<br>Ends '+pe(publicDate(occurrences[0].end_at)):''}`:`<ul class="event-detail-dates">${occurrences.map(occurrence=>`<li><time datetime="${pe(event.date_only?pacificDayKey(occurrence.start_at):occurrence.start_at)}">${pe(publicEventDate(occurrence))}${!event.date_only&&occurrence.end_at?' – '+pe(eventTimeFormat.format(new Date(occurrence.end_at))):''}</time></li>`).join('')}</ul>`;
- return shell(`${event.title} | Yolo Solano Veterans`,event.description,`<section class="wrap detail-page event-detail-page"><a class="back" href="/events">← All events</a><div class="profile-heading"><span class="eyebrow">${pe(event.kind)} · ${pe(event.county)} COUNTY</span><h1>${pe(event.title)}</h1>${past?'<span class="label amber">Past event</span>':''}<p>${pe(event.description)}</p></div><div class="profile-grid"><section class="panel"><h2>Plan your visit</h2><dl><div><dt>When</dt><dd>${when}</dd></div><div><dt>Where</dt><dd>${pe(event.venue)}<br><a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(event.venue)}" target="_blank" rel="noopener noreferrer">Open venue in Maps ↗</a></dd></div><div><dt>Who can attend?</dt><dd>${pe(event.audience)}</dd></div><div><dt>Organizer</dt><dd>${pe(event.organizer)}${host?`<br><a href="/organizations/${host.id}">View related organization →</a>`:''}</dd></div>${participants}</dl>${event.time_note?`<p class="small-note">${pe(event.time_note)}</p>`:''}<div class="profile-actions">${event.source_url?`<a class="button" href="${pe(event.source_url)}" target="_blank" rel="noopener noreferrer">${event.source_kind==='project_team'?'Organizer website':'Organizer details / registration'} ↗</a>`:''}<a class="button outline" href="/events.ics?event=${pe(event.id)}">Add to calendar ↓</a></div></section><aside class="panel">${eventReview(event)}<p>Follow the organizer’s latest instructions for registration, accessibility, weather changes and cancellations.</p><a href="/for-organizations?kind=event">Suggest a correction →</a></aside></div></section>`,{path:'/events/'+event.id,detail:true});
+ return shell(`${event.title} | Yolo Solano Veterans`,event.description,`<section class="wrap detail-page event-detail-page"><a class="back" href="/events">← All events</a><div class="profile-heading"><span class="eyebrow">${pe(event.kind)} · ${pe(event.county)} COUNTY</span><h1>${pe(event.title)}</h1>${past?'<span class="label amber">Past event</span>':''}<p>${pe(event.description)}</p></div><div class="profile-grid"><section class="panel"><h2>Plan your visit</h2><dl><div><dt>When</dt><dd>${when}</dd></div><div><dt>Where</dt><dd>${pe(event.venue)}<br><a href="https://www.google.com/maps/search/?api=1&amp;query=${encodeURIComponent(event.venue)}" target="_blank" rel="noopener noreferrer">Open venue in Maps ↗</a></dd></div><div><dt>Who can attend?</dt><dd>${pe(event.audience)}</dd></div><div><dt>Organizer</dt><dd>${pe(event.organizer)}${host?`<br><a href="/organizations/${host.id}">View related organization →</a>`:''}</dd></div>${participants}</dl>${event.time_note?`<p class="small-note">${pe(event.time_note)}</p>`:''}<div class="profile-actions">${event.source_url?`<a class="button" href="${pe(event.source_url)}" target="_blank" rel="noopener noreferrer">${event.source_kind==='project_team'?'Organizer website':'Organizer details / registration'} ↗</a>`:''}<a class="button outline" href="/events.ics?event=${pe(event.id)}">Add to calendar ↓</a></div></section><aside class="panel">${eventReview(event)}<p>Follow the organizer’s latest instructions for registration, accessibility, weather changes and cancellations.</p><a href="/for-organizations?kind=event">Suggest a correction →</a></aside></div></section>`,{path:'/events/'+event.id,detail:true,structuredData:eventStructuredData(event,occurrences,host)});
 }
 const icsEscape=s=>String(s||'').replaceAll('\\','\\\\').replace(/\r?\n/g,'\\n').replaceAll(';','\\;').replaceAll(',','\\,');
 const utc=s=>new Date(s).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');

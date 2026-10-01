@@ -11,6 +11,26 @@ test('event detail works independently with optional supplied organization choic
   assert.match(eventDetail(event,[{id:'synthetic-host'}]),/href="\/organizations\/synthetic-host"/);
 });
 
+test('event detail publishes factual Event JSON-LD for every visible occurrence',()=>{
+  const event=sanitizePublicEvent({id:'event-structured',title:'Synthetic fundraiser',description:'Support a local program.',
+    start_at:'2030-01-15T18:00:00-08:00',end_at:'2030-01-15T20:00:00-08:00',
+    additional_occurrences:[{start_at:'2030-01-22T18:00:00-08:00',end_at:'2030-01-22T20:00:00-08:00'}],
+    venue:'Community Hall',city:'Davis',status:'published',organizer:'Local host',organization_id:'synthetic-host',
+    image_url:'https://images.example.org/event.jpg'});
+  const html=eventDetail(event,[{id:'synthetic-host',verified_name:'Local host'}]);
+  const data=JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+  assert.equal(data['@type'],'Event');
+  assert.equal(data.url,'https://www.norcalveterans.org/events/event-structured');
+  assert.equal(data.startDate,'2030-01-16T02:00:00.000Z');
+  assert.equal(data.location.name,'Community Hall');
+  assert.equal(data.location.address.addressLocality,'Davis');
+  assert.equal(data.organizer.url,'https://www.norcalveterans.org/organizations/synthetic-host');
+  assert.equal(data.image,'https://images.example.org/event.jpg');
+  assert.equal(data.subEvent.length,1);
+  assert.equal(data.subEvent[0].startDate,'2030-01-23T02:00:00.000Z');
+  assert.equal(data.subEvent[0].endDate,'2030-01-23T04:00:00.000Z');
+});
+
 test('organization meetings stay off the public Events page without changing calendar safeguards',()=>{
   const meeting=sanitizePublicEvent({id:'organization-meeting-vfw-ca-8151-2030-01',title:'Dixon VFW Post 8151 monthly meeting',description:'Monthly gathering.',start_at:'2030-01-18T02:00:00Z',venue:'Olde Vets Hall',status:'published',organization_id:'vfw-ca-8151',kind:'Organization meeting',organizer:'Dixon VFW Post 8151',county:'Solano',city:'Dixon',audience:'Contact the post for attendance details.',meeting_times:[{time:'18:00',label:'Social hour'},{time:'19:00',label:'Post meeting'},{time:'20:00',label:'Social time'}]});
   const html=eventsPagePublic(new URL('https://test/events?month=2030-01'),[meeting]);
