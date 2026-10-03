@@ -64,7 +64,7 @@ test('VFW, Legion and MCL directory cards share the branded card design with fam
  assert.equal(page.status,200);
  for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
  for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
- assert.ok(page.html.includes('/styles.css?v=seo-pages-20261001-1'));
+ assert.ok(page.html.includes('/styles.css?v=davis-vfw-20261002-1'));
  assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','.vfw-profile .profile-brand-logo{object-fit:cover}','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
@@ -121,7 +121,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=seo-pages-20261001-1'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=davis-vfw-20261002-1'),r.id);
   assert.ok(page.html.includes('/app.js?v=profiles-20260913-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }
@@ -207,6 +207,19 @@ test('county and sufficiently populated city pages have distinct canonicals and 
  assert.ok(city.html.includes('Davis Veteran Group'));
  assert.ok(city.html.includes('href="/events/davis-event"'));
  assert.equal(render(new URL('https://test/locations/singleton'),organizations,events).status,404);
+});
+test('Davis VFW closure notice identifies nearby recruiting posts on the city and profile pages',()=>{
+ const cityRecords=records.filter(record=>['vfw-ca-6949','little-reata-veterans','vfw-ca-8151','vfw-ca-7143'].includes(record.id));
+ const city=render(new URL('https://test/locations/davis'),cityRecords);
+ assert.equal(city.status,200);
+ for(const phrase of ['Davis VFW Post 6949 has closed','actively recruits','serves the area','has members in Davis','href="/organizations/vfw-ca-8151"','href="/organizations/vfw-ca-7143"'])assert.ok(city.html.includes(phrase),phrase);
+ assert.ok(city.html.includes('CLOSED · VFW · Davis'));
+ const profile=render(new URL('https://test/organizations/vfw-ca-6949'));
+ assert.equal(profile.status,200);
+ assert.ok(profile.html.includes('VFW · Yolo COUNTY · CLOSED'));
+ assert.ok(profile.html.includes('Davis VFW Post 6949 has closed'));
+ assert.ok(profile.html.includes('Western Yolo VFW Post 7143 in Esparto'));
+ assert.ok(!profile.html.includes('Current post contact details, meeting location and schedule are being verified.'));
 });
 test('submission desk and unknown mutation routes stay separate',async()=>{
  const page=publicExtension(new URL('https://test/for-organizations'),[]);assert.ok(page.html.includes('Submit for review'));assert.ok(!page.html.includes('type="password"'));
