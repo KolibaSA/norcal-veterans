@@ -257,6 +257,34 @@
       "notes": null
     },
     {
+      "id": "west-sac-vso",
+      "title": "Veteran Services Officer",
+      "publisher": "West Sacramento VFW Post 8762",
+      "url": "https://westsacvfw.com/veteran-services",
+      "fields": [
+        "veteran_services",
+        "VA_benefits_guidance",
+        "service_branch_coverage"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-10-01",
+      "notes": "The post says its trained and certified Veterans Service Officers provide free VA guidance, review documents with veterans and arrange appointments after contact."
+    },
+    {
+      "id": "west-sac-bingo",
+      "title": "Bingo Nights",
+      "publisher": "West Sacramento VFW Post 8762",
+      "url": "https://westsacvfw.com/bingo-nights-1",
+      "fields": [
+        "community_activity",
+        "public_participation",
+        "schedule"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-10-01",
+      "notes": "The post advertises Wednesday bingo beginning at 6:30 p.m., with eight rounds, prizes, food and participation open to all ages."
+    },
+    {
       "id": "benicia-vfw",
       "title": "Benicia VFW",
       "publisher": "VFW Post 3928",
@@ -1028,16 +1056,18 @@
         "Veteran community",
         "Benefits navigation"
       ],
-      "audience": "Veterans, families and community; program rules need confirmation.",
+      "audience": "Veterans from all service branches seeking VA benefits guidance; the post advertises bingo as open to all ages. Confirm membership eligibility and participation details directly with the post.",
       "eligibility": null,
       "event_information": null,
       "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
       "partnership_notes": null,
       "officers": [],
       "officers_status": "not_verified",
-      "member_information": "Post website links to benefits assistance and hall rentals. Confirm how assistance is provided.",
+      "member_information": "West Sacramento VFW Post 8762 connects veterans and the community through post activities and veteran benefits support. Its Veterans Service Officers offer free guidance on VA benefits and claims, including help reviewing documents and identifying next steps. The post says its officers are trained and certified to assist veterans from all service branches; appointments are arranged after contact. The post also hosts family-friendly bingo every Wednesday evening at 6:30, with eight rounds and prizes. Check with the post before visiting because activities and schedules can change.",
       "source_ids": [
-        "west-sac"
+        "west-sac",
+        "west-sac-vso",
+        "west-sac-bingo"
       ],
       "last_verified_date": "2026-09-02",
       "verification_method": "public_source_review",
@@ -1190,7 +1220,7 @@
     },
     {
       "id": "toys-yolo",
-      "verified_name": "Toys for Tots - Yolo County",
+      "verified_name": "Toys for Tots Yolo County",
       "organization_type": "Toys for Tots",
       "entity_kind": "seasonal_campaign",
       "city": null,
@@ -1200,13 +1230,13 @@
           "Yolo"
         ],
         "cities": [],
-        "notes": "Yolo County children; 2026 campaign rules not yet verified."
+        "notes": "Yolo County children and families. The official 2026 campaign timeline lists applications October 1-November 15 and distribution December 1-15; confirm current request eligibility and details with the coordinator."
       },
       "address": null,
       "public_contacts": {
         "phone": null,
         "email": null,
-        "website": "https://woodland-ca.toysfortots.org/"
+        "website": "https://woodland-ca.toysfortots.org/local-coordinator-sites/lco-sites/default.aspx?nPageID=0&nPreviewInd=0&nRedirectInd=3"
       },
       "hours": null,
       "meeting_schedule": null,
@@ -1219,28 +1249,28 @@
       "eligibility": null,
       "event_information": {
         "status": "past",
-        "text": "UC Davis collection ran December 1-11, 2025. Family application and distribution dates for 2026 remain unverified. See the shared calendar for campaign-related community events.",
+        "text": "UC Davis collection ran December 1-11, 2025.",
         "source_id": "toys-yolo"
       },
-      "referral_notes": "Contact the organization to confirm available services and the appropriate next step.",
+      "referral_notes": "The campaign directs toy requests to its local coordinator. Approved applicants receive their specific distribution date and location. Confirm current application instructions and volunteer openings on the official campaign site.",
       "partnership_notes": "UC Davis Mail Services collection partnership documented for 2025.",
       "officers": [],
       "officers_status": "not_verified",
-      "member_information": "Seasonal toy collection and distribution program. Follow the campaign for current application instructions.",
+      "member_information": "Marine Toys for Tots Yolo County is a volunteer-run local campaign that collects new, unwrapped toys for holiday distribution to children in the community. Its official 2026 timeline lists applications open October 1-November 15, responses November 16-23, and toy distribution December 1-15. Families seeking toys are directed to contact the local coordinator; approved applicants receive their specific distribution date and location. The campaign lists route drivers, warehouse helpers, and event volunteers, though its volunteer sign-up text still refers to the 2025 season, so confirm current openings. The campaign home page reports that its 2025 effort distributed 9,592 toys and supported 3,097 children.",
       "source_ids": [
         "toys-yolo",
         "toys-chamber"
       ],
-      "last_verified_date": "2026-09-02",
+      "last_verified_date": "2026-10-01",
       "verification_method": "public_source_review",
       "organization_confirmed_at": null,
       "confidence": "medium",
       "missing_data_flags": [
-        "campaign_page_unavailable",
-        "2026_dates_missing",
         "address_missing",
-        "application_rules_unknown"
-      ]
+        "application_rules_unknown",
+        "current_volunteer_openings_unconfirmed"
+      ],
+      "review_source_url": "https://woodland-ca.toysfortots.org/local-coordinator-sites/lco-sites/local-dates.aspx"
     },
     {
       "id": "vso-yolo",

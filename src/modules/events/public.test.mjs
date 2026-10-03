@@ -50,6 +50,7 @@ test('events page lists every Yolo and Solano city and filters by the selected c
   for(const city of ['Davis','West Sacramento','Winters','Woodland','Benicia','Dixon','Fairfield','Rio Vista','Suisun City','Vacaville','Vallejo'])assert.match(html,new RegExp(`<option value="${city}"`),city);
   assert.match(html,/value="Winters" selected/);
   assert.match(html,/Winters volunteer day/);
+  assert.match(html,/<link rel="canonical" href="https:\/\/www\.norcalveterans\.org\/events">/);
   assert.doesNotMatch(html,/Davis volunteer day|class="panel month-calendar"|id="calendar"|MONTH AT A GLANCE/);
 });
 

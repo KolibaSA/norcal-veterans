@@ -64,7 +64,7 @@ test('VFW, Legion and MCL directory cards share the branded card design with fam
  assert.equal(page.status,200);
  for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
  for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
- assert.ok(page.html.includes('/styles.css?v=toys-logo-20261001-1'));
+ assert.ok(page.html.includes('/styles.css?v=seo-pages-20261001-1'));
  assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','.vfw-profile .profile-brand-logo{object-fit:cover}','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
@@ -121,7 +121,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=toys-logo-20261001-1'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=seo-pages-20261001-1'),r.id);
   assert.ok(page.html.includes('/app.js?v=profiles-20260913-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }
@@ -179,6 +179,34 @@ test('resources page provides local and official help across the requested categ
  for(const heading of ['Start with a local benefits counselor','VA disability and claims','Education and training','Employment and careers','Housing and homelessness','Mental health and connection'])assert.ok(page.html.includes(heading),heading);
  for(const url of ['https://www.yolocounty.gov/government/general-government-departments/health-human-services/adults/veterans-service-office','https://www.solanocounty.gov/government/veterans-services','https://www.va.gov/disability/','https://www.va.gov/education/','https://edd.ca.gov/en/jobs_and_training/services_for_veterans/','https://www.va.gov/housing-assistance/','https://www.veteranscrisisline.net/'])assert.ok(page.html.includes(url),url);
  assert.ok(page.html.includes('call <a href="tel:988">988</a> and press 1'));
+ for(const topic of ['local','disability','education','employment','housing','mental-health','organization-help'])assert.ok(page.html.includes(`href="/resources/${topic}"`),topic);
+ const topic=render(new URL('https://test/resources/disability'));
+ assert.equal(topic.status,200);
+ assert.ok(topic.html.includes('<link rel="canonical" href="https://www.norcalveterans.org/resources/disability">'));
+ assert.ok(topic.html.includes('VA disability and claims'));
+ assert.ok(topic.html.includes('href="/organizations/vso-yolo"'));
+ assert.ok(topic.html.includes('href="/events"'));
+ assert.equal(render(new URL('https://test/resources/not-a-topic')).status,404);
+});
+test('county and sufficiently populated city pages have distinct canonicals and link to published details',()=>{
+ const organizations=[
+  {id:'local-davis-1',verified_name:'Davis Veteran Group',organization_type:'Veterans nonprofit',city:'Davis',location_county:'Yolo',member_information:'A published Davis community listing.'},
+  {id:'local-davis-2',verified_name:'Davis VFW Post',organization_type:'VFW',city:'Davis',location_county:'Yolo',member_information:'A second published Davis organization.'},
+  {id:'vso-yolo',verified_name:'Yolo County Veterans Services Office',organization_type:'County Veterans Office',city:'Woodland',location_county:'Yolo',member_information:'County benefits counseling and referrals.'},
+  {id:'vso-solano',verified_name:'Solano County Veterans Services Office',organization_type:'County Veterans Office',city:'Fairfield',location_county:'Solano',member_information:'County benefits counseling and referrals.'}
+ ];
+ const events=[{id:'davis-event',title:'Davis Volunteer Day',description:'A published local event.',start_at:'2099-10-15T18:00:00-07:00',venue:'Davis Community Park',status:'published',kind:'Volunteer event',city:'Davis',county:'Yolo',organizer:'Davis Veteran Group',audience:'Community members.'}];
+ const county=render(new URL('https://test/locations/yolo-county'),organizations,events);
+ assert.equal(county.status,200);
+ assert.ok(county.html.includes('<link rel="canonical" href="https://www.norcalveterans.org/locations/yolo-county">'));
+ assert.ok(county.html.includes('href="/locations/davis"'));
+ assert.ok(county.html.includes('href="/organizations/vso-yolo"'));
+ const city=render(new URL('https://test/locations/davis'),organizations,events);
+ assert.equal(city.status,200);
+ assert.ok(city.html.includes('<link rel="canonical" href="https://www.norcalveterans.org/locations/davis">'));
+ assert.ok(city.html.includes('Davis Veteran Group'));
+ assert.ok(city.html.includes('href="/events/davis-event"'));
+ assert.equal(render(new URL('https://test/locations/singleton'),organizations,events).status,404);
 });
 test('submission desk and unknown mutation routes stay separate',async()=>{
  const page=publicExtension(new URL('https://test/for-organizations'),[]);assert.ok(page.html.includes('Submit for review'));assert.ok(!page.html.includes('type="password"'));
