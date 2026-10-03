@@ -64,7 +64,7 @@ test('VFW, Legion and MCL directory cards share the branded card design with fam
  assert.equal(page.status,200);
  for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
  for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
- assert.ok(page.html.includes('/styles.css?v=nearby-city-20261002-1'));
+ assert.ok(page.html.includes('/styles.css?v=city-welcome-20261002-1'));
  assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','.vfw-profile .profile-brand-logo{object-fit:cover}','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
@@ -121,7 +121,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=nearby-city-20261002-1'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=city-welcome-20261002-1'),r.id);
   assert.ok(page.html.includes('/app.js?v=city-scroll-20261002-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }
@@ -148,6 +148,7 @@ test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
   const page=render(new URL('https://test'+path));
   assert.equal(page.status,200);
   for(const phrase of ['NorCal Veterans','regional-hero','Find your people.','UPCOMING IN OUR REGION','FEATURED CONNECTIONS','THE FULL YOLO-SOLANO DIRECTORY','OFFICIAL COUNTY SUPPORT','BUILD THE NETWORK WITH US'])assert.ok(page.html.includes(phrase),phrase);
+  for(const phrase of ['We ask so we can show organizations in your city before the full regional directory.','we don’t request your device location.','Your choice is saved in this browser, and you can change it later.','Skip for now','data-city-change'])assert.ok(page.html.includes(phrase),phrase);
   const localCommunityIndex=page.html.indexOf('<section class="regional-nearby"'),directoryIndex=page.html.indexOf('<section class="regional-directory');
   assert.ok(localCommunityIndex>=0&&localCommunityIndex<directoryIndex);
   assert.ok(page.html.includes('/published-assets/norcal-veterans.png?v=logo-20260913-1'));
