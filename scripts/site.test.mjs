@@ -13,6 +13,15 @@ test('logo gallery keeps every organization reachable with accessible post and l
  assert.ok(!html.includes('class="org-card"'));
  for(const r of records){assert.ok(html.includes(`href="/organizations/${r.id}"`),r.id);assert.ok(html.includes(escapeHtml(r.verified_name+' — '+(r.city||r.location_county+' County'))),r.id);}
  for(const logo of Object.values(brandLogos)){const response=await worker.fetch(new Request('https://test'+logo.src));assert.equal(response.status,200,logo.src);assert.match(response.headers.get('Content-Type'),/^image\//);assert.ok((await response.arrayBuffer()).byteLength>100);}
+ assert.equal(brandLogos['veterans-beer-club-yolo-solano'].src,'/logos/vbc-yolo-solano.png');
+ assert.ok(html.includes('class="logo-tile logo-tile--vbc"'));
+ assert.ok(html.includes('/logos/vbc-yolo-solano.png?v=silver-20260902-2'));
+ const vbcHome=render(new URL('https://test/yolo-solano')).html;
+ assert.ok(vbcHome.includes('class="featured-org-card featured-org-card--vbc"'));
+ const vbcProfile=render(new URL('https://test/organizations/veterans-beer-club-yolo-solano')).html;
+ assert.ok(vbcProfile.includes('/logos/vbc-yolo-solano.png'));
+ const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
+ for(const rule of ['.logo-tile--vbc .logo-art img{display:block;width:min(100%,260px);height:auto;max-width:260px;object-fit:contain}', '.featured-org-card--vbc .featured-org-logo{height:180px;background:#050505}', '.beer-club-profile .profile-brand-logo{padding:0;object-fit:contain;background:#050505;border-radius:14px}']) assert.ok(styles.includes(rule),rule);
  const solano=render(new URL('https://test/?place=Solano+County')).html;
  assert.ok(solano.includes('/organizations/rememberavet'));
  const remember=render(new URL('https://test/organizations/rememberavet')).html;
@@ -83,7 +92,7 @@ test('VFW, Legion and MCL directory cards share the branded card design with fam
  assert.equal(page.status,200);
  for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
  for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
- assert.ok(page.html.includes('/styles.css?v=nearby-cards-20261002-2'));
+ assert.ok(page.html.includes('/styles.css?v=vbc-logo-20261002-1'));
  assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','.vfw-profile .profile-brand-logo{object-fit:cover}','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
@@ -140,7 +149,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=nearby-cards-20261002-2'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=vbc-logo-20261002-1'),r.id);
   assert.ok(page.html.includes('/app.js?v=city-scroll-20261002-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }

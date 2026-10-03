@@ -706,3 +706,10 @@ html:has(.detail-page),body:has(.detail-page){overflow-x:clip}
 .city-welcome-skip{padding:10px 14px;background:#eef2f6;border:1px solid #bbc7d5;border-radius:8px;color:var(--ink);font-weight:750;text-decoration:none}.city-welcome-skip:hover{background:#e2e8ef}
 .events-page .event-card-details{position:relative;z-index:4;display:inline-flex;align-items:center;gap:6px;margin-top:7px;padding:5px 9px;border:1px solid #bdcbd9;border-radius:7px;background:#f4f7fa;color:#183f69;font-size:11px;font-weight:800;line-height:1.2;pointer-events:auto}.events-page .event-card-details:hover{background:#e8eff6;text-decoration:none}.events-page .event-card-details:focus-visible{outline:3px solid #176db5;outline-offset:2px}
 .regional-search-clear{grid-column:1/-1;justify-self:start;color:#244a70;font-size:13px;font-weight:750}.regional-search-clear:focus-visible{outline:3px solid #176db5;outline-offset:3px;border-radius:3px}
+
+/* The supplied VBC mark is a square black-background image with artwork close to its edges. */
+.logo-tile--vbc .logo-art{min-height:0;padding:0;background:#050505}
+.logo-tile--vbc .logo-art img{display:block;width:min(100%,260px);height:auto;max-width:260px;object-fit:contain}
+.featured-org-card--vbc .featured-org-logo{height:180px;background:#050505}
+.featured-org-card--vbc .featured-org-logo img{width:min(100%,180px);height:auto;max-width:180px;max-height:180px;object-fit:contain}
+.beer-club-profile .profile-brand-logo{padding:0;object-fit:contain;background:#050505;border-radius:14px}
