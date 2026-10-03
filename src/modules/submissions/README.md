@@ -1,6 +1,6 @@
 # Submissions
 
-Owns public contribution intake and private review: `records(kind=submission)` with pending, reviewed and rejected states, plus `submission_limits` for anonymous JSON intake. Review does not publish an organization/event or grant authority automatically.
+Owns public contribution intake and private review: `records(kind=submission)` with pending, reviewed and rejected states, plus `submission_limits` for anonymous JSON intake. The organization form accepts profile updates, events, stewardship requests, other contributions and website design suggestions. Design feedback stays private for consideration; it is not published or treated as authorization. Review does not publish an organization/event or grant authority automatically.
 
 - `server.mjs`: `handleSubmission(req, env, url)` preserves `POST /api/submissions`, its 15 KB byte cap, same-origin requirement, honeypot, hashed hourly rate bucket and pending private record.
 - `public.mjs`: public contribution form and `organizationSubmission` parsing.

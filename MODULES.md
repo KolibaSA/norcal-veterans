@@ -47,6 +47,8 @@ The current public directory/profile renderer remains in `src/site.mjs`; it is n
 Public crawl discovery lives in `src/app/public-seo.mjs`; the active Worker serves `/robots.txt` and `/sitemap.xml`. The sitemap reads only the public serializer's published organizations and event-detail eligibility. Public page titles, descriptions and canonical links come from the shared shell and their page renderers.
 Organization profile descriptions and structured data come from the Organizations module's public SEO interface; the public shell only handles safe JSON-LD placement.
 
+The public News items are maintained in `src/news.mjs`. The Resources page lists them by date, and the regional homepage features the newest item unless an item is explicitly pinned as the homepage feature. This is currently source-managed content, not an HQ editor feature; adding or changing a story requires a website release.
+
 **Example: investigate a Requests save failure**
 
 Start with [Requests](src/modules/requests/README.md) and its browser contract. The request target (`website`, `headquarters`, or `decide`) is stored in `payload.target`; the API record kind remains `request`. The record save body must also include the selected `status`. The September 12 omission of that status was fixed in `c708f52` in `src/shared/browser-runtime.mjs`, with coverage in `src/shared/browser-runtime.test.mjs`.

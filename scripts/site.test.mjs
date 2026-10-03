@@ -250,7 +250,14 @@ test('Davis VFW closure notice identifies nearby recruiting posts on the city an
  assert.ok(profile.html.includes('VFW · Yolo COUNTY · CLOSED'));
  assert.ok(profile.html.includes('Davis VFW Post 6949 has closed'));
  assert.ok(profile.html.includes('Western Yolo VFW Post 7143 in Esparto'));
+ assert.ok(profile.html.includes('href="/for-organizations?org=vfw-ca-6949&amp;kind=design"'));
+ assert.ok(profile.html.includes('Suggest a website design change'));
  assert.ok(!profile.html.includes('Current post contact details, meeting location and schedule are being verified.'));
+});
+test('custom organization pages link to a profile-specific design suggestion form',()=>{
+ const page=render(new URL('https://test/mcl-yolo'));
+ assert.equal(page.status,200);
+ assert.ok(page.html.includes('href="/for-organizations?org=mcl-yolo&amp;kind=design"'));
 });
 test('submission desk and unknown mutation routes stay separate',async()=>{
  const page=publicExtension(new URL('https://test/for-organizations'),[]);assert.ok(page.html.includes('Submit for review'));assert.ok(!page.html.includes('type="password"'));

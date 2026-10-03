@@ -13,12 +13,21 @@ test('organization contribution keeps sender details in its review body',()=>{
   assert.equal(row.status,undefined);
 });
 test('contribution checks public-information consent and selected live organization',()=>{
-  assert.throws(()=>organizationSubmission(input({privacy:''}),organizations),/public organization information/);
+  assert.throws(()=>organizationSubmission(input({privacy:''}),organizations),/permission to submit/);
   assert.throws(()=>organizationSubmission(input({org_id:'unknown'}),organizations),/Choose an organization/);
   assert.throws(()=>organizationSubmission(input({kind:'grant_admin'}),organizations),/valid option/);
   assert.equal(JSON.parse(organizationSubmission(input({org_id:''}),organizations).body).orgId,'');
 });
+test('design suggestions stay private in the review queue and retain the selected organization',()=>{
+  const row=organizationSubmission(input({kind:'design',title:'Improve event links',details:'Add the local calendar near each profile.'}),organizations);
+  assert.deepEqual(JSON.parse(row.body),{kind:'design',orgId:'fixture-org',name:'Private sender',email:'private@example.test',details:'Add the local calendar near each profile.',source:''});
+  const html=submissionPage(new URL('https://site.test/for-organizations?kind=design&org=fixture-org'),{organizations});
+  assert.match(html,/Suggest a website design change/);
+  assert.match(html,/value="design" selected/);
+  assert.match(html,/Design suggestions are considered by the site team and will not be published as submitted/);
+  assert.match(html,/option value="fixture-org" selected/);
+});
 test('contribution form markup matches the approved public shell',()=>{
   const html=submissionPage(new URL('https://site.test/for-organizations'),{organizations});
-  assert.equal(createHash('sha256').update(html).digest('hex'),'ce4c847b1f2f955a535500e02825b75a515f6b60e62c77cd8528547af1114f56');
+  assert.equal(createHash('sha256').update(html).digest('hex'),'24ac11ffa61703e57813b4fd873fbb4b768a54cf0d57043ee94f435cdfaa8408');
 });
