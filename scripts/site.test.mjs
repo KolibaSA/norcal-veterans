@@ -61,6 +61,7 @@ test('combined county/type search and same-city ranking',()=>{
  const page=render(new URL('https://test/yolo-solano?type=VFW&place=Vacaville'));
  assert.match(page.html,/class="regional-search"[^>]*role="search"/);
  assert.match(page.html,/href="\/yolo-solano#directory">Clear all filters<\/a>/);
+ assert.equal((page.html.match(/Clear (?:all )?filters/g)||[]).length,1);
  assert.match(page.html,/<option value="VFW" selected>VFW<\/option>/);
  assert.match(page.html,/<option selected>Vacaville<\/option>/);
 });
