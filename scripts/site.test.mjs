@@ -122,7 +122,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
   assert.ok(page.html.includes('/styles.css?v=nearby-city-20261002-1'),r.id);
-  assert.ok(page.html.includes('/app.js?v=nearby-city-20261002-1'),r.id);
+  assert.ok(page.html.includes('/app.js?v=city-scroll-20261002-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }
  assert.ok(styles.includes('.toys-profile .profile-brand-logo{background:#d71920}'));

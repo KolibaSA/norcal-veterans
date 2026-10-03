@@ -46,7 +46,7 @@ if(location.pathname==='/'||location.pathname==='/yolo-solano'){
  cityForm?.addEventListener('submit',event=>{
   const city=citySelect?.value||'';
   if(!cityOptions.has(city))return;
-  event.preventDefault();updateCity(city);dialog?.close();safeWrite('sessionStorage',skipKey,'1');citySection?.querySelector('h2')?.focus();
+  event.preventDefault();updateCity(city);dialog?.close();safeWrite('sessionStorage',skipKey,'1');
  });
  document.querySelectorAll('[data-city-change]').forEach(button=>button.addEventListener('click',()=>dialog?.showModal()));
  document.querySelectorAll('[data-city-skip]').forEach(button=>button.addEventListener('click',()=>{safeWrite('sessionStorage',skipKey,'1');dialog?.close();}));
