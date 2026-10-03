@@ -39,14 +39,16 @@ test('logo gallery keeps every organization reachable with accessible post and l
  assert.ok(vetRecord.source_ids.some(id=>sources.some(s=>s.id===id&&s.url==='https://www.veteransequinetherapy.com/')));
  for(const flag of ['current_intake_unconfirmed','schedule_unconfirmed','visit_location_unconfirmed'])assert.ok(vetRecord.missing_data_flags.includes(flag));
   });
-test('nearby organization cards use a consistent branded layout for every organization type',()=>{
+test('nearby organization cards align the logo and detail panels across organization types',()=>{
  const city=render(new URL('https://test/yolo-solano?city=Davis'));
  assert.equal(city.status,200);
  const nearby=city.html.split('data-city-grid>')[1].split('</div></div></section>')[0];
- assert.ok(nearby.includes('organization-brand-card equine-profile'),'VETs should use the branded nearby-card layout');
+ assert.ok(nearby.includes('class="logo-tile logo-tile--vets"'),'VETs retains its white-logo and navy-details design');
  assert.ok(nearby.includes('Veterans Equine Therapy (VETs)'));
  assert.ok(nearby.includes('organization-brand-card vfw-profile'),'VFW cards keep the same nearby-card layout');
- assert.ok(!nearby.includes('logo-reveal'),'nearby cards should not stretch the compact directory reveal into an oversized blank panel');
+ assert.ok(nearby.includes('logo-reveal'),'VETs keeps its navy details panel');
+ const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
+ for(const rule of ['.city-nearby-grid .logo-art{flex:0 0 350px;min-height:350px}', '.city-nearby-grid .logo-reveal{display:flex;flex:0 0 150px;flex-direction:column;justify-content:space-between;min-height:150px;gap:0}', '.city-nearby-grid .logo-tile--vets .logo-art img{width:min(100%,260px);height:260px;max-width:260px;object-fit:contain}']) assert.ok(styles.includes(rule),rule);
  const directory=render(new URL('https://test/')).html;
  assert.ok(directory.includes('logo-tile--vets'),'the full directory retains its existing VETs tile');
 });
@@ -81,7 +83,7 @@ test('VFW, Legion and MCL directory cards share the branded card design with fam
  assert.equal(page.status,200);
  for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
  for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
- assert.ok(page.html.includes('/styles.css?v=nearby-cards-20261002-1'));
+ assert.ok(page.html.includes('/styles.css?v=nearby-cards-20261002-2'));
  assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','.vfw-profile .profile-brand-logo{object-fit:cover}','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
@@ -138,7 +140,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=nearby-cards-20261002-1'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=nearby-cards-20261002-2'),r.id);
   assert.ok(page.html.includes('/app.js?v=city-scroll-20261002-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }

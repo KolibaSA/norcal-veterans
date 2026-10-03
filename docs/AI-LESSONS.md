@@ -15,8 +15,18 @@ Adopted September 13, 2026. Practical guidance, not doctrine. Read the current s
 1. **Reuse the verified Windows tool locations.** Distinguish missing command paths and blocked subprocesses from code failures. [L-20260913-01](#l-20260913-01)
 2. **Test the real form submission, not only its visible selections or API handler.** Label local/staging/production evidence accurately. [L-20260913-02](#l-20260913-02)
 3. **Use one primary release path.** The connected GitHub build already deploys; do not add a manual deployment by habit. [L-20260913-03](#l-20260913-03)
+4. **For card redesigns, verify the visible panel order, divider and logo scale against the reference image.** [L-20261002-01](#l-20261002-01)
 
 ## Lessons
+
+<a id="l-20261002-01"></a>
+### L-20261002-01 — Verify card geometry against the reference image
+- Scope/tags: NorCal public site; organization cards; visual changes.
+- Status: Verified observation.
+- Observation: A nearby-card change passed markup checks but did not match the intended VETs appearance. The owner clarified the exact white-logo/navy-details order, divider alignment with the VFW card, and larger emblem.
+- Evidence: Owner’s October 2 screenshot correction; regression coverage in `scripts/site.test.mjs` and the corresponding rules in `public/styles.css`.
+- Next time: Translate a reference image into specific panel boundaries and logo scale, then inspect a populated browser preview and add focused layout assertions before release.
+- Limits: Staging may use synthetic records and lack the exact target organization; use local source records for that target when needed.
 
 <a id="l-20260913-03"></a>
 ### L-20260913-03 — Avoid duplicate release paths
