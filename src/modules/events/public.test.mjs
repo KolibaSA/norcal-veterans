@@ -70,6 +70,8 @@ test('events page groups compact cards by month and identifies hosts and accepte
   assert.match(html,/src="https:\/\/images\.example\.org\/train\.jpg"/);
   assert.match(html,/<h2>Buddy Poppy Fundraiser<\/h2>/);assert.doesNotMatch(html,/<h2><a[^>]*>Buddy Poppy Fundraiser<\/a>/);
   assert.match(html,/class="event-card-hit-area" href="\/events\/poppy"/);assert.match(html,/event-card--poppy/);
+  assert.match(html,/class="event-card-details" href="\/events\/poppy">View event details/);
+  assert.match(html,/class="event-card-summary"><strong>6:00 PM<\/strong><span aria-hidden="true"> · <\/span><span>Davis · Grocery Outlet, Davis, CA<\/span>/);
   assert.doesNotMatch(html,/>Details\s*</);
   assert.match(html,/href="https:\/\/example\.org\/volunteer"[^>]*>Volunteer Now/);
   assert.match(html,/href="https:\/\/example\.org\/donate"[^>]*>Donate Now/);

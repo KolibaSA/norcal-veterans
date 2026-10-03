@@ -117,5 +117,5 @@ test('new published content is labeled unverified and profile review dates come 
  }
  env.insert('reviewed-org','organization',{...organization,last_verified_date:'2026-09-05',review_source_url:'https://example.org/evidence'});
  const response=await worker.fetch(new Request('https://site.test/organizations/reviewed-org'),env);
- assert.match(await response.text(),/Public sources reviewed <strong>2026-09-05<\/strong>/);
+ assert.match(await response.text(),/Last reviewed against public sources on <strong>2026-09-05<\/strong>/);
 });

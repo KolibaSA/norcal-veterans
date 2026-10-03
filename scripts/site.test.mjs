@@ -58,13 +58,18 @@ test('combined county/type search and same-city ranking',()=>{
  const result=filterRecords(new URLSearchParams({type:'VFW',place:'Vacaville'}));assert.equal(result.length,5);assert.equal(result[0].id,'vfw-ca-7244');assert.ok(result.every(r=>r.location_county==='Solano'&&r.organization_type==='VFW'));
  assert.equal(filterRecords(new URLSearchParams({type:'DAV',place:'Yolo County'})).length,0);
  assert.equal(filterRecords(new URLSearchParams({q:'8762'}))[0].id,'vfw-ca-8762');
+ const page=render(new URL('https://test/yolo-solano?type=VFW&place=Vacaville'));
+ assert.match(page.html,/class="regional-search"[^>]*role="search"/);
+ assert.match(page.html,/href="\/yolo-solano#directory">Clear all filters<\/a>/);
+ assert.match(page.html,/<option value="VFW" selected>VFW<\/option>/);
+ assert.match(page.html,/<option selected>Vacaville<\/option>/);
 });
 test('VFW, Legion and MCL directory cards share the branded card design with family themes',()=>{
  const page=render(new URL('https://test/yolo-solano'));
  assert.equal(page.status,200);
  for(const theme of ['vfw-profile','legion-profile','mcl-profile'])assert.ok(page.html.includes(`organization-brand-card ${theme}`),theme);
  for(const phrase of ['organization-brand-kicker','organization-brand-logo','organization-brand-number','organization-brand-details','organization-brand-location','Dixon, CA'])assert.ok(page.html.includes(phrase),phrase);
- assert.ok(page.html.includes('/styles.css?v=city-welcome-20261002-1'));
+ assert.ok(page.html.includes('/styles.css?v=event-cards-20261002-1'));
  assert.ok(!page.html.includes('SERVICE COMMUNITY VETERANS ALWAYS'));
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.logo-grid--branded{grid-template-columns:repeat(3','.organization-brand-card{min-height:500px','.vfw-profile .profile-brand-logo{object-fit:cover}','@media(max-width:480px){.logo-grid--branded{grid-template-columns:1fr'])assert.ok(styles.includes(phrase),phrase);
@@ -86,8 +91,8 @@ test('invalid, empty and injection input stays safe',()=>{
  assert.equal(render(new URL('https://test/organizations/missing')).status,404);
  assert.equal(escapeHtml('"<a>'),'&quot;&lt;a&gt;');
 });
-test('each profile has its own metadata, source links and term caveat',()=>{
- for(const r of records){const p=render(new URL('https://test/organizations/'+r.id));assert.equal(p.status,200);assert.ok(p.html.includes(escapeHtml(r.verified_name)));assert.ok(p.html.includes('Sources for this profile'));assert.ok(!p.html.includes('property="og:image"'));if(r.officers.length)assert.ok(p.html.includes('current terms have not been confirmed'));}
+test('each profile has its own metadata, review status, source links and term caveat',()=>{
+ for(const r of records){const p=render(new URL('https://test/organizations/'+r.id));assert.equal(p.status,200);assert.ok(p.html.includes(escapeHtml(r.verified_name)));assert.ok(p.html.includes('Last reviewed'),r.id);assert.ok(p.html.includes('Sources for this profile'));assert.ok(!p.html.includes('property="og:image"'));if(r.officers.length)assert.ok(p.html.includes('current terms have not been confirmed'));}
 });
 test('American Legion profiles use the shared profile design with Legion family styling',()=>{
  const legion=records.filter(r=>r.organization_type==='American Legion');
@@ -100,7 +105,7 @@ test('American Legion profiles use the shared profile design with Legion family 
   assert.ok(page.html.includes('class="wrap detail-page legion-profile"'),r.id);
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
-  for(const phrase of ['Upcoming events','Plan your visit','Activities &amp; member information','Sources for this profile','Submit an update'])assert.ok(page.html.includes(phrase),r.id+' '+phrase);
+  for(const phrase of ['Upcoming events','Plan your visit','Activities &amp; member information','Sources for this profile','Suggest a correction or update'])assert.ok(page.html.includes(phrase),r.id+' '+phrase);
   assert.ok(!page.html.includes('class="org-site legion-site"'),r.id);
  }
 });
@@ -121,7 +126,7 @@ test('every organization type uses the shared branded profile design and its fam
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=city-welcome-20261002-1'),r.id);
+  assert.ok(page.html.includes('/styles.css?v=event-cards-20261002-1'),r.id);
   assert.ok(page.html.includes('/app.js?v=city-scroll-20261002-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }
@@ -165,7 +170,7 @@ test('Detachment 627 uses the simple profile with its branding and content',()=>
  for(const path of ['/mcl-yolo','/organizations/mcl-yolo']){
   const page=render(new URL('https://test'+path));
   assert.equal(page.status,200);
-  for(const phrase of ['Detachment 627','Upcoming events','id="photos"','id="officers"','Plan your visit','Activities &amp; member information','Sources for this profile','Submit an update'])assert.ok(page.html.includes(phrase),phrase);
+  for(const phrase of ['Detachment 627','Upcoming events','id="photos"','id="officers"','Plan your visit','Activities &amp; member information','Sources for this profile','Suggest a correction or update'])assert.ok(page.html.includes(phrase),phrase);
   assert.ok(page.html.includes('class="wrap detail-page mcl-profile"'));
   assert.ok(page.html.includes('class="profile-brand-logo"'));
   assert.ok(!page.html.includes('class="org-site mcl-site"'));
