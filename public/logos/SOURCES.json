@@ -105,7 +105,16 @@
       "width": 1254,
       "height": 1254,
       "background": "Black; cream barrel and ribbon with brown linework and lettering.",
-      "verification": "Supplied directly by Chris on October 2, 2026. The file is copied unchanged and used as the current local chapter logo."
+      "verification": "Supplied directly by Chris on October 2, 2026. The original remains unchanged; the public page uses the separately listed white-background copy requested by Chris on October 2, 2026."
+    },
+    {
+      "file": "site/public/logos/vbc-yolo-solano-white.png",
+      "organization": "Veterans Beer Club Yolo-Solano",
+      "mark": "VBC Yolo-Solano barrel and tap logo with white background",
+      "width": 1254,
+      "height": 1254,
+      "background": "White; original cream barrel, brown linework and lettering retained.",
+      "verification": "Derived from the October 2, 2026 logo supplied directly by Chris, at Chris's request to change only its black background to white. The original supplied asset remains unchanged."
     },
     {
       "file": "site/public/logos/vets.jpg",
