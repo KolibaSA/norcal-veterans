@@ -49,6 +49,8 @@ Organization profile descriptions and structured data come from the Organization
 
 The public News items are maintained in `src/news.mjs`. The Resources page lists them by date, and the regional homepage features the newest item unless an item is explicitly pinned as the homepage feature. This is currently source-managed content, not an HQ editor feature; adding or changing a story requires a website release.
 
+The public Privacy Notice is rendered from `src/privacy.mjs`, linked through the shared footer, and included in `src/app/public-seo.mjs` sitemap discovery. Keep its disclosures aligned with the public forms, Clerk sign-in, Cloudflare hosting and browser-stored city preference.
+
 **Example: investigate a Requests save failure**
 
 Start with [Requests](src/modules/requests/README.md) and its browser contract. The request target (`website`, `headquarters`, or `decide`) is stored in `payload.target`; the API record kind remains `request`. The record save body must also include the selected `status`. The September 12 omission of that status was fixed in `c708f52` in `src/shared/browser-runtime.mjs`, with coverage in `src/shared/browser-runtime.test.mjs`.

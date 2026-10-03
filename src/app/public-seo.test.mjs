@@ -18,9 +18,9 @@ test('sitemap lists canonical public pages once and excludes private, draft and 
   assert.match(xml, /<loc>https:\/\/www\.norcalveterans\.org\/events\/community-event<\/loc>/);
   assert.match(xml, /<loc>https:\/\/www\.norcalveterans\.org\/locations\/yolo-county<\/loc>/);
   assert.match(xml, /<loc>https:\/\/www\.norcalveterans\.org\/locations\/davis<\/loc>/);
-  assert.match(xml, /<loc>https:\/\/www\.norcalveterans\.org\/resources\/disability<\/loc>/);
+  assert.match(xml, /<loc>https:\/\/www\.norcalveterans\.org\/privacy<\/loc>/);
   assert.equal((xml.match(/\/organizations\/mcl-yolo<\/loc>/g) || []).length, 1);
-  assert.doesNotMatch(xml, /bad<id>|draft-event|vfw-meeting|<loc>https:\/\/www\.norcalveterans\.org\/mcl-yolo<\/loc>|\/hq|\/api\//);
+  assert.doesNotMatch(xml, /bad<id>|draft-event|vfw-meeting|<loc>https:\/\/www\.norcalveterans\.org\/resources\/(?:local|disability|education|employment|housing|mental-health|organization-help)<\/loc>|<loc>https:\/\/www\.norcalveterans\.org\/mcl-yolo<\/loc>|\/hq|\/api\//);
 });
 
 test('robots declares the production sitemap without advertising it on staging', () => {

@@ -210,14 +210,18 @@ test('resources page provides local and official help across the requested categ
  for(const heading of ['Start with a local benefits counselor','VA disability and claims','Education and training','Employment and careers','Housing and homelessness','Mental health and connection'])assert.ok(page.html.includes(heading),heading);
  for(const url of ['https://www.yolocounty.gov/government/general-government-departments/health-human-services/adults/veterans-service-office','https://www.solanocounty.gov/government/veterans-services','https://www.va.gov/disability/','https://www.va.gov/education/','https://edd.ca.gov/en/jobs_and_training/services_for_veterans/','https://www.va.gov/housing-assistance/','https://www.veteranscrisisline.net/'])assert.ok(page.html.includes(url),url);
  assert.ok(page.html.includes('call <a href="tel:988">988</a> and press 1'));
- for(const topic of ['local','disability','education','employment','housing','mental-health','organization-help'])assert.ok(page.html.includes(`href="/resources/${topic}"`),topic);
- const topic=render(new URL('https://test/resources/disability'));
- assert.equal(topic.status,200);
- assert.ok(topic.html.includes('<link rel="canonical" href="https://www.norcalveterans.org/resources/disability">'));
- assert.ok(topic.html.includes('VA disability and claims'));
- assert.ok(topic.html.includes('href="/organizations/vso-yolo"'));
- assert.ok(topic.html.includes('href="/events"'));
+ for(const label of ['Latest News','Local help','Disability','Education','Employment','Housing','Mental health','Organization programs'])assert.ok(page.html.includes(label),label);
+ assert.doesNotMatch(page.html,/Open the (?:start with a local benefits counselor|va disability|education and training|employment and careers|housing and homelessness|mental health|help from organizations) guide/i);
+ for(const topic of ['local','disability','education','employment','housing','mental-health','organization-help'])assert.equal(render(new URL('https://test/resources/'+topic)).status,404,topic);
  assert.equal(render(new URL('https://test/resources/not-a-topic')).status,404);
+});
+test('privacy notice explains current collection, providers and user requests and is linked site-wide',()=>{
+ const page=render(new URL('https://test/privacy'));
+ assert.equal(page.status,200);
+ for(const item of ['Privacy Notice','name, reply email','Clerk','Cloudflare','local storage','no fixed automatic deletion schedule','Do Not Track','sterling.koliba@gmail.com'])assert.ok(page.html.includes(item),item);
+ assert.ok(page.html.includes('<link rel="canonical" href="https://www.norcalveterans.org/privacy">'));
+ const home=render(new URL('https://test/yolo-solano'));
+ assert.ok(home.html.includes('href="/privacy">Privacy Notice</a>'));
 });
 test('county and sufficiently populated city pages have distinct canonicals and link to published details',()=>{
  const organizations=[

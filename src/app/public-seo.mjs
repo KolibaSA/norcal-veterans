@@ -1,10 +1,9 @@
 import { eventDetailIsPublic } from '../modules/events/public.mjs';
 import { localPagePaths } from '../local-pages.mjs';
-import { resourceTopicIds } from '../resources.mjs';
 import { origin } from '../shared/public-shell.mjs';
 
 const publicId = id => typeof id === 'string' && /^[-_a-zA-Z0-9]{1,120}$/.test(id);
-const staticPaths = ['/yolo-solano', '/regions', '/events', '/resources', ...resourceTopicIds.map(id => '/resources/' + id), '/about', '/memorial-day', '/for-organizations', '/share'];
+const staticPaths = ['/yolo-solano', '/regions', '/events', '/resources', '/about', '/memorial-day', '/for-organizations', '/share', '/privacy'];
 
 export function robotsText(staging = false) {
   return `User-agent: *\nAllow: /\n${staging ? '' : `Sitemap: ${origin}/sitemap.xml\n`}`;

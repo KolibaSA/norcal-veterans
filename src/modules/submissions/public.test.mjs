@@ -29,5 +29,5 @@ test('design suggestions stay private in the review queue and retain the selecte
 });
 test('contribution form markup matches the approved public shell',()=>{
   const html=submissionPage(new URL('https://site.test/for-organizations'),{organizations});
-  assert.equal(createHash('sha256').update(html).digest('hex'),'24ac11ffa61703e57813b4fd873fbb4b768a54cf0d57043ee94f435cdfaa8408');
+  assert.equal(createHash('sha256').update(html).digest('hex'),'6dcc65fcc2d28a55614f2d417e89becd52c1a4dfd836a934c950912f9a5cea64');
 });

@@ -67,7 +67,7 @@ function locationPage({ name, countyName, path, records, events, isCounty, child
   const description = isCounty
     ? `Explore published veterans organizations, upcoming community events, county services and resources in ${name} County, California.`
     : `Find published veterans organizations and upcoming community events in ${name}, ${countyName} County, California.`;
-  const resourcePath = isCounty ? '/resources/local' : '/resources';
+  const resourcePath = isCounty ? '/resources#local' : '/resources';
   const countyLink = `<a class="button outline" href="${localPath(counties.find(item => item.name === countyName).slug)}">Explore ${h(countyName)} County →</a>`;
   const offices = isCounty ? records.filter(record => record.id === countyOffice) : [];
   const officeLinks = offices.map(organizationCard).join('');
