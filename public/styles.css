@@ -722,3 +722,5 @@ html:has(.detail-page),body:has(.detail-page){overflow-x:clip}
 .equine-profile .profile-brand-logo{width:min(30vw,384px);height:min(30vw,384px)}
 @media(max-width:850px){.beer-club-profile .profile-brand-logo{width:152px;height:152px}.equine-profile .profile-brand-logo{width:228px;height:228px}}
 @media(max-width:650px){.beer-club-profile .profile-brand-logo{width:128px;height:128px}.equine-profile .profile-brand-logo{width:192px;height:192px}}
+
+.regional-explainer{padding-top:40px;padding-bottom:40px}.regional-explainer video{display:block;width:100%;max-width:960px;height:auto;margin:0 auto;border-radius:16px;background:#071b35}
