@@ -78,7 +78,8 @@ test('logos are complete source files and submissions stay in the existing priva
   } finally {env.sqlite.close();}
 });
 
-test('HQ event assignments reach the matching organization calendar with legacy payload fallback',async()=>{
+test('HQ event assignments reach the matching organization calendar with legacy payload fallback',async t=>{
+  t.mock.method(Date,'now',()=>Date.parse('2026-10-01T12:00:00-07:00'));
   const env=setup(),[first,second]=records;
   try {
     const insert=env.sqlite.prepare("INSERT INTO records(id,kind,title,region_id,organization_id,status,payload,created_by,created_at,updated_at,mutation_id) VALUES(?,'event',?,'yolo-solano',?,'published',?,'owner','2026-09-12','2026-09-12',?)");

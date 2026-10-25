@@ -28,3 +28,5 @@ Events are the only generic HQ record type that opts into hard deletion. DELETE 
 Private HTTP handlers receive the shell's verified identity and current grants. `worker/legacy/index.mjs` authenticates every HQ request and checks write origins before dispatch. Shared infrastructure supplies bounded JSON, authorization, D1 transactions, optimistic versions, immutable audit/history and generic record serialization.
 
 See [BROWSER.md](./BROWSER.md) for browser entry points, editor state, markup, actions and focused UI checks.
+
+The public Events page includes a native, collapsed-by-default “View Past Events” disclosure above upcoming listings. It defaults to the current Pacific year; `past_year` selects an available year and keeps the disclosure open after submission. The archive respects the city filter, lists published community events only, and filters individual occurrences by Pacific year and the same upcoming boundary used by the main listing.

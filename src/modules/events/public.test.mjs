@@ -110,3 +110,46 @@ test('one event record renders, prunes, details, and exports multiple dates',()=
   const calendar=eventCalendar([event]);assert.equal((calendar.match(/BEGIN:VEVENT/g)||[]).length,3);
   for(const day of ['20261107','20261108','20261111'])assert.match(calendar,new RegExp(`DTSTART;VALUE=DATE:${day}`));
 });
+
+test('past events default closed, select Pacific year, preserve city and exclude private records',t=>{
+  t.mock.method(Date,'now',()=>Date.parse('2026-10-25T19:00:00Z'));
+  const base={venue:'Public hall',status:'published',city:'Davis',start_at:'2026-10-08T18:00:00-07:00'};
+  const events=[
+    {...base,id:'recent',title:'Recent gathering'},
+    {...base,id:'older',title:'Older gathering',start_at:'2026-03-01T18:00:00-08:00'},
+    {...base,id:'prior',title:'Prior Pacific year',start_at:'2026-01-01T01:00:00Z'},
+    {...base,id:'private',title:'Private draft',status:'draft'},
+    {...base,id:'archived',title:'Archived record',status:'archived'},
+    {...base,id:'meeting',title:'Regular meeting',kind:'Organization meeting'},
+    {...base,id:'other-city',title:'Woodland gathering',city:'Woodland'},
+    {...base,id:'future',title:'Future gathering',start_at:'2026-11-01T18:00:00-08:00'}
+  ];
+  const html=eventsPagePublic(new URL('https://test/events?city=Davis'),events);
+  const archive=html.match(/<details class="events-past[\s\S]*?<\/details>/)[0];
+  assert.match(archive, /id="past-events"><summary>View Past Events/);
+  assert.match(archive, /value="2026" selected/);
+  assert.match(archive, /value="2025"/);
+  assert.match(archive, /name="city" value="Davis"/);
+  assert.ok(archive.indexOf('Recent gathering')<archive.indexOf('Older gathering'));
+  assert.doesNotMatch(archive,/Prior Pacific year|Private draft|Archived record|Regular meeting|Woodland gathering|Future gathering/);
+  assert.ok(html.indexOf('View Past Events')<html.indexOf('Future gathering'));
+  const prior=eventsPagePublic(new URL('https://test/events?city=Davis&past_year=2025'),events).match(/<details class="events-past[\s\S]*?<\/details>/)[0];
+  assert.match(prior,/id="past-events" open/);
+  assert.match(prior,/Prior Pacific year/);
+  assert.doesNotMatch(prior,/Recent gathering|Older gathering/);
+  assert.match(eventsPagePublic(new URL('https://test/events?past_year=invalid'),[]),/No past events listed for 2026/);
+});
+
+test('past archive separates recurring dates and excludes ongoing and current date-only events',t=>{
+  t.mock.method(Date,'now',()=>Date.parse('2026-10-25T19:00:00Z'));
+  const base={venue:'Public hall',status:'published'};
+  const html=eventsPagePublic(new URL('https://test/events'),[
+    {...base,id:'repeat',title:'Recurring gathering',start_at:'2025-05-01T18:00:00-07:00',additional_occurrences:[{start_at:'2026-05-01T18:00:00-07:00'},{start_at:'2026-11-01T18:00:00-08:00'}]},
+    {...base,id:'ongoing',title:'Ongoing gathering',start_at:'2026-10-24T18:00:00-07:00',end_at:'2026-10-26T18:00:00-07:00'},
+    {...base,id:'today',title:'Date only today',start_at:'2026-10-25T12:00:00-07:00',date_only:true}
+  ]);
+  const archive=html.match(/<details class="events-past[\s\S]*?<\/details>/)[0];
+  assert.match(archive,/Recurring gathering/);
+  assert.match(archive,/2026-05-02/);
+  assert.doesNotMatch(archive,/2025-05-02|2026-11-02|Ongoing gathering|Date only today/);
+});

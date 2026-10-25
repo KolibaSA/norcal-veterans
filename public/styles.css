@@ -724,3 +724,5 @@ html:has(.detail-page),body:has(.detail-page){overflow-x:clip}
 @media(max-width:650px){.beer-club-profile .profile-brand-logo{width:128px;height:128px}.equine-profile .profile-brand-logo{width:192px;height:192px}}
 
 .regional-explainer{padding-top:40px;padding-bottom:40px}.regional-explainer video{display:block;width:100%;max-width:960px;height:auto;margin:0 auto;border-radius:16px;background:#071b35}
+
+.events-past{margin-top:24px}.events-past>summary{color:var(--navy);font-size:1.2rem;font-weight:800}.events-past>summary:focus-visible{outline:3px solid var(--navy);outline-offset:5px}.events-past[open]>summary{margin-bottom:24px}.events-past .inline-form{flex-wrap:wrap}
