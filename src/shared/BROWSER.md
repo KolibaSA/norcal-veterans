@@ -4,7 +4,7 @@ The application composition in `src/app/hq-browser.mjs` passes a registry to `st
 
 The runtime owns startup, identity, navigation/URL and load sequencing, generic record lists, the common editor frame, focus restoration, unsaved-change prompts, optimistic-conflict comparison, and common record persistence. Feature descriptors/controllers own their rules, custom fields, markup, actions, and state. The runtime has no feature-name switch.
 
-`browser-records.mjs` supplies the common record descriptor factory. Its inputs are a kind, title, statuses and optional field/payload/editor/lifecycle hooks. It returns a new instance with independent `{ rows, filter }` state, common form mapping, a kind-scoped `list(api)` interface, publishing eligibility and descriptor overrides. Each feature declares its own lifecycle and overrides only behavior it owns. Every save is still authorized and validated by the server.
+`browser-records.mjs` supplies the common record descriptor factory. Its inputs are a kind, title, statuses and optional field/payload/editor/lifecycle hooks. It returns a new instance with independent `{ rows, filter }` state, common form mapping, a kind-scoped `list(api, options?)` interface, publishing eligibility and descriptor overrides. Record-backed section lists request 25 rows per page with server-side search and status filtering, and provide previous/next controls. The no-options interface remains for legacy consumers. Each feature declares its own lifecycle and overrides only behavior it owns. Every read and save is still authorized by the server.
 
 Supported descriptor members:
 

@@ -1,5 +1,5 @@
 import { esc, label, dateLabel } from '../../shared/browser-ui.mjs';
-import { createRecordFeature } from '../../shared/browser-records.mjs';
+import { createRecordFeature, fetchOrganizationChoices } from '../../shared/browser-records.mjs';
 import { joined, splitList } from '../../shared/browser-ui.mjs';
 import { VFW_8151_ID, meetingPlanFields, meetingPlansFromFields } from './meeting-plans.mjs';
 
@@ -65,18 +65,32 @@ export function createFeature() {
       $('org').disabled = true;
     },
     connect(context) {
-      const { $ } = context;
+      const { $, api } = context;
+      let affiliationTimer, affiliationSequence=0, affiliationOptions=[];
       const updateRelationship = () => {
         const independent = $('relationshipType').value === 'independent';
         $('affiliatedWithField').hidden = independent;
         $('affiliatedWith').required = !independent;
         if (independent) $('affiliatedWith').value = '';
-        const options = JSON.parse($('org').dataset.organizationOptions || '[]');
+        const options = [...JSON.parse($('org').dataset.organizationOptions || '[]'),...affiliationOptions];
         const valid = independent || options.some(option => option.id === $('affiliatedWith').value && option.id !== context.editing?.id);
         $('affiliatedWith').setCustomValidity?.(valid ? '' : 'Choose an existing organization.');
       };
       $('relationshipType').onchange = updateRelationship;
-      $('affiliatedWith').oninput = updateRelationship;
+      $('affiliatedWith').oninput = () => {
+        updateRelationship();
+        const query=$('affiliatedWith').value.trim(), serial=++affiliationSequence;
+        clearTimeout(affiliationTimer);
+        affiliationTimer=setTimeout(async()=>{
+          try {
+            const result=await fetchOrganizationChoices(api,{query,ids:[query]});
+            if(serial!==affiliationSequence)return;
+            affiliationOptions=[...result.organizations,...result.selected].filter(option=>option.id!==context.editing?.id);
+            $('affiliatedOrganizationOptions').innerHTML=affiliationOptions.map(option=>'<option value="'+esc(option.id)+'" label="'+esc(option.title)+'"></option>').join('');
+            updateRelationship();
+          } catch { $('affiliatedWith').setCustomValidity?.('Could not check organization choices. Try again.'); }
+        },250);
+      };
       $('addressType').onchange = () => { if ($('addressType').value === 'mailing') $('mapEligible').checked = false; };
       $('meetingPlanYear').onchange = () => {
         const record = context.editing;
@@ -84,7 +98,7 @@ export function createFeature() {
         const values = meetingPlanFields(record, Number($('meetingPlanYear').value));
         for (const [id, value] of Object.entries(values)) if ($(id) && id !== 'meetingPlanYear') $(id).value = value;
       };
-      return { initialize(metadata) {
+      return { resetEditor() { ++affiliationSequence; clearTimeout(affiliationTimer); affiliationOptions=[]; }, initialize(metadata) {
         $('countyOptions').innerHTML = metadata.counties.map(value => '<option value="' + esc(value) + '"></option>').join('');
         $('typeOptions').innerHTML = metadata.organizationTypes.map(value => '<option value="' + esc(value) + '"></option>').join('');
         $('addressType').innerHTML = '<option value="">Not recorded</option>' + metadata.addressTypes.map(value => '<option value="' + esc(value) + '">' + esc(label(value)) + '</option>').join('');
@@ -93,11 +107,33 @@ export function createFeature() {
     afterSave: context => context.refreshScopeOptions()
   });
 }
-export async function loadScopeOptions(api, select) {
-  const organizations = await api('records?kind=organization');
-  const options = organizations.map(org => ({ id: org.id, title: org.title }));
-  const families = [...new Set(organizations.map(org => org.payload?.organization_type).filter(Boolean))].sort();
-  select.dataset.organizationOptions = JSON.stringify(options);
-  select.dataset.organizationFamilies = JSON.stringify(families);
-  select.innerHTML = '<option value="">Region-wide</option>' + options.map(org => '<option value="' + esc(org.id) + '">' + esc(org.title) + '</option>').join('');
+export async function loadScopeOptions(api, select, controls = {}) {
+  const { search, previous, next, status, ids = [] } = controls;
+  if (!select.scopeController) {
+    let sequence=0, timer;
+    const load = async (page=1, extraIds=[], includeFamilies=false) => {
+      const serial=++sequence, current=select.value;
+      const result=await fetchOrganizationChoices(api,{query:search?.value || '',page,ids:[...extraIds,current].filter(id=>id && !id.startsWith('family:')),families:includeFamilies});
+      if (serial!==sequence) return;
+      const selectedNow=select.value;
+      const retained=JSON.parse(select.dataset.organizationOptions || '[]').filter(org=>org.id===selectedNow);
+      const options=[...new Map([...result.organizations,...result.selected].map(org=>[org.id,{id:org.id,title:org.title,region:org.region_id}]).concat(retained.map(org=>[org.id,org]))).values()];
+      select.dataset.organizationOptions=JSON.stringify(options);
+      if(includeFamilies)select.dataset.organizationFamilies=JSON.stringify(result.families);
+      const families=JSON.parse(select.dataset.organizationFamilies || '[]');
+      const familyOptions=select.dataset.scopeFamilies==='1' && families.length ? '<optgroup label="Organization families">'+families.map(type=>'<option value="family:'+esc(type)+'">All '+esc(type)+'</option>').join('')+'</optgroup>' : '';
+      select.innerHTML='<option value="">'+(select.dataset.scopeFamilies==='1'?'All organizations':'Region-wide')+'</option>'+familyOptions+options.map(org=>'<option value="'+esc(org.id)+'">'+esc(org.title)+'</option>').join('');
+      select.value=selectedNow;
+      select.dataset.scopePage=String(page);select.dataset.scopeHasMore=String(result.hasMore);
+      if(previous)previous.disabled=select.disabled || page<=1;
+      if(next)next.disabled=select.disabled || !result.hasMore;
+      if(status)status.textContent=`Organization choices, page ${page}${result.hasMore ? '. More choices available.' : '.'}`;
+    };
+    select.scopeController={load};
+    if(search)search.oninput=()=>{clearTimeout(timer);timer=setTimeout(()=>void load(1).catch(()=>{if(status)status.textContent='Could not load organization choices.';}),250);};
+    const report=()=>{if(status)status.textContent='Could not load organization choices.';};
+    if(previous)previous.onclick=()=>load(Math.max(1,Number(select.dataset.scopePage || 1)-1)).catch(report);
+    if(next)next.onclick=()=>load(Number(select.dataset.scopePage || 1)+1).catch(report);
+  }
+  await select.scopeController.load(1,ids,!select.dataset.organizationFamilies);
 }

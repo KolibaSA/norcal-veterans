@@ -1,6 +1,8 @@
 import { text, present, invalid, canonicalDate, canonicalInstant, pacificLocal, pacificToInstant, object } from '../../shared/validation.mjs';
 import { validatePublicContent } from '../../shared/content-validation.mjs';
 import { validatePayload } from '../../shared/record-validation.mjs';
+import { HTTPError } from '../../shared/server-http.mjs';
+import { statement } from '../../shared/server-storage.mjs';
 
 export const timeZone = 'America/Los_Angeles';
 const dayMilliseconds = 86400000;
@@ -75,6 +77,11 @@ export function validateEvent(input, options = {}) {
 }
 
 export const recordDefinition = Object.freeze({ kind: 'event', statuses: ['draft', 'published', 'archived'], validate: validateEvent,
+  async beforeSave({ env, existing, region, organizationId }) {
+    if (existing || !organizationId) return;
+    const host = await statement(env, "SELECT id FROM records WHERE id=? AND kind='organization' AND region_id=?", organizationId, region).first();
+    if (!host) throw new HTTPError('Choose an organization in the event’s region.');
+  },
   // Invitation responses live in the server-owned invitation table. Generic
   // event saves must never create or revive a public participation claim.
   authorizePayload(payload) { delete payload.accepted_organization_ids; return payload; },

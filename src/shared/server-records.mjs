@@ -21,7 +21,7 @@ export async function saveRecord(input, env, user, grants, definition, existing 
   if (existing && (!Number.isInteger(input.version) || input.version !== existing.version)) {
     return fail('Someone changed this record. Your draft is preserved; compare it with the latest version.', 409);
   }
-  await definition.beforeSave?.({ env, user, existing, status: input.status, id });
+  await definition.beforeSave?.({ env, user, existing, status: input.status, id, region, organizationId: org });
   const title = field(input.title, 'Title', 200, true), body = field(input.body, 'Description', 20000);
   let previous = null;
   if (existing) {
@@ -64,9 +64,30 @@ export async function deleteRecord(input, env, user, grants, definition, existin
   return json({ id: existing.id, deleted: true });
 }
 
-export async function listRecords(env, user, grants, definition) {
+export async function listRecords(env, user, grants, definition, options = null) {
   const scope = readScope(user, grants);
+  if (options) {
+    const page = Number(options.page);
+    if (!Number.isSafeInteger(page) || page < 1 || page > 100000) throw new HTTPError('Choose a valid page.');
+    const status = String(options.status || '');
+    if (status && !definition.statuses.includes(status)) throw new HTTPError('Choose a valid status.');
+    const query = String(options.query || '').trim().slice(0, 200).toLowerCase();
+    const where = ['kind=?', scope.sql], values = [definition.kind, ...scope.values];
+    if (status) { where.push('status=?'); values.push(status); }
+    if (query) {
+      where.push("lower(title || ' ' || body || ' ' || replace(status,'_',' ')) LIKE ? ESCAPE '\\'");
+      values.push('%' + query.replace(/[\\%_]/g, '\\$&') + '%');
+    }
+    const found = await rows(env, 'SELECT * FROM records WHERE ' + where.join(' AND ') + ' ORDER BY updated_at DESC,id DESC LIMIT 26 OFFSET ?', ...values, (page - 1) * 25);
+    return { records: found.slice(0,25).map(record => visibleRecord(record, definition.redactPayload)), page, hasMore: found.length > 25 };
+  }
   return (await rows(env, 'SELECT * FROM records WHERE kind=? AND ' + scope.sql + ' ORDER BY updated_at DESC,id DESC LIMIT 500', definition.kind, ...scope.values)).map(record => visibleRecord(record, definition.redactPayload));
+}
+
+export async function summarizeRecords(env, user, grants, definition) {
+  const scope = readScope(user, grants);
+  const groups = await rows(env, 'SELECT status,COUNT(*) AS count FROM records WHERE kind=? AND ' + scope.sql + ' GROUP BY status', definition.kind, ...scope.values);
+  return { counts: Object.fromEntries(groups.map(row=>[row.status,Number(row.count)])) };
 }
 
 export async function findRecord(env, user, grants, id, action = 'read') {

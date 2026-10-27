@@ -156,3 +156,11 @@ test('past archive separates recurring dates and excludes ongoing and current da
   assert.match(archive,/2026-05-02/);
   assert.doesNotMatch(archive,/2025-05-02|2026-11-02|Ongoing gathering|Date only today/);
 });
+
+test('event filters and the archive preserve the selected region',()=>{
+  const defaultArchive=eventsPagePublic(new URL('https://site.test/events?region=synthetic-north&city=Davis'),[],[]);
+  assert.match(defaultArchive,/past_year=\d{4}&amp;city=Davis&amp;region=synthetic-north/);
+  assert.match(defaultArchive,/name="region" value="synthetic-north"/);
+  const loadedArchive=eventsPagePublic(new URL('https://site.test/events?region=synthetic-north&past_year=2025'),[],[]);
+  assert.match(loadedArchive,/name="region" value="synthetic-north"/);
+});

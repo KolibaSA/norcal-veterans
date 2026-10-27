@@ -28,16 +28,27 @@ if(location.pathname==='/'||location.pathname==='/yolo-solano'){
  const regionForCity=city=>cityOptions.has(city)?(regionByCity[city]||''):'';
  const safeRead=(kind,key)=>{try{return window[kind].getItem(key)||'';}catch{return '';}};
  const safeWrite=(kind,key,value)=>{try{window[kind].setItem(key,value);}catch{}};
- const updateCity=city=>{
+ let citySequence=0,loadedCity=new URLSearchParams(location.search).get('city')||'';
+ const updateCity=async city=>{
   if(!cityOptions.has(city)||!citySection||!cityGrid)return false;
   safeWrite('localStorage',cityKey,city);
   const region=regionForCity(city);if(region)safeWrite('localStorage',regionKey,region);
   if(citySelect)citySelect.value=city;
   const description=citySection.querySelector('[data-city-description]');if(description)description.textContent=`Public organization profiles in ${city}.`;
-  const sourceTiles=Array.from(document.querySelectorAll('.regional-directory .logo-tile[data-organization-city]')).filter(tile=>tile.dataset.organizationCity===city);
-  cityGrid.replaceChildren(...sourceTiles.map(tile=>tile.cloneNode(true)));
-  if(!sourceTiles.length){const empty=document.createElement('p');empty.className='city-nearby-empty';empty.textContent=`No public organization profiles are listed in ${city} yet. Browse the full regional directory below.`;cityGrid.append(empty);}
   citySection.hidden=false;
+  const sequence=++citySequence;
+  if(loadedCity!==city){
+   const url=new URL(location.href);url.searchParams.set('city',city);url.hash='';
+   cityGrid.setAttribute('aria-busy','true');
+   try{
+    const response=await fetch(url,{credentials:'omit'});if(!response.ok)throw new Error('City unavailable');
+    const page=new DOMParser().parseFromString(await response.text(),'text/html'),replacement=page.querySelector('[data-city-grid]');
+    if(!replacement)throw new Error('City unavailable');
+    if(sequence===citySequence){cityGrid.replaceChildren(...Array.from(replacement.childNodes).map(node=>document.importNode(node,true)));loadedCity=city;}
+   }catch{
+    if(sequence===citySequence){const link=document.createElement('a');link.href=url.href;link.textContent='Open organizations near '+city;cityGrid.replaceChildren(link);loadedCity='';}
+   }finally{if(sequence===citySequence)cityGrid.removeAttribute('aria-busy');}
+  }else cityGrid.removeAttribute('aria-busy');
   return true;
  };
  const requestedCity=new URLSearchParams(location.search).get('city'),savedCity=safeRead('localStorage',cityKey),initialCity=cityOptions.has(requestedCity)?requestedCity:(cityOptions.has(savedCity)?savedCity:'');
@@ -52,6 +63,28 @@ if(location.pathname==='/'||location.pathname==='/yolo-solano'){
  document.querySelectorAll('[data-city-skip]').forEach(button=>button.addEventListener('click',()=>{safeWrite('sessionStorage',skipKey,'1');dialog?.close();}));
  if(dialog&&!initialCity&&!safeRead('sessionStorage',skipKey))try{dialog.showModal();}catch{}
 }
+// Enhance archive pagination while keeping its normal links usable without JS.
+document.addEventListener('click',async event=>{
+ const link=event.target.closest?.('a[data-archive-more]');
+ if(!link||event.defaultPrevented||event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
+ if(link.dataset.loading){event.preventDefault();return;}
+ const archive=link.closest('#past-events'),grid=archive?.querySelector('.event-card-grid');
+ if(!grid)return;
+ event.preventDefault();link.dataset.loading='true';link.setAttribute('aria-busy','true');
+ try{
+  const response=await fetch(link.href,{credentials:'omit'});
+  if(!response.ok)throw new Error('Archive unavailable');
+  const page=new DOMParser().parseFromString(await response.text(),'text/html');
+  const additional=page.querySelector('#past-events .event-card-grid');
+  if(!additional)throw new Error('Archive unavailable');
+  grid.append(...Array.from(additional.children).map(node=>document.importNode(node,true)));
+  const note=archive.querySelector('.results-note');
+  if(note)note.textContent=note.textContent.replace(/^\d+ past listings/,grid.children.length+' past listings');
+  const next=page.querySelector('#past-events a[data-archive-more]');
+  if(next)link.replaceWith(document.importNode(next,true));else link.remove();
+ }catch{link.textContent='Open the next page';delete link.dataset.archiveMore;}
+ finally{link.removeAttribute('aria-busy');delete link.dataset.loading;}
+});
 {
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const reveal=[...document.querySelectorAll('[data-reveal]')];

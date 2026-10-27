@@ -55,6 +55,8 @@ The modularity release passed its automated suite and isolated staging acceptanc
 
 Public response caching is documented in [the cache policy and recovery guide](docs/public-cache.md). Its release status is tracked in [deployment operations](docs/norcal-deployment.md#operations).
 
+October 27, 2026 scalability work is implemented locally and verified on staging. It adds regional directory and event pagination, derived occurrence/time indexes, paginated and searchable HQ organization choices, paginated HQ lists and scoped summary counts. The hosted first-page comparison held at 308 event-retrieval rows read when the fictional fixture grew from 1,000 to 6,000 events. See [performance measurements](docs/public-performance-baseline-2026-10-27.md). This work is not yet a production release.
+
 ## Development and deployment
 
 Requires Node 24 or newer. Install the locked dependencies with pnpm.

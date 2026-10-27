@@ -18,4 +18,6 @@ Run `npm run test:module -- organizations`. Wider API/privacy compatibility is c
 
 Private HTTP handlers receive the shell's verified identity and current grants. `worker/legacy/index.mjs` authenticates every HQ request and checks write origins before dispatch. Shared infrastructure supplies bounded JSON, authorization, D1 transactions, optimistic versions, immutable audit/history and generic record serialization.
 
+`server.mjs` exports `organizationScopeOptions(env, user, grants, options)`. It returns a page of at most 25 organization IDs, titles and regions, optional selected-ID lookups, and optional organization-family metadata through the authenticated records dispatcher. Every query retains the caller's current read scope. Full private profile payloads are not needed for these choices.
+
 See [BROWSER.md](./BROWSER.md) for browser entry points, editor state, markup, actions and focused UI checks.

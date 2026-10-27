@@ -16,7 +16,7 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
   const params = new URLSearchParams(location.search);
   let tab = registry[params.get('tab')] ? params.get('tab') : defaultTab;
   let me, editing = null, baseline = '';
-  let focusReturn = null, loadSequence = 0, conflictDraft = null, conflictLatest = null, recordSaving = false;
+  let focusReturn = null, loadSequence = 0, editorSequence = 0, searchSequence = 0, searchTimer, conflictDraft = null, conflictLatest = null, recordSaving = false;
   const currentFeature = () => registry[tab];
   if (currentFeature().state) currentFeature().state.filter = { query: params.get('q') ?? '', status: params.get('status') ?? '' };
   const draftMemory = new Map();
@@ -79,6 +79,10 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
   }
   async function showEditor(record = null, { checkDraft = true, updateLink = true, source = null } = {}) {
     if (checkDraft && !permitLeave()) return;
+    const serial=++editorSequence, openingTab=tab;
+    $('org').dataset.scopeFamilies = '';
+    await initializeOptions?.({api, $, ids:[record?.organization_id, record?.payload?.affiliated_with_id, me.grants?.find(g => g.organization_id)?.organization_id].filter(Boolean)});
+    if(serial!==editorSequence || tab!==openingTab)return;
     editing = record ? structuredClone(record) : null;
     conflictDraft = null; conflictLatest = null;
     $('conflict').hidden = true;
@@ -88,14 +92,19 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
     $('editorTitle').textContent = (record?.id ? 'View or edit ' : 'New ') + feature.editorLabel;
     $('itemLink').hidden = !record?.id;
     if (record?.id) $('itemLink').href = itemURL(tab, record.id);
+    const assignedOrganization = me.grants?.find(g => g.organization_id)?.organization_id || '';
+    const organizationRegion = JSON.parse($('org').dataset.organizationOptions || '[]').find(option => option.id === assignedOrganization)?.region;
     const defaults = {
-      kind: tab, region_id: me.grants?.find(g => g.region_id)?.region_id || 'yolo-solano',
-      organization_id: me.grants?.find(g => g.organization_id)?.organization_id || '', ...record
+      kind: tab, region_id: me.grants?.find(g => g.region_id)?.region_id || organizationRegion || 'yolo-solano',
+      organization_id: assignedOrganization, ...record
     };
     $('recordStatus').innerHTML = feature.statusesFor(me, defaults).map(status => '<option value="' + esc(status) + '">' + esc(label(status)) + '</option>').join('');
     const sections = new Set(Object.values(registry).flatMap(entry => entry.editorSections ?? []));
     for (const id of sections) $(id).hidden = !feature.editorSections.includes(id);
     $('region').disabled = !!record?.id; $('org').disabled = !!record?.id;
+    if ($('scopeSearch')) $('scopeSearch').disabled = !!record?.id;
+    if ($('scopePrevious')) $('scopePrevious').disabled = !!record?.id || Number($('org').dataset.scopePage || 1) <= 1;
+    if ($('scopeNext')) $('scopeNext').disabled = !!record?.id || $('org').dataset.scopeHasMore !== 'true';
     const values = feature.fields(defaults);
     feature.configureEditor?.({ $, record: defaults, values });
     // Input type changes can clear dates, so assign canonical values last.
@@ -108,6 +117,7 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
   }
   function closeEditor() {
     if (!permitLeave()) return;
+    ++editorSequence;
     $('editor').hidden = true; editing = null;
     notify('editorClosed');
     updateURL(null);
@@ -118,10 +128,23 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
     const { rows, filter: state } = currentFeature().state;
     const visible = filterRecords(rows, state.query, state.status);
     $('list').innerHTML = visible.map(record => `<article class="record"><div><span class="pill">${esc(label(record.status))}</span><h3>${esc(record.title)}</h3><p>${esc(record.body?.slice(0, 450))}</p><p class="scope">${esc(record.region_id)}${record.organization_id ? ' · ' + esc(record.organization_id) : ''} · Updated ${esc(dateLabel(record.updated_at))}</p></div><div><button type="button" class="secondary" data-edit="${esc(record.id)}" aria-label="Open ${esc(record.title)}">Open item</button></div></article>`).join('') || '<p class="empty">No items match these filters.</p>';
-    $('resultCount').textContent = `${visible.length} of ${rows.length} loaded items${rows.length === 500 ? ' · Showing the 500 most recently updated items. Older items remain available through their direct links.' : ''}`;
+    const pagination = currentFeature().state.pagination;
+    $('resultCount').textContent = pagination ? `Page ${pagination.page} · ${visible.length} ${visible.length === 1 ? 'item' : 'items'}` : `${visible.length} of ${rows.length} loaded items`;
+    if ($('previousPage')) $('previousPage').disabled = !pagination || pagination.page <= 1;
+    if ($('nextPage')) $('nextPage').disabled = !pagination?.hasMore;
     $('list').querySelectorAll('[data-edit]').forEach(button => {
       button.onclick = async () => { if (!permitLeave()) return; focusReturn = button; await openRecord(button.dataset.edit, false); };
     });
+  }
+  async function refreshRows(feature, page = 1) {
+    const sequence = ++searchSequence, filter = feature.state.filter;
+    try {
+      const result = await feature.list(api, { ...filter, page });
+      if (sequence !== searchSequence || currentFeature() !== feature) return;
+      feature.state.rows = Array.isArray(result) ? result : result.records;
+      feature.state.pagination = Array.isArray(result) ? null : { page: result.page, hasMore: result.hasMore };
+      renderRows();
+    } catch (cause) { if (sequence === searchSequence && currentFeature() === feature) message(cause.message, true); }
   }
   async function openRecord(id, checkDraft = true) {
     if (checkDraft && !permitLeave()) return;
@@ -142,19 +165,23 @@ export function startBrowserRuntime({ registry, defaultTab, api, itemURL, initia
     notify('sectionChanged');
     try {
       if (feature.statuses) {
-        const result = await feature.list(api);
+        const result = await feature.list(api, { ...feature.state.filter, page: 1 });
         if (sequence !== loadSequence) return;
         feature.state.rows = Array.isArray(result) ? result : result.records;
+        feature.state.pagination = Array.isArray(result) ? null : { page: result.page, hasMore: result.hasMore };
         const state = feature.state.filter;
-        $('content').innerHTML = `<div class="bar"><h2>${esc(feature.heading)}</h2>${feature.canCreate(me) ? '<button type="button" id="new">' + esc(feature.newLabel) + '</button>' : ''}</div><div class="grid"><div><label for="search">Search this section</label><input type="search" id="search" placeholder="Title, description, or status"></div><div><label for="statusFilter">Filter by status</label><select id="statusFilter"><option value="">All statuses</option>${feature.statuses.map(status => `<option value="${esc(status)}">${esc(label(status))}</option>`).join('')}</select></div></div><div class="bar"><p id="resultCount" class="small muted" role="status"></p><button type="button" class="secondary" id="refreshList">Refresh items</button></div><div class="panel" id="list"></div>`;
+        $('content').innerHTML = `<div class="bar"><h2>${esc(feature.heading)}</h2>${feature.canCreate(me) ? '<button type="button" id="new">' + esc(feature.newLabel) + '</button>' : ''}</div><div class="grid"><div><label for="search">Search this section</label><input type="search" id="search" placeholder="Title, description, or status"></div><div><label for="statusFilter">Filter by status</label><select id="statusFilter"><option value="">All statuses</option>${feature.statuses.map(status => `<option value="${esc(status)}">${esc(label(status))}</option>`).join('')}</select></div></div><div class="bar"><p id="resultCount" class="small muted" role="status"></p><button type="button" class="secondary" id="refreshList">Refresh items</button></div><div class="panel" id="list"></div><nav class="bar" aria-label="Section pages"><button type="button" class="secondary" id="previousPage">Previous page</button><button type="button" class="secondary" id="nextPage">Next page</button></nav>`;
         $('search').value = state.query; $('statusFilter').value = state.status;
         const filterChanged = () => {
           feature.state.filter = { query: $('search').value, status: $('statusFilter').value };
-          updateURL(); renderRows();
+          updateURL(); clearTimeout(searchTimer); ++searchSequence;
+          searchTimer = setTimeout(() => void refreshRows(feature, 1), 250);
         };
         $('search').oninput = filterChanged; $('statusFilter').onchange = filterChanged;
         if ($('new')) $('new').onclick = () => { focusReturn = $('new'); void showEditor(); };
         $('refreshList').onclick = () => { if (permitLeave()) void loadSection({ item: editing?.id }); };
+        $('previousPage').onclick = () => { if (permitLeave()) void refreshRows(feature, Math.max(1, feature.state.pagination.page - 1)); };
+        $('nextPage').onclick = () => { if (permitLeave()) void refreshRows(feature, feature.state.pagination.page + 1); };
         renderRows();
       } else await featureControllers.get(tab).render?.({ isCurrent: () => sequence === loadSequence });
       if (sequence !== loadSequence) return;

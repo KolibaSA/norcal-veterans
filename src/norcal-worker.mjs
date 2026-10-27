@@ -1,6 +1,7 @@
 import {norcalPublicData,publicDataForRequest} from './app/public-content.mjs';
 import { publicSitemap, robotsText } from './app/public-seo.mjs';
 import { cachedPublicResponse } from './app/public-cache.mjs';
+import { rebuildPublicOccurrences } from './app/public-occurrence-index.mjs';
 export {norcalPublicData};
 import legacy from '../worker/legacy/index.mjs';
 import { dataset, sources } from './data.mjs';
@@ -45,6 +46,9 @@ const norcalWorker = {
     }
     try {
       if (!['GET','HEAD'].includes(request.method) && !(request.method === 'POST' && ['/submit','/speaker-submissions'].includes(path))) return new Response('Method not allowed.', { status: 405 });
+      if (path === '/events' && request.method === 'GET' && ctx?.waitUntil && env.DB && env.CF_VERSION_METADATA?.id) {
+        ctx.waitUntil(rebuildPublicOccurrences(env.DB,25).catch(() => console.warn(JSON.stringify({event:'public_occurrence_sync_pending'}))));
+      }
       const live = await publicDataForRequest(env.DB, url);
       if (path === '/sitemap.xml') return new Response(head ? null : publicSitemap(live), {
         headers: { ...securityHeaders, 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=300' }
@@ -59,7 +63,7 @@ const norcalWorker = {
       }
       if (path === '/data.json') return Response.json({ ...dataset, last_verified_date: null, verification_note: 'Publication and verification are separate. See each record for its source references and recorded review date; confirm current details with the organization.', records: live.records, events: live.events, sources, memorial_services: memorialServices }, { headers: { ...securityHeaders, 'Cache-Control': 'public, max-age=30' } });
       if (path === '/events.ics') return new Response(head ? null : eventCalendar(url.searchParams.has('event') ? live.events.filter(event => event.id === url.searchParams.get('event')) : upcomingEvents(live.events)), { headers: { ...securityHeaders, 'Content-Type': 'text/calendar; charset=utf-8' } });
-      const page = (path === '/share' ? {status: 200, html: shareProgramPage(url, live.records, {received: url.searchParams.has('received')})} : null) || publicExtension(url, live.events, live.records) || render(url, live.records, live.events);
+      const page = (path === '/share' ? {status: 200, html: shareProgramPage(url, live.records, {received: url.searchParams.has('received')})} : null) || publicExtension(url, live.events, live.records, live.pagination) || render(url, live.records, live.events, live.directory);
       return localPage(head ? '' : page.html, page.status);
     } catch {
       console.error(JSON.stringify({event:'public_request_failed',request_id:crypto.randomUUID(),operation:'public_render'}));

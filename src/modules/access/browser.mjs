@@ -1,5 +1,6 @@
 import { isPlatformAdmin } from '../../shared/permissions.mjs';
 import { esc, label, dateLabel } from '../../shared/browser-ui.mjs';
+import { fetchOrganizationChoices } from '../../shared/browser-records.mjs';
 
 const REGIONS = [
   ['yolo-solano', 'Yolo-Solano'], ['sacramento', 'Sacramento'], ['sierra-foothills', 'Sierra Foothills'],
@@ -14,16 +15,16 @@ export function connectAccess(context) {
     if (!isPlatformAdmin(context.me)) throw new Error('Only the platform owner or a Super Admin manages access.');
     const grants = await api('access');
     if (!isCurrent()) return;
-    const organizations = JSON.parse($('org').dataset.organizationOptions || '[]');
+    let organizations = JSON.parse($('org').dataset.organizationOptions || '[]');
     const regionOptions = REGIONS.map(([value, text]) => `<option value="${esc(value)}">${esc(text)}</option>`).join('');
-    const organizationOptions = organizations.map(org => `<option value="${esc(org.id)}">${esc(org.title)}</option>`).join('');
-    $('content').innerHTML = `<div class="notice">Assignments control access within this headquarters. ${context.me.invitationsEnabled ? 'Save an assignment, then send the person a sign-in invitation using their assigned email.' : 'People must also be allowed through Cloudflare Access.'} Revocation here takes effect on their next request.</div><form id="grant" class="panel"><h2>Assign an administrator or editor</h2><label for="email">Email</label><input id="email" type="email" required><label for="role">Role</label><select id="role"><option value="region_admin">Region administrator</option><option value="organization_admin">Organization administrator</option><option value="editor">Editor</option><option value="super_admin">Super Admin</option></select><label for="scopeType">Scope</label><select id="scopeType"><option value="global" disabled>All regions and organizations</option><option value="region">Region</option><option value="organization">Organization</option></select><label for="scopeValue">Choose the region or organization</label><select id="scopeValue" required></select><p id="scopeHelp" class="small muted">Choose the region this person can manage.</p><button type="submit">Save assignment</button></form><div class="panel">${grants.map(grant => `<div class="record"><div><b>${esc(grant.email)}</b><p>${esc(grant.role === 'super_admin' ? 'Super Admin' : label(grant.role))} · ${esc(grant.role === 'super_admin' ? 'All HQ, regions and organizations' : grant.region_id || grant.organization_id)}</p></div><div>${context.me.invitationsEnabled ? `<button type="button" class="secondary" data-invite="${esc(grant.id)}" aria-label="Invite ${esc(grant.email)}">Send invitation</button> ` : ''}<button type="button" class="secondary" data-revoke="${esc(grant.id)}" aria-label="Revoke ${esc(grant.email)} assignment">Revoke</button></div></div>`).join('')}</div>`;
+    $('content').innerHTML = `<div class="notice">Assignments control access within this headquarters. ${context.me.invitationsEnabled ? 'Save an assignment, then send the person a sign-in invitation using their assigned email.' : 'People must also be allowed through Cloudflare Access.'} Revocation here takes effect on their next request.</div><form id="grant" class="panel"><h2>Assign an administrator or editor</h2><label for="email">Email</label><input id="email" type="email" required><label for="role">Role</label><select id="role"><option value="region_admin">Region administrator</option><option value="organization_admin">Organization administrator</option><option value="editor">Editor</option><option value="super_admin">Super Admin</option></select><label for="scopeType">Scope</label><select id="scopeType"><option value="global" disabled>All regions and organizations</option><option value="region">Region</option><option value="organization">Organization</option></select><div id="accessOrganizationSearchField" hidden><label for="accessOrganizationSearch">Find an organization</label><input id="accessOrganizationSearch" type="search" autocomplete="off" placeholder="Search by name or ID"><p class="small muted">Enter a name or ID to narrow the choices.</p></div><label for="scopeValue">Choose the region or organization</label><select id="scopeValue" required></select><p id="scopeHelp" class="small muted">Choose the region this person can manage.</p><button type="submit">Save assignment</button></form><div class="panel">${grants.map(grant => `<div class="record"><div><b>${esc(grant.email)}</b><p>${esc(grant.role === 'super_admin' ? 'Super Admin' : label(grant.role))} · ${esc(grant.role === 'super_admin' ? 'All HQ, regions and organizations' : grant.region_id || grant.organization_id)}</p></div><div>${context.me.invitationsEnabled ? `<button type="button" class="secondary" data-invite="${esc(grant.id)}" aria-label="Invite ${esc(grant.email)}">Send invitation</button> ` : ''}<button type="button" class="secondary" data-revoke="${esc(grant.id)}" aria-label="Revoke ${esc(grant.email)} assignment">Revoke</button></div></div>`).join('')}</div>`;
     const scopeType = $('scopeType'), scopeValue = $('scopeValue'), role = $('role'), scopeHelp = $('scopeHelp');
     const updateScopeChoices = () => {
       const global = role.value === 'super_admin';
       scopeValue.disabled = global;
       scopeValue.required = !global;
       if (global) {
+        $('accessOrganizationSearchField').hidden = true;
         scopeType.value = 'global'; scopeType.disabled = true;
         scopeValue.innerHTML = '<option value="">Entire HQ</option>'; scopeValue.value = '';
         scopeHelp.textContent = 'Full HQ access: all regions and organizations, publishing, Requests, exports, and managing access—including other Super Admins. The platform owner retains permanent access.';
@@ -33,12 +34,29 @@ export function connectAccess(context) {
       const requiredScope = role.value === 'region_admin' ? 'region' : role.value === 'organization_admin' ? 'organization' : scopeType.value;
       scopeType.value = requiredScope;
       scopeType.disabled = role.value !== 'editor';
-      scopeValue.innerHTML = requiredScope === 'region' ? regionOptions : organizationOptions;
+      $('accessOrganizationSearchField').hidden = requiredScope !== 'organization';
+      scopeValue.innerHTML = requiredScope === 'region' ? regionOptions : organizations.map(org => `<option value="${esc(org.id)}">${esc(org.title)}</option>`).join('');
       scopeValue.value = requiredScope === 'region' ? REGIONS[0]?.[0] ?? '' : organizations[0]?.id ?? '';
       scopeHelp.textContent = requiredScope === 'region' ? 'Choose the region this person can manage.' : 'Choose the organization this person can manage.';
     };
     role.onchange = updateScopeChoices;
     scopeType.onchange = updateScopeChoices;
+    let searchTimer, searchSequence=0;
+    $('accessOrganizationSearch').oninput=()=>{
+      const query=$('accessOrganizationSearch').value, sequence=++searchSequence;
+      if(scopeType.value==='organization')scopeValue.value='';
+      clearTimeout(searchTimer);
+      searchTimer=setTimeout(async()=>{
+        try {
+          const result=await fetchOrganizationChoices(api,{query});
+          if(sequence!==searchSequence || !isCurrent() || scopeType.value!=='organization')return;
+          organizations=result.organizations;
+          scopeValue.innerHTML='<option value="">Choose an organization</option>'+organizations.map(org=>`<option value="${esc(org.id)}">${esc(org.title)}</option>`).join('');
+          scopeValue.value='';
+          scopeHelp.textContent=result.hasMore ? 'Narrow the search to find more organizations.' : 'Choose the organization this person can manage.';
+        } catch { scopeHelp.textContent='Could not load organization choices. Try again.'; }
+      },250);
+    };
     updateScopeChoices();
     $('grant').onsubmit = async event => {
       event.preventDefault();

@@ -46,6 +46,7 @@ function requestOrganizationId(fields) {
 
 function configureRequestScope($, record, values) {
   const select = $('org');
+  select.dataset.scopeFamilies = '1';
   const organizations = parseOptions(select.dataset.organizationOptions);
   const families = parseOptions(select.dataset.organizationFamilies).filter(Boolean);
   const current = select.value;

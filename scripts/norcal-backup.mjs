@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { verifyConfig, TARGET, wranglerQuery } from './norcal-hq-agent.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
-const tables = ['records','grants','audit','attachments','submission_limits','request_runs','request_entries','hq_agent_health','record_revisions','organization_event_invitations','public_cache_state'];
+const tables = ['records','grants','audit','attachments','submission_limits','request_runs','request_entries','hq_agent_health','record_revisions','organization_event_invitations','public_cache_state','public_occurrences','public_occurrence_dirty','public_occurrence_windows'];
 
 export function verifySQLBackup(sql, { upgradeCheck = false } = {}) {
   const db = new DatabaseSync(':memory:');
@@ -19,7 +19,8 @@ export function verifySQLBackup(sql, { upgradeCheck = false } = {}) {
     if (upgradeCheck) {
       for (const file of readdirSync(resolve(root,'migrations/legacy')).filter(name=>name.endsWith('.sql')).sort()) {
         const exists = file.startsWith('0001_') ? existingTables.has('records') :
-          file.startsWith('0002_') ? existingTables.has('request_runs') : file.startsWith('0003_') ? existingTables.has('record_revisions') : migrationNames.has(file);
+          file.startsWith('0002_') ? existingTables.has('request_runs') : file.startsWith('0003_') ? existingTables.has('record_revisions') :
+          file.startsWith('0009_') ? existingTables.has('public_occurrences') : file.startsWith('0010_') ? existingTables.has('public_occurrence_windows') : file.startsWith('0011_') ? db.prepare('PRAGMA table_info(public_occurrences)').all().some(column=>column.name==='listable') : migrationNames.has(file);
         if (!exists) { db.exec(readFileSync(resolve(root,'migrations/legacy',file),'utf8')); upgrades.push(file); }
       }
     }
@@ -36,6 +37,11 @@ export function verifySQLBackup(sql, { upgradeCheck = false } = {}) {
       for (const name of ['record_insert','record_update','record_delete','invitation_insert','invitation_update','invitation_delete']) {
         if (!triggers.has('public_cache_'+name)) throw new Error('Backup is missing a cache invalidation trigger.');
       }
+    }
+    if (names.has('public_occurrences')) {
+      if (!names.has('public_occurrence_dirty')) throw new Error('Backup is missing occurrence rebuild state.');
+      const triggers = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().map(row=>row.name));
+      for (const action of ['insert','update','delete']) if (!triggers.has('public_occurrence_record_'+action)) throw new Error('Backup is missing an occurrence change trigger.');
     }
     const counts = Object.fromEntries(tables.filter(name=>names.has(name)).map(name=>[name,db.prepare('SELECT COUNT(*) AS count FROM '+name).get().count]));
     const duplicates = db.prepare("SELECT id FROM records WHERE version<1 OR NOT json_valid(payload)").all();

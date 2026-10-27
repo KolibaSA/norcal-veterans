@@ -28,8 +28,8 @@ test('organization relationships save and reopen using the parent organization I
 
 test('organization scope choices use escaped public labels and their existing stable IDs', async () => {
   const { $ } = controls(), paths = [];
-  await loadScopeOptions(async path => { paths.push(path); return [{ id: 'org-"x', title: '<Example>' }]; }, $('org'));
-  assert.deepEqual(paths, ['records?kind=organization']);
+  await loadScopeOptions(async path => { paths.push(path); return { organizations:[{ id: 'org-"x', title: '<Example>' }], selected:[], families:[], hasMore:false }; }, $('org'));
+  assert.deepEqual(paths, ['records?kind=organization&scope_options=1&page=1&families=1']);
   assert.match($('org').innerHTML, /org-&quot;x/); assert.match($('org').innerHTML, /&lt;Example&gt;/);
   assert.doesNotMatch($('org').innerHTML, /<Example>/);
 });

@@ -16,8 +16,19 @@ Adopted September 13, 2026. Practical guidance, not doctrine. Read the current s
 2. **Test the real form submission, not only its visible selections or API handler.** Label local/staging/production evidence accurately. [L-20260913-02](#l-20260913-02)
 3. **Use one primary release path.** The connected GitHub build already deploys; do not add a manual deployment by habit. [L-20260913-03](#l-20260913-03)
 4. **For card redesigns, verify the visible panel order, divider and logo scale against the reference image.** [L-20261002-01](#l-20261002-01)
+5. **Verify query shape and read growth on hosted D1.** Local SQLite acceptance does not establish Cloudflare SQL limits. [L-20261027-01](#l-20261027-01)
 
 ## Lessons
+
+<a id="l-20261027-01"></a>
+### L-20261027-01: Verify database scale changes in the hosted runtime
+
+- Scope/tags: Public event retrieval; D1; query limits; staging.
+- Status: Verified October 27, 2026.
+- Observation: An active-event lookup combining 49 limited SELECT branches passed local SQLite checks but hosted D1 rejected it with a compound SELECT limit. A D1 batch of limited ID lookups worked in the hosted Worker. Limiting returned records alone had also hidden a regional scan before the limit.
+- Evidence: The staged time-index implementation and the 1,000/6,000-event comparison in [performance measurements](public-performance-baseline-2026-10-27.md#bounded-upcoming-lookup-and-hq-picker-acceptance).
+- Next time: Check query plans and actual hosted rows read against growing fictional data before describing a pagination change as a scale fix. Load full payloads after choosing the page IDs.
+- Limits: Synthetic checks do not establish production concurrency or maximum database capacity. Preserve data and use the separate staging database for test writes.
 
 <a id="l-20261002-01"></a>
 ### L-20261002-01 — Verify card geometry against the reference image

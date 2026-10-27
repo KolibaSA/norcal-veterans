@@ -69,7 +69,7 @@ test('default events avoid historical payloads; explicit archives, details and e
   add('host','organization',{city:'Davis'});
   event('future', undefined, {}, { organizationId: 'host' });
   for (let index = 0; index < 2000; index++) {
-    event('past-'+index, '2020-06-01T12:00:00Z', {}, { region: 'synthetic-region-'+index%10 });
+    event('past-'+index, '2020-06-01T12:00:00Z');
   }
   const data = await request(DB, '/events');
   assert.deepEqual(data.events.map(event => event.id), ['future']);
@@ -110,4 +110,66 @@ test('contribution forms read published organizations without their schedules or
   assert.deepEqual(data.records.map(record => record.id), ['host']);
   assert.deepEqual(data.events, []);
   assert.equal(queries.length, 1);
+});
+
+test('regional pages scope organizations and event listings before returning records', async t => {
+  const { DB, add, event, queries } = setup(t);
+  add('local-org','organization',{city:'Davis'});
+  add('remote-org','organization',{city:'Davis'},{region:'synthetic-north'});
+  event('local-event',undefined,{}, {organizationId:'local-org'});
+  event('remote-event',undefined,{}, {organizationId:'remote-org',region:'synthetic-north'});
+  const local=await request(DB,'/yolo-solano');
+  assert.deepEqual(local.records.map(r=>r.id),['local-org']);
+  assert.deepEqual(local.events.map(e=>e.id),['local-event']);
+  assert.ok(queries.every(q=>!q.ids.includes('remote-org')&&!q.ids.includes('remote-event')));
+  queries.length=0;
+  const other=await request(DB,'/events?region=synthetic-north');
+  assert.deepEqual(other.events.map(e=>e.id),['remote-event']);
+  assert.deepEqual(other.records.map(r=>r.id),['remote-org']);
+  assert.ok(queries.every(q=>!q.ids.includes('local-event')));
+  const calendar=await request(DB,'/events.ics');
+  assert.deepEqual(calendar.events.map(e=>e.id).sort(),['local-event','remote-event']);
+  const exportData=await norcalPublicData(DB);
+  assert.deepEqual(exportData.events.map(e=>e.id).sort(),['local-event','remote-event']);
+});
+
+test('indexed event and archive pages retrieve at most 25 records and preserve history', async t => {
+  const { DB, event, queries } = setup(t);
+  const { rebuildPublicOccurrences } = await import('./public-occurrence-index.mjs');
+  for (let i=0;i<55;i++) event('page-event-'+String(i).padStart(2,'0'),'2020-02-01T19:00:00Z', { additional_occurrences:[{start_at:'2035-02-01T19:00:00Z'}] });
+  while ((await rebuildPublicOccurrences(DB,100)).examined) {}
+  queries.length=0;
+  const page=await publicDataForRequest(DB,new URL('/events','https://site.test'),now);
+  assert.equal(page.events.length,25);assert.equal(page.pagination.upcoming.hasMore,true);
+  assert.ok(queries.every(query=>query.rows<=(query.sql.includes('AS occurrence_start')?52:26)));
+  const archive=await publicDataForRequest(DB,new URL('/events?past_year=2020&past_page=2','https://site.test'),now);
+  assert.equal(archive.pagination.archive.page,2);assert.equal(archive.pagination.archive.ids.length,25);
+  assert.ok(archive.pagination.archive.years.includes('2020'));
+  const third=await publicDataForRequest(DB,new URL('/events?past_year=2020&past_page=3','https://site.test'),now);
+  assert.equal(third.pagination.archive.ids.length,5);assert.equal(third.pagination.archive.hasMore,false);
+  assert.equal(new Set([...archive.pagination.archive.ids,...third.pagination.archive.ids]).size,30);
+  const rendered=await (await worker.fetch(new Request('https://site.test/events?past_year=2020'),{DB})).text();
+  assert.match(rendered,/data-archive-more/);assert.match(rendered,/past_page=2/);assert.match(rendered,/Next page/);
+  assert.equal((await norcalPublicData(DB)).events.length,55);
+});
+
+test('regional homepage pages the directory while retaining featured and nearby organizations', async t => {
+ const { DB, add, event } = setup(t);
+ for(let i=0;i<60;i++) add('org-'+String(i).padStart(2,'0'),'organization',{city:i>=45?'Davis':'Dixon',location_county:'Yolo',organization_type:'VFW'});
+ add('veterans-beer-club-yolo-solano','organization',{city:'Woodland',location_county:'Yolo',organization_type:'Veterans Beer Club'});
+ add('mcl-yolo','organization',{city:'Woodland',location_county:'Yolo',organization_type:'Marine Corps League'});
+ add('remote-feature','organization',{city:'Davis',location_county:'Yolo',organization_type:'VFW'},{region:'other-region'});
+ for(let i=0;i<10;i++) event('future-event-'+i,'2035-01-01T19:00:00Z');
+ const {rebuildPublicOccurrences}=await import('./public-occurrence-index.mjs');while((await rebuildPublicOccurrences(DB,100)).examined){}
+ const data=await publicDataForRequest(DB,new URL('/yolo-solano?city=Davis','https://site.test'),now);
+ assert.equal(data.directory.ids.length,25);assert.equal(data.directory.hasMore,true);
+ assert.ok(data.directory.nearbyIds.includes('org-59'));
+ assert.ok(data.records.some(r=>r.id==='veterans-beer-club-yolo-solano'));
+ assert.ok(data.records.some(r=>r.id==='org-59'));assert.ok(!data.records.some(r=>r.id==='remote-feature'));
+ assert.equal(data.events.length,3);
+ const page=await worker.fetch(new Request('https://site.test/yolo-solano?city=Davis'),{DB});
+ const html=await page.text();assert.match(html,/aria-label="Organization pages"/);assert.match(html,/org_page=2/);
+ assert.match(html,/Veterans Beer Club/);assert.match(html,/org-59/);
+ const second=await publicDataForRequest(DB,new URL('/yolo-solano?org_page=2','https://site.test'),now);
+ assert.ok(data.directory.ids.every(id=>!second.directory.ids.includes(id)));
 });

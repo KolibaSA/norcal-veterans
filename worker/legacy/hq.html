@@ -53,7 +53,7 @@
             <!-- HQ_PARTIAL: src/modules/requests/editor.html -->
             <div class="grid">
               <div id="regionField"><label for="region">Region</label><select id="region"><option value="all">All regions</option><option value="yolo-solano">Yolo-Solano</option><option value="sacramento">Sacramento</option><option value="sierra-foothills">Sierra Foothills</option><option value="north-bay">North Bay</option><option value="east-bay">East Bay</option><option value="south-bay-peninsula">South Bay / Peninsula</option><option value="north-state">North State</option><option value="north-coast">North Coast</option><option value="northern-san-joaquin">Northern San Joaquin</option></select></div>
-              <div id="organizationScopeField"><label for="org">Organization scope</label><select id="org"><option value="">Region-wide</option></select></div>
+              <div id="organizationScopeField"><label for="scopeSearch">Find an organization</label><input id="scopeSearch" type="search" autocomplete="off" placeholder="Search by name or ID"><label for="org">Organization scope</label><select id="org"><option value="">Region-wide</option></select><div class="actions"><button id="scopePrevious" type="button" class="secondary">Previous organizations</button><button id="scopeNext" type="button" class="secondary">More organizations</button></div><p id="scopeResult" class="small muted" role="status"></p></div>
               <div><label for="recordStatus">Status</label><select id="recordStatus"></select></div>
             </div>
 

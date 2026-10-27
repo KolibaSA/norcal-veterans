@@ -1,5 +1,7 @@
 import {publicOrganizationRecord,publicMeetingPlanEvents} from '../modules/organizations/public.mjs';
-import {publicEventRecord,sanitizePublicEvent} from '../modules/events/public.mjs';
+import {publicEventRecord,sanitizePublicEvent,eventCities} from '../modules/events/public.mjs';
+import {occurrenceIndexReady,queryPublicEventPage,publicArchiveYears} from './public-occurrence-query.mjs';
+import {queryPublicDirectory,queryNearbyOrganizations} from './public-directory-query.mjs';
 const serializers = { organization: publicOrganizationRecord, event: publicEventRecord };
 export function publicPayload(r) {
  try {
@@ -113,11 +115,60 @@ export async function publicDataForRequest(db, url, now = Date.now()) {
   const directory = path === '/' || path === '/yolo-solano' || path.startsWith('/locations/');
   if (listing || directory || path === '/events.ics') {
     // Archive requests load historical payloads only after the visitor asks.
-    // Indexed occurrence/year queries replace this expanded read in stage two.
+    // If the occurrence index is not ready, retain the conservative old path.
     const archive = listing && url.searchParams.has('past_year');
     const filter = recentEventFilter(now);
-    const events = await publishedRows(db, 'event', archive ? '1' : filter.sql, archive ? [] : filter.values);
-    const organizations = directory ? await publishedRows(db, 'organization') : path === '/events.ics' ? await organizationsById(db, ['vfw-ca-8151']) : [];
+    // The regional home and location pages represent Yolo-Solano. Events may
+    // explicitly select a region, while the general calendar remains complete.
+    const requestedRegion = listing ? url.searchParams.get('region') : null;
+    const region = path === '/events.ics' ? null : (requestedRegion && /^[-_a-zA-Z0-9]{1,80}$/.test(requestedRegion) ? requestedRegion : 'yolo-solano');
+    if (path === '/' || path === '/yolo-solano') {
+      const directoryPage = await queryPublicDirectory(db,url,region);
+      const nearby = await queryNearbyOrganizations(db,region,url.searchParams.get('city'));
+      const featuredIds = ['veterans-beer-club-yolo-solano','rememberavet','little-reata-veterans','mcl-yolo'];
+      const featured = await publishedRows(db,'organization',`region_id=? AND id IN (${featuredIds.map(()=>'?').join(',')})`,[region,...featuredIds]);
+      const base = [...new Map([...directoryPage.rows,...nearby,...featured].map(row=>[row.id,row])).values()];
+      const parents = base.map(row=>row.id);
+      const affiliates = parents.length ? await publishedRows(db,'organization',`region_id=? AND json_extract(${safePayload},'$.affiliated_with_id') IN (${parents.map(()=>'?').join(',')})`,[region,...parents]) : [];
+      const organizations = [...new Map([...base,...affiliates].map(row=>[row.id,row])).values()];
+      let events;
+      try {
+        events = await occurrenceIndexReady(db,region)
+          ? (await queryPublicEventPage(db,{region,now,pageSize:3})).rows
+          : await publishedRows(db,'event',filter.sql+' AND region_id=?',[...filter.values,region]);
+      } catch { events = await publishedRows(db,'event',filter.sql+' AND region_id=?',[...filter.values,region]); }
+      const data = await withEventOrganizations(db,events,organizations);
+      data.directory = {ids:directoryPage.rows.map(row=>row.id),nearbyIds:nearby.map(row=>row.id),page:directoryPage.page,hasMore:directoryPage.hasMore,types:directoryPage.types};
+      return data;
+    }
+    if (listing) {
+      let ready = false;
+      try { ready = await occurrenceIndexReady(db, region); } catch { /* The previous schema uses the existing fallback. */ }
+      if (ready) {
+        const requestedCity = url.searchParams.get('city') || '', city = eventCities.has(requestedCity) ? requestedCity : '';
+        const validPage = value => /^\d{1,5}$/.test(value || '') && Number(value) > 0 ? Number(value) : 1;
+        const upcoming = await queryPublicEventPage(db, { region,city,now,page:validPage(url.searchParams.get('page')) });
+        let archivePage = null, years = [];
+        if (archive) {
+          years = await publicArchiveYears(db, { region,city,now });
+          const currentYear = new Intl.DateTimeFormat('en-CA',{year:'numeric',timeZone:'America/Los_Angeles'}).format(new Date(now));
+          if (!years.includes(currentYear)) years.push(currentYear);
+          years.sort().reverse();
+          const requestedYear = url.searchParams.get('past_year');
+          const year = years.includes(requestedYear) ? requestedYear : currentYear;
+          archivePage = { ...(await queryPublicEventPage(db, { region,city,now,year,page:validPage(url.searchParams.get('past_page')) })), year };
+        }
+        const selectedRows = [...upcoming.rows,...(archivePage?.rows || [])];
+        const unique = [...new Map(selectedRows.map(row=>[row.id,row])).values()];
+        const data = await withEventOrganizations(db, unique);
+        data.pagination = { upcoming: { page:upcoming.page,hasMore:upcoming.hasMore,ids:upcoming.rows.map(row=>row.id) },
+          archive: archivePage ? { page:archivePage.page,hasMore:archivePage.hasMore,ids:archivePage.rows.map(row=>row.id),year:archivePage.year,years } : null };
+        return data;
+      }
+    }
+    const eventWhere = [archive ? '1' : filter.sql, ...(region ? ['region_id=?'] : [])].join(' AND ');
+    const events = await publishedRows(db, 'event', eventWhere, [...(archive ? [] : filter.values), ...(region ? [region] : [])]);
+    const organizations = directory ? await publishedRows(db, 'organization', 'region_id=?', [region]) : path === '/events.ics' ? await organizationsById(db, ['vfw-ca-8151']) : [];
     return withEventOrganizations(db, events, organizations);
   }
   // Static pages and unknown routes do not depend on live directory storage.

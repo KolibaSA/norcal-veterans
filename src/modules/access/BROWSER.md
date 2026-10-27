@@ -8,6 +8,8 @@ Owns administrator assignment form state. Role-required scope choices are presen
 
 Dependencies: Injected HTTP/message/section refresh interface and shared escaped labels. Other features use common authorization interfaces and need not inspect this administration screen.
 
+Organization scope includes a server-backed name/ID search with 25 matching choices, so access assignments can select organizations beyond the former startup cutoff. Typing a new search clears the selection and requires an explicit choice before saving. Search responses from an abandoned section cannot replace the active form.
+
 When `me.invitationsEnabled` is true, an assignment has a Send invitation action. It calls the grant-specific invitation endpoint and shows the returned status. It does not modify scope or grant authority; the server still requires current platform-admin permission.
 
 Focused checks: `node scripts/run-tests.mjs --module access`. Browser coverage: non-owner denial before fetch, selected-scope payload, escaped assignment labels and stale section response. Wider release checks remain required before publication.

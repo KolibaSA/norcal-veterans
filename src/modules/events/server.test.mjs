@@ -113,6 +113,18 @@ test('a newly created host event can invite, while the host cannot answer for th
   assert.equal((await norcalPublicData(DB)).events.some(event => event.id === id), false);
 });
 
+test('new events cannot attach an organization from another region', async t => {
+  const DB = createDatabase(t); seed(DB);
+  org(DB, 'other-host', 'Another region host');
+  DB.raw.prepare("UPDATE records SET region_id='sacramento' WHERE id='other-host'").run();
+  const regionAdmin = { email: 'region@example.test', owner: false };
+  const grants = [{ email: regionAdmin.email, region_id: 'yolo-solano', organization_id: null, role: 'region_admin' }];
+  const req = new Request(origin + '/api/hq/records', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: 'event', title: 'Cross-region', region_id: 'yolo-solano', organization_id: 'other-host', status: 'draft', payload: { start_at: '2099-12-13T23:00:00Z', venue: 'Hall' } }) });
+  await assert.rejects(handleRecordRoute(req, { DB }, regionAdmin, grants), /organization in the event’s region/);
+  assert.equal(DB.raw.prepare("SELECT count(*) AS n FROM records WHERE title='Cross-region'").get().n, 0);
+});
+
 test('additive migration preserves existing accepted organizations as canonical invitations', () => {
   const raw = new DatabaseSync(':memory:');
   try {

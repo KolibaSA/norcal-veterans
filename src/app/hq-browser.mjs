@@ -12,7 +12,7 @@ export async function startHeadquarters() {
   }
   return startBrowserRuntime({
     registry: createRegistry(), defaultTab: 'request', api: hqAPI, itemURL,
-    initializeOptions: ({ api, $ }) => loadScopeOptions(api, $('org')),
+    initializeOptions: ({ api, $, ids }) => loadScopeOptions(api, $('org'), { search:$('scopeSearch'),previous:$('scopePrevious'),next:$('scopeNext'),status:$('scopeResult'),ids }),
     extensions: [connectAttachments]
   });
 }
