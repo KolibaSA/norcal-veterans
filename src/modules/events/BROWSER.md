@@ -14,4 +14,6 @@ Dependencies: Shared record controls. The app initializes county choices through
 
 Focused checks: `node scripts/run-tests.mjs --module events`. Browser coverage: winter/summer wall time, UTC day boundaries, payload preservation, additional-date sorting, date-only conversion and required-control cleanup. Wider release checks remain required before publication.
 
+Public archive checks: `/events` starts collapsed with no archive cards. Expand it to load the current Pacific year and year selector without leaving the page. Change year and submit to verify the selected year, city filter and open disclosure survive navigation. Closing and reopening a successfully loaded archive must not refetch it. The fallback link must remain usable after a load failure or without JavaScript.
+
 For routine changes, start here and in this module. Read the shared browser contract only when the change affects a shared editor/navigation behavior. Other modules are entered through their supported runtime entry point, never a private controller.

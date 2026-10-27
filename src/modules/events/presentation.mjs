@@ -123,16 +123,22 @@ const eventCityGroups=[
 const eventCities=new Set(eventCityGroups.flatMap(([,cities])=>cities));
 const eventCityOptions=selected=>'<option value="">All Yolo &amp; Solano cities</option>'+eventCityGroups.map(([county,cities])=>`<optgroup label="${county}">${cities.map(city=>`<option value="${city}" ${selected===city?'selected':''}>${city}</option>`).join('')}</optgroup>`).join('');
 function pastEventsSection(url,events,organizations,city,now){
+ const currentYear=pacificDayKey(now).slice(0,4);
+ if(!url.searchParams.has('past_year')){
+  const query=new URLSearchParams({past_year:currentYear});if(city)query.set('city',city);
+  const href='/events?'+query.toString()+'#past-events';
+  return `<details class="events-past panel" id="past-events" data-archive-url="${pe(href)}"><summary>View Past Events</summary><div data-archive-content><p data-archive-status role="status"></p><a href="${pe(href)}">View past events for ${currentYear}</a></div></details>`;
+ }
  const past=events.map(sanitizePublicEvent).filter(event=>event&&event.status==='published'&&event.kind!=='Organization meeting'&&(!city||event.city===city)).map(event=>({
   ...event,occurrences:eventOccurrences(event).filter(occurrence=>!occurrenceIsUpcoming(occurrence,now))
  })).filter(event=>event.occurrences.length);
- const currentYear=pacificDayKey(now).slice(0,4),years=[...new Set([currentYear,...past.flatMap(event=>event.occurrences.map(occurrence=>pacificDayKey(occurrence.start_at).slice(0,4)))])].sort().reverse();
+ const years=[...new Set([currentYear,...past.flatMap(event=>event.occurrences.map(occurrence=>pacificDayKey(occurrence.start_at).slice(0,4)))])].sort().reverse();
  const requestedYear=url.searchParams.get('past_year'),year=years.includes(requestedYear)?requestedYear:currentYear;
  const selected=past.map(event=>{
   const occurrences=event.occurrences.filter(occurrence=>pacificDayKey(occurrence.start_at).startsWith(year+'-'));
   return occurrences.length?{...event,start_at:occurrences[0].start_at,end_at:occurrences[0].end_at,occurrences}:null;
  }).filter(Boolean).sort((a,b)=>Date.parse(b.occurrences.at(-1).start_at)-Date.parse(a.occurrences.at(-1).start_at));
- return `<details class="events-past panel" id="past-events"${years.includes(requestedYear)?' open':''}><summary>View Past Events</summary><form class="inline-form" method="get" action="/events#past-events">${city?`<input type="hidden" name="city" value="${pe(city)}">`:''}<label for="past-event-year">Year</label><select id="past-event-year" name="past_year">${years.map(value=>`<option value="${value}"${value===year?' selected':''}>${value}</option>`).join('')}</select><button class="button">Show past events</button></form><p class="results-note">${selected.length} past listings in ${year}${city?' · '+pe(city):''}. Most recent first.</p>${selected.length?`<div class="event-card-grid">${selected.map(event=>publicEventCard(event,organizations)).join('')}</div>`:`<p>No past events listed for ${year}${city?' in '+pe(city):''}.</p>`}</details>`;
+ return `<details class="events-past panel" id="past-events" open><summary>View Past Events</summary><div data-archive-content><form class="inline-form" method="get" action="/events#past-events">${city?`<input type="hidden" name="city" value="${pe(city)}">`:''}<label for="past-event-year">Year</label><select id="past-event-year" name="past_year">${years.map(value=>`<option value="${value}"${value===year?' selected':''}>${value}</option>`).join('')}</select><button class="button">Show past events</button></form><p class="results-note">${selected.length} past listings in ${year}${city?' · '+pe(city):''}. Most recent first.</p>${selected.length?`<div class="event-card-grid">${selected.map(event=>publicEventCard(event,organizations)).join('')}</div>`:`<p>No past events listed for ${year}${city?' in '+pe(city):''}.</p>`}</div></details>`;
 }
 export function eventsPagePublic(url,events,organizations=[]){
  const requestedCity=url.searchParams.get('city')||'',city=eventCities.has(requestedCity)?requestedCity:'',upcoming=upcomingEvents(events).filter(v=>v.kind!=='Organization meeting'&&(!city||v.city===city));

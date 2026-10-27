@@ -61,3 +61,28 @@ if(location.pathname==='/'||location.pathname==='/yolo-solano'){
   reveal.forEach(item=>observer.observe(item));
  }
 }
+// Load the event archive only after its disclosure is opened. The ordinary
+// link and GET form remain usable without JavaScript or if the request fails.
+{
+ const archive=document.querySelector('[data-archive-url]');
+ let loading=false,loaded=false;
+ archive?.addEventListener('toggle',async()=>{
+  if(!archive.open||loading||loaded)return;
+  const content=archive.querySelector('[data-archive-content]');
+  const status=archive.querySelector('[data-archive-status]');
+  loading=true;content.setAttribute('aria-busy','true');status.textContent='Loading past events…';
+  try{
+   const response=await fetch(archive.dataset.archiveUrl,{credentials:'omit'});
+   if(!response.ok)throw new Error('Archive unavailable');
+   const page=new DOMParser().parseFromString(await response.text(),'text/html');
+   const replacement=page.querySelector('#past-events [data-archive-content]');
+   if(!replacement)throw new Error('Archive unavailable');
+   content.replaceChildren(...Array.from(replacement.childNodes).map(node=>document.importNode(node,true)));
+   loaded=true;
+  }catch{
+   status.textContent='Past events could not load. Use the link below to try again.';
+  }finally{
+   loading=false;content.removeAttribute('aria-busy');
+  }
+ });
+}

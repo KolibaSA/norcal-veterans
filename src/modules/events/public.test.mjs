@@ -125,8 +125,11 @@ test('past events default closed, select Pacific year, preserve city and exclude
     {...base,id:'future',title:'Future gathering',start_at:'2026-11-01T18:00:00-08:00'}
   ];
   const html=eventsPagePublic(new URL('https://test/events?city=Davis'),events);
-  const archive=html.match(/<details class="events-past[\s\S]*?<\/details>/)[0];
-  assert.match(archive, /id="past-events"><summary>View Past Events/);
+  const collapsed=html.match(/<details class="events-past[\s\S]*?<\/details>/)[0];
+  assert.match(collapsed, /data-archive-url="\/events\?past_year=2026&amp;city=Davis#past-events"/);
+  assert.doesNotMatch(collapsed, / open|Recent gathering|Older gathering|<select/);
+  assert.match(collapsed, /href="\/events\?past_year=2026&amp;city=Davis#past-events"/);
+  const archive=eventsPagePublic(new URL('https://test/events?city=Davis&past_year=2026'),events).match(/<details class="events-past[\s\S]*?<\/details>/)[0];
   assert.match(archive, /value="2026" selected/);
   assert.match(archive, /value="2025"/);
   assert.match(archive, /name="city" value="Davis"/);
@@ -143,7 +146,7 @@ test('past events default closed, select Pacific year, preserve city and exclude
 test('past archive separates recurring dates and excludes ongoing and current date-only events',t=>{
   t.mock.method(Date,'now',()=>Date.parse('2026-10-25T19:00:00Z'));
   const base={venue:'Public hall',status:'published'};
-  const html=eventsPagePublic(new URL('https://test/events'),[
+  const html=eventsPagePublic(new URL('https://test/events?past_year=2026'),[
     {...base,id:'repeat',title:'Recurring gathering',start_at:'2025-05-01T18:00:00-07:00',additional_occurrences:[{start_at:'2026-05-01T18:00:00-07:00'},{start_at:'2026-11-01T18:00:00-08:00'}]},
     {...base,id:'ongoing',title:'Ongoing gathering',start_at:'2026-10-24T18:00:00-07:00',end_at:'2026-10-26T18:00:00-07:00'},
     {...base,id:'today',title:'Date only today',start_at:'2026-10-25T12:00:00-07:00',date_only:true}

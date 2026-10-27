@@ -1,4 +1,4 @@
-import {norcalPublicData} from './app/public-content.mjs';
+import {norcalPublicData,publicDataForRequest} from './app/public-content.mjs';
 import { publicSitemap, robotsText } from './app/public-seo.mjs';
 export {norcalPublicData};
 import legacy from '../worker/legacy/index.mjs';
@@ -44,7 +44,7 @@ const norcalWorker = {
     }
     try {
       if (!['GET','HEAD'].includes(request.method) && !(request.method === 'POST' && ['/submit','/speaker-submissions'].includes(path))) return new Response('Method not allowed.', { status: 405 });
-      const live = await norcalPublicData(env.DB);
+      const live = await publicDataForRequest(env.DB, url);
       if (path === '/sitemap.xml') return new Response(head ? null : publicSitemap(live), {
         headers: { ...securityHeaders, 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=300' }
       });
