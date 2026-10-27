@@ -1,5 +1,6 @@
 import {norcalPublicData,publicDataForRequest} from './app/public-content.mjs';
 import { publicSitemap, robotsText } from './app/public-seo.mjs';
+import { cachedPublicResponse } from './app/public-cache.mjs';
 export {norcalPublicData};
 import legacy from '../worker/legacy/index.mjs';
 import { dataset, sources } from './data.mjs';
@@ -69,7 +70,7 @@ const norcalWorker = {
 
 export default {
   async fetch(request, env, ctx) {
-    const response = await norcalWorker.fetch(request, env, ctx);
+    const response = await cachedPublicResponse(request, env, ctx, () => norcalWorker.fetch(request, env, ctx));
     if (env.STAGING !== 'true') return response;
     const headers = new Headers(response.headers);
     headers.set('X-Robots-Tag', 'noindex, noarchive');

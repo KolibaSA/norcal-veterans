@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { verifyConfig, TARGET, wranglerQuery } from './norcal-hq-agent.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
-const tables = ['records','grants','audit','attachments','submission_limits','request_runs','request_entries','hq_agent_health','record_revisions','organization_event_invitations'];
+const tables = ['records','grants','audit','attachments','submission_limits','request_runs','request_entries','hq_agent_health','record_revisions','organization_event_invitations','public_cache_state'];
 
 export function verifySQLBackup(sql, { upgradeCheck = false } = {}) {
   const db = new DatabaseSync(':memory:');
@@ -29,6 +29,14 @@ export function verifySQLBackup(sql, { upgradeCheck = false } = {}) {
     const names = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(row=>row.name));
     for (const name of tables.slice(0,5)) if (!names.has(name)) throw new Error('Backup is missing an active HQ table: '+name);
     if (upgradeCheck) for (const name of tables) if (!names.has(name)) throw new Error('Upgrade is missing table: '+name);
+    if (names.has('public_cache_state')) {
+      const state = db.prepare('SELECT revision FROM public_cache_state WHERE id=1').get();
+      if (!state || !Number.isSafeInteger(state.revision) || state.revision < 0) throw new Error('Backup cache metadata is invalid.');
+      const triggers = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().map(row=>row.name));
+      for (const name of ['record_insert','record_update','record_delete','invitation_insert','invitation_update','invitation_delete']) {
+        if (!triggers.has('public_cache_'+name)) throw new Error('Backup is missing a cache invalidation trigger.');
+      }
+    }
     const counts = Object.fromEntries(tables.filter(name=>names.has(name)).map(name=>[name,db.prepare('SELECT COUNT(*) AS count FROM '+name).get().count]));
     const duplicates = db.prepare("SELECT id FROM records WHERE version<1 OR NOT json_valid(payload)").all();
     if (duplicates.length) throw new Error('Backup contains malformed record versions or payloads.');
