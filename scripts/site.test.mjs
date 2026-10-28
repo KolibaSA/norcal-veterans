@@ -171,6 +171,25 @@ test('homepage renders the responsive Why NorCalVeterans cards and contact pop-u
  const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
  for(const phrase of ['.regional-purpose-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))','.regional-purpose-grid{grid-template-columns:1fr}','why-norcal-background.png','why-veterans-find.png','why-organizations-share.png','why-organizations-coordinate.png','.regional-contact-popover::backdrop'])assert.ok(styles.includes(phrase),phrase);
 });
+test('homepage uses remaining occurrences and Pacific date boundaries for upcoming cards',t=>{
+ t.mock.method(Date,'now',()=>Date.parse('2026-11-02T07:30:00Z'));
+ const base={status:'published',venue:'Fictional hall',city:'Davis'};
+ const events=[
+  {...base,id:'recurring',title:'Recurring review event',start_at:'2020-01-01T20:00:00Z',additional_occurrences:[{start_at:'2026-11-03T20:00:00Z'}]},
+  {...base,id:'date-only',title:'Pacific date-only review',start_at:'2026-11-01T07:00:00Z',date_only:true},
+  {...base,id:'ended',title:'Already ended review',start_at:'2026-11-02T05:00:00Z',end_at:'2026-11-02T07:00:00Z'},
+  {...base,id:'later',title:'Later review event',start_at:'2026-11-04T20:00:00Z'},
+  {...base,id:'fourth',title:'Fourth review event',start_at:'2026-11-05T20:00:00Z'}
+ ];
+ const {html}=render(new URL('https://test/yolo-solano'),[],events);
+ assert.match(html,/<span>Nov 3, 2026<\/span><h3>Recurring review event<\/h3>/);
+ assert.match(html,/<span>Nov 1, 2026<\/span><h3>Pacific date-only review<\/h3>/);
+ assert.ok(html.indexOf('Pacific date-only review')<html.indexOf('Recurring review event'));
+ assert.match(html,/Later review event/);
+ assert.doesNotMatch(html,/Already ended review|Fourth review event|Jan 1, 2020/);
+ assert.equal((html.match(/class="regional-event-card"/g)||[]).length,3);
+});
+
 test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
  for(const path of ['/','/yolo-solano']){
   const page=render(new URL('https://test'+path));

@@ -17,8 +17,19 @@ Adopted September 13, 2026. Practical guidance, not doctrine. Read the current s
 3. **Use one primary release path.** The connected GitHub build already deploys; do not add a manual deployment by habit. [L-20260913-03](#l-20260913-03)
 4. **For card redesigns, verify the visible panel order, divider and logo scale against the reference image.** [L-20261002-01](#l-20261002-01)
 5. **Verify query shape and read growth on hosted D1.** Local SQLite acceptance does not establish Cloudflare SQL limits. [L-20261027-01](#l-20261027-01)
+6. **Check the rendered occurrence date, not only the selected event ID.** Homepage and Events cards must use the same remaining-date rules. [L-20261027-02](#l-20261027-02)
 
 ## Lessons
+
+<a id="l-20261027-02"></a>
+### L-20261027-02: Verify recurring events through the rendered page
+
+- Scope/tags: Homepage; recurring dates; event rendering.
+- Status: Verified October 27, 2026 in local tests and staging.
+- Observation: The indexed homepage query selected a recurring event correctly, but an older renderer check discarded it because its original date had passed. Loader tests alone did not catch the missing card.
+- Evidence: The homepage now uses the Events module's `upcomingEvents` interface. Regression checks cover the displayed next occurrence, order, expired timed events and the Pacific date-only DST boundary; hosted staging checked fallback and indexed rendering.
+- Next time: Assert the final card and displayed date for a past primary date with a future occurrence, along with query eligibility.
+- Limits: Rendering checks do not establish hosted write availability; the staging run separately encountered the account's daily D1 write allowance.
 
 <a id="l-20261027-01"></a>
 ### L-20261027-01: Verify database scale changes in the hosted runtime

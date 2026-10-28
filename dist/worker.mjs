@@ -2118,7 +2118,7 @@ function regionalHome(url, list = records, events = [], directoryPage = null) {
   canonicalParams.set("type", selectedType);
   canonicalParams.set("place", selectedPlace);
   const q = (params.get("q") || "").slice(0, 200), directoryRecords = directoryPage ? list.filter((record2) => directoryPage.ids.includes(record2.id)) : list, matched = filterRecords(canonicalParams, directoryRecords), found = q.trim() ? matched : matched.filter((record2) => record2.relationship_type === "independent"), filtered = !!(selectedType || q || selectedPlace !== "All locations");
-  const now = Date.now(), upcoming = events.filter((event) => event.status === "published" && Date.parse(event.end_at || event.start_at) + 864e5 >= now).sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at)).slice(0, 3);
+  const upcoming = upcomingEvents(events).slice(0, 3);
   const date = (event) => new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/Los_Angeles" }).format(new Date(event.start_at));
   const eventCards = upcoming.map((event) => `<article class="regional-event-card" data-reveal><span>${h4(date(event))}</span><h3>${h4(event.title)}</h3><p>${h4(event.city || event.county + " County")} &middot; ${h4(event.venue)}</p><a href="/events/${encodeURIComponent(event.id)}">Event details <span aria-hidden="true">&rarr;</span></a></article>`).join("") || '<article class="regional-event-card"><h3>More community events are being verified.</h3><a href="/events">Open the community calendar &rarr;</a></article>';
   const featuredIds = ["veterans-beer-club-yolo-solano", "rememberavet", "little-reata-veterans", "mcl-yolo"], featured = featuredIds.map((id) => list.find((record2) => record2.id === id)).filter(Boolean);

@@ -20,4 +20,6 @@ Private HTTP handlers receive the shell's verified identity and current grants. 
 
 `server.mjs` exports `organizationScopeOptions(env, user, grants, options)`. It returns a page of at most 25 organization IDs, titles and regions, optional selected-ID lookups, and optional organization-family metadata through the authenticated records dispatcher. Every query retains the caller's current read scope. Full private profile payloads are not needed for these choices.
 
+Public directory and paginated HQ record searches use literal substring matching for queries up to 200 characters. They retain the complete search text and treat percent signs, underscores and backslashes as ordinary characters, without relying on D1's shorter LIKE-pattern limit.
+
 See [BROWSER.md](./BROWSER.md) for browser entry points, editor state, markup, actions and focused UI checks.

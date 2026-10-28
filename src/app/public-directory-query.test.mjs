@@ -19,3 +19,17 @@ test('directory queries page and filter published organizations in the selected 
  const result=await query('/yolo-solano?q=unique%20resource');assert.deepEqual(result.rows.map(row=>row.id),['org-00']);
  const nearby=await queryNearbyOrganizations(DB,'yolo-solano','Davis');assert.equal(nearby.length,25);assert.ok(nearby.every(row=>row.region_id==='yolo-solano'));
 });
+
+test('long directory searches match the full literal query within the region',async t=>{
+ const DB=db(t),insert=DB.raw.prepare("INSERT INTO records(id,kind,title,body,region_id,status,payload,created_by,created_at,updated_at,mutation_id) VALUES(?,'organization',?,?,?,'published','{}','test','2026','2026',?)");
+ const queries=['a'.repeat(49),'shared prefix '.repeat(5)+'expected','é'.repeat(30),'%_\\'.repeat(25),'x'.repeat(200)];
+ for(const [index,query] of queries.entries()){
+  const id='long-'+index;
+  insert.run(id,'Matching organization '+index,query,'yolo-solano',id);
+  insert.run(id+'-partial','Partial organization '+index,query.slice(0,-1)+'!','yolo-solano',id+'-partial');
+  insert.run(id+'-other','Other region '+index,query,'other-region',id+'-other');
+  const url=new URL('/yolo-solano','https://site.test');url.searchParams.set('q',query);
+  const page=await queryPublicDirectory(DB,url);
+  assert.deepEqual(page.rows.map(row=>row.id),[id],query);
+ }
+});

@@ -30,8 +30,10 @@ export async function queryPublicDirectory(db,url,region='yolo-solano') {
   }
   if(text){
     const categories=`COALESCE((SELECT group_concat(value,' ') FROM json_each(CASE WHEN json_type(${safe},'$.service_categories')='array' THEN json_extract(${safe},'$.service_categories') ELSE '[]' END) WHERE type='text'),'')`;
-    conditions.push(`lower(r.title || ' ' || ${city} || ' ' || ${county} || ' ' || r.body || ' ' || ${categories}) LIKE ? ESCAPE '\\'`);
-    values.push('%'+text.replace(/[\\%_]/g,'\\$&')+'%');
+    // Literal substring search avoids D1's 50-byte LIKE-pattern limit while
+    // retaining the complete query and treating %, _ and backslashes as text.
+    conditions.push(`instr(lower(r.title || ' ' || ${city} || ' ' || ${county} || ' ' || r.body || ' ' || ${categories}),?)>0`);
+    values.push(text);
   }
   const result=(await db.prepare(`SELECT ${columns} FROM records r WHERE ${conditions.join(' AND ')} ORDER BY CASE WHEN ${city}=? THEN 0 ELSE 1 END,r.title COLLATE NOCASE,r.id LIMIT 26 OFFSET ?`).bind(...values,place,(page-1)*25).all()).results;
   return {rows:result.slice(0,25),page,hasMore:result.length>25,types};

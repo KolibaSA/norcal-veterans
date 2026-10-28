@@ -75,8 +75,8 @@ export async function listRecords(env, user, grants, definition, options = null)
     const where = ['kind=?', scope.sql], values = [definition.kind, ...scope.values];
     if (status) { where.push('status=?'); values.push(status); }
     if (query) {
-      where.push("lower(title || ' ' || body || ' ' || replace(status,'_',' ')) LIKE ? ESCAPE '\\'");
-      values.push('%' + query.replace(/[\\%_]/g, '\\$&') + '%');
+      where.push("instr(lower(title || ' ' || body || ' ' || replace(status,'_',' ')),?)>0");
+      values.push(query);
     }
     const found = await rows(env, 'SELECT * FROM records WHERE ' + where.join(' AND ') + ' ORDER BY updated_at DESC,id DESC LIMIT 26 OFFSET ?', ...values, (page - 1) * 25);
     return { records: found.slice(0,25).map(record => visibleRecord(record, definition.redactPayload)), page, hasMore: found.length > 25 };

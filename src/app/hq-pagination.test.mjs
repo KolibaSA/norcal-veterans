@@ -52,3 +52,20 @@ test('organization picker searches beyond 500 while enforcing read assignments',
   const owner=await (await call('q=organization%20649','owner@example.com')).json();
   assert.deepEqual(owner.organizations.map(org=>org.id),['org-649']);
 });
+
+test('HQ long literal searches retain the complete query and permission scope',async t=>{
+ const DB=db(t),env={...envBase,DB};
+ const insert=DB.raw.prepare("INSERT INTO records(id,kind,title,body,region_id,status,payload,created_by,created_at,updated_at,mutation_id) VALUES(?,'task','Search fixture',?,?,'open','{}','test','2026','2026',?)");
+ DB.raw.prepare("INSERT INTO grants(id,email,role,region_id) VALUES('grant','editor@example.test','editor','region-a')").run();
+ const queries=['a'.repeat(49),'shared prefix '.repeat(5)+'expected','é'.repeat(30),'%_\\'.repeat(25),'x'.repeat(200)];
+ for(const [index,query] of queries.entries()){
+  const id='long-'+index;
+  insert.run(id,query,'region-a',id);
+  insert.run(id+'-partial',query.slice(0,-1)+'!','region-a',id+'-partial');
+  insert.run(id+'-other',query,'region-b',id+'-other');
+  const params=new URLSearchParams({kind:'task',page:'1',q:query});
+  const response=await req(env,'/api/hq/records?'+params,'editor@example.test');
+  assert.equal(response.status,200);
+  assert.deepEqual((await response.json()).records.map(row=>row.id),[id],query);
+ }
+});

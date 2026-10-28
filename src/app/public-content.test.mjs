@@ -153,6 +153,20 @@ test('indexed event and archive pages retrieve at most 25 records and preserve h
   assert.equal((await norcalPublicData(DB)).events.length,55);
 });
 
+test('indexed homepage displays the next date of a recurring event after its original date',async t=>{
+ t.mock.method(Date,'now',()=>now);
+ const {DB,event}=setup(t);
+ event('recurring-home','2020-01-01T12:00:00Z',{additional_occurrences:[{start_at:'2026-10-26T19:00:00Z'}]});
+ event('later-home','2026-10-27T19:00:00Z');
+ const {rebuildPublicOccurrences}=await import('./public-occurrence-index.mjs');
+ while((await rebuildPublicOccurrences(DB,100)).examined){}
+ const response=await worker.fetch(new Request(origin+'/yolo-solano'),{DB});
+ assert.equal(response.status,200);
+ const html=await response.text();
+ assert.match(html,/<span>Oct 26, 2026<\/span><h3>recurring-home<\/h3>/);
+ assert.ok(html.indexOf('<h3>recurring-home</h3>')<html.indexOf('<h3>later-home</h3>'));
+});
+
 test('regional homepage pages the directory while retaining featured and nearby organizations', async t => {
  const { DB, add, event } = setup(t);
  for(let i=0;i<60;i++) add('org-'+String(i).padStart(2,'0'),'organization',{city:i>=45?'Davis':'Dixon',location_county:'Yolo',organization_type:'VFW'});
