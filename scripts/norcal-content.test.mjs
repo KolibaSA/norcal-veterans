@@ -20,6 +20,32 @@ function setup(t) {
  return {DB,insert};
 }
 
+test('only the published Detachment 627 profile permits its fixed external website frame',async t=>{
+ const env=setup(t);
+ env.insert('mcl-yolo','organization',{...organization,public_contacts:{website:'https://example.org/'}},'Marine Corps League Yolo County Detachment 627');
+ env.insert('other-mcl','organization',{...organization,organization_type:'Marine Corps League'},'Another detachment');
+ for(const method of ['GET','HEAD']){
+  const response=await worker.fetch(new Request('https://site.test/organizations/mcl-yolo',{method}),env);
+  assert.equal(response.status,200);
+  const policy=response.headers.get('Content-Security-Policy');
+  assert.ok(policy.includes('frame-src https://www.yolomarines.org'));
+  assert.ok(policy.includes("frame-ancestors 'none'"));
+  assert.equal(response.headers.get('X-Frame-Options'),'DENY');
+  const html=await response.text();
+  if(method==='GET')assert.ok(html.includes('src="https://www.yolomarines.org/"'));
+  else assert.equal(html,'');
+ }
+ for(const path of ['/organizations/other-mcl','/privacy','/organizations/missing']){
+  const response=await worker.fetch(new Request('https://site.test'+path),env);
+  assert.ok(!response.headers.get('Content-Security-Policy').includes('yolomarines.org'),path);
+  assert.ok(!(await response.text()).includes('<iframe'),path);
+ }
+ const empty=setup(t);
+ const missing=await worker.fetch(new Request('https://site.test/organizations/mcl-yolo'),empty);
+ assert.equal(missing.status,404);
+ assert.ok(!missing.headers.get('Content-Security-Policy').includes('yolomarines.org'));
+});
+
 test('active content validation rejects malformed nested values and field lengths',()=>{
  for(const patch of [{service_categories:'Community'},{source_ids:{}},{missing_data_flags:123},{service_area:{counties:'Solano'}},{public_contacts:'phone'},{address:{type:'residential',text:'Private home'}},{address:{type:'meeting_venue',text:123}},{event_information:[]},{reviewed_update:{reviewed_at:'broken',source_url:'https://example.org/'}},{photos:{}},{city:'x'.repeat(121)}])assert.throws(()=>validateRecordPayload('organization',{...organization,...patch}),JSON.stringify(patch));
  assert.throws(()=>validateRecordPayload('organization',{...organization,public_contacts:{website:'javascript:alert(1)'}}));

@@ -1,0 +1,113 @@
+diff --git a/README.md b/README.md
+index aca3c3d..231483f 100644
+--- a/README.md
++++ b/README.md
+@@ -16,3 +16,8 @@ The site uses Cloudflare Workers Static Assets, configured in `wrangler.jsonc`.
+ To deploy, add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` as GitHub Actions repository secrets, then run the workflow from the Actions tab. The Worker name is `mcl-yolo-627`.
+ 
+ The page photographs are illustrative images generated for this design, not photographs of actual Detachment 627 members or events. Replace them with approved detachment photographs when available.
++
++
++## NorCal continuous-page integration
++
++`public/norcal-embed.js` reports the natural page height only to the approved NorCal parent after an origin-checked handshake. The parent provides its viewport height so viewport-sized sections do not grow with the iframe. Resize, font and image changes update the height automatically. Standalone visits retain their normal layout. Run `node --test tests/norcal-embed.test.mjs` before release. Publish this support before the NorCal parent integration. No content or artwork changes are required.
+diff --git a/public/index.html b/public/index.html
+index 31de56a..7c676e5 100644
+--- a/public/index.html
++++ b/public/index.html
+@@ -1,4 +1,4 @@
+-<!doctype html><html lang="en"><head>  <meta charset="utf-8">  <meta name="viewport" content="width=device-width, initial-scale=1">  <meta name="theme-color" content="#101b2a">  <meta name="description" content="Marine Corps League Yolo County Detachment 627. Serving Woodland, Esparto, Davis, Dixon, and Winters.">  <title>Marine Corps League | Yolo County Detachment 627</title>  <link rel="icon" type="image/png" href="/images/detachment-627-seal.png">  <link rel="stylesheet" href="/styles.css"></head><body>  <header class="motto-bar">    <img class="header-seal" src="/images/detachment-627-seal.png" alt="Marine Corps League Yolo County Detachment #627 seal">    <p><span>Honor</span><i aria-hidden="true">-</i><span>Courage</span><i aria-hidden="true">-</i><span>Commitment</span></p>  </header>
++<!doctype html><html lang="en"><head>  <meta charset="utf-8">  <meta name="viewport" content="width=device-width, initial-scale=1">  <meta name="theme-color" content="#101b2a">  <meta name="description" content="Marine Corps League Yolo County Detachment 627. Serving Woodland, Esparto, Davis, Dixon, and Winters.">  <title>Marine Corps League | Yolo County Detachment 627</title>  <link rel="icon" type="image/png" href="/images/detachment-627-seal.png">  <link rel="stylesheet" href="/styles.css"><script src="/norcal-embed.js?v=20261029-1" defer></script></head><body>  <header class="motto-bar">    <img class="header-seal" src="/images/detachment-627-seal.png" alt="Marine Corps League Yolo County Detachment #627 seal">    <p><span>Honor</span><i aria-hidden="true">-</i><span>Courage</span><i aria-hidden="true">-</i><span>Commitment</span></p>  </header>
+   <main>    <section class="hero" aria-labelledby="hero-title">      <img class="hero-image" src="/images/hero-iwo-jima.png" alt="A Marine veteran watches the bronze Iwo Jima flag-raising memorial at sunset" fetchpriority="high">      <div class="hero-shade"></div>      <div class="hero-content">        <p class="eyebrow eyebrow-light">Marine Corps League <span aria-hidden="true">•</span> Yolo County Detachment #627</p>        <h1 id="hero-title">Once a Marine.<br><span>Always a Marine.</span></h1>        <p class="hero-subtitle">Semper Fidelis</p>      </div>      <div class="hero-mark" aria-hidden="true">627</div>    </section>
+     <section class="who section-light" aria-labelledby="who-title">      <div class="who-photo-wrap">        <img class="who-photo" src="/images/fellowship.jpg" alt="Veterans and family members sharing coffee and conversation at a community gathering" loading="lazy">        <div class="photo-caption">Semper Fidelis</div>      </div>      <div class="who-copy">        <img class="detachment-seal" src="/images/detachment-627-seal.png" alt="Marine Corps League Yolo County Detachment #627 seal" loading="lazy">        <p class="eyebrow">Who We Are</p>        <h2 id="who-title">Still serving.<br><span>Still standing together.</span></h2>        <p>The Marine Corps League brings Marines together in camaraderie and fellowship, to preserve the traditions and promote the interests of the United States Marine Corps.</p>        <p>Yolo County Detachment #627 serves the Woodland area, including Woodland, Esparto, Davis, Dixon, and Winters.</p>        <div class="gold-rule" aria-hidden="true"></div>        <p class="service-line">A place for service, fellowship, and mutual support.</p>        <div class="veterans-event">          <a class="veterans-event-link" href="https://www.norcalveterans.org/organizations/mcl-yolo" target="_blank" rel="noopener noreferrer">Find Upcoming Events</a>          <img src="/images/yolo-solano-veterans.png" alt="Yolo-Solano Veterans" loading="lazy">        </div>      </div>    </section>
+     <section class="meeting" aria-labelledby="meeting-title">      <img class="meeting-image" src="/images/meeting-coffee.jpg" alt="Coffee and breakfast set out in a warm community meeting hall" loading="lazy">      <div class="meeting-shade"></div>      <div class="meeting-card">        <p class="eyebrow eyebrow-gold">When We Meet</p>        <h2 id="meeting-title">Third Saturday<br><span>of every month</span></h2>        <p class="meeting-time">9:00 <small>AM</small></p>        <div class="gold-rule" aria-hidden="true"></div>        <h3>Woodland Elks Lodge</h3>        <address>500 Bush Street<br>Woodland, CA 95695</address>        <p class="coffee-note">Sometimes breakfast.<br><strong>Always coffee.</strong></p>      </div>    </section>
+diff --git a/public/norcal-embed.js b/public/norcal-embed.js
+new file mode 100644
+index 0000000..8480b31
+--- /dev/null
++++ b/public/norcal-embed.js
+@@ -0,0 +1,28 @@
++// Share only layout height with the approved NorCal parent. Standalone visits
++// keep the normal website layout and behavior.
++(() => {
++ if(window.parent===window)return;
++ const allowed=new Set(['https://www.norcalveterans.org','https://norcalveterans.org','https://norcal-veterans-staging.sterling-koliba.workers.dev']);
++ if(location.hostname==='127.0.0.1')allowed.add('http://127.0.0.1:8796');
++ let parentOrigin='',pending=false,lastHeight=0;
++ const report=()=>{
++  pending=false;
++  const height=Math.ceil(document.body.getBoundingClientRect().height)+1;
++  if(!parentOrigin||height<200||height>60000||height===lastHeight)return;
++  lastHeight=height;
++  window.parent.postMessage({type:'norcal:website:height',version:1,height},parentOrigin);
++ };
++ const schedule=()=>{if(!pending){pending=true;requestAnimationFrame(report);}};
++ window.addEventListener('message',event=>{
++  const data=event.data;
++  if(event.source!==window.parent||!allowed.has(event.origin)||data?.type!=='norcal:website:init'||data.version!==1||!Number.isFinite(data.viewportHeight)||data.viewportHeight<180||data.viewportHeight>3000)return;
++  parentOrigin=event.origin;
++  document.documentElement.style.setProperty('--norcal-viewport-height',Math.round(data.viewportHeight)+'px');
++  document.documentElement.classList.add('norcal-embedded');
++  lastHeight=0;
++  schedule();
++ });
++ new ResizeObserver(schedule).observe(document.body);
++ document.addEventListener('load',schedule,true);
++ document.fonts?.ready.then(schedule);
++})();
+diff --git a/public/styles.css b/public/styles.css
+index 312329e..9965926 100644
+--- a/public/styles.css
++++ b/public/styles.css
+@@ -509,3 +509,14 @@ h2 { font-family: var(--serif); font-weight: 600; letter-spacing: -.04em; }
+   .veteran-resources-button { min-height: 50px; padding: 0 16px; font-size: 11px; letter-spacing: .08em; }
+   .veteran-resources-action img { width: 88px; height: 88px; }
+ }
++
++/* A continuous NorCal page uses the parent viewport, not the growing frame. */
++html.norcal-embedded { overflow: hidden; scroll-behavior: auto; }
++.norcal-embedded .hero { min-height: max(660px, calc(var(--norcal-viewport-height) - 104px)); }
++@media (max-width: 850px) {
++ .norcal-embedded .hero { min-height: max(650px, calc(var(--norcal-viewport-height) - 64px)); }
++ .norcal-embedded .who-photo-wrap, .norcal-embedded .who-photo { max-height: calc(var(--norcal-viewport-height) * .6); }
++ .norcal-embedded .membership-photo-wrap, .norcal-embedded .membership-photo,
++ .norcal-embedded .service-photo-wrap, .norcal-embedded .service-photo { max-height: calc(var(--norcal-viewport-height) * .64); }
++}
++@media (max-width: 480px) { .norcal-embedded .hero { min-height: 680px; } }
+diff --git a/tests/norcal-embed.test.mjs b/tests/norcal-embed.test.mjs
+new file mode 100644
+index 0000000..e930832
+--- /dev/null
++++ b/tests/norcal-embed.test.mjs
+@@ -0,0 +1,31 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {readFileSync} from 'node:fs';
++import {runInNewContext} from 'node:vm';
++const source=readFileSync(new URL('../public/norcal-embed.js',import.meta.url),'utf8');
++function setup(standalone=false){
++ const messages=[],listeners={},properties={},classes=new Set();let height=5000;
++ const parent={postMessage:(...args)=>messages.push(args)};
++ const window={parent,addEventListener:(name,fn)=>listeners[name]=fn};
++ if(standalone)window.parent=window;
++ const document={body:{getBoundingClientRect:()=>({height})},documentElement:{style:{setProperty:(key,value)=>properties[key]=value},classList:{add:name=>classes.add(name)}},addEventListener(){},fonts:{ready:{then(){}}}};
++ runInNewContext(source,{window,document,location:{hostname:'www.yolomarines.org'},ResizeObserver:class{observe(){}},requestAnimationFrame:fn=>fn()});
++ return {messages,listeners,properties,classes,parent,setHeight:value=>height=value};
++}
++test('only the approved parent can initialize continuous layout and receive height',()=>{
++ const f=setup(),data={type:'norcal:website:init',version:1,viewportHeight:900};
++ f.listeners.message({origin:'https://evil.test',source:f.parent,data});
++ f.listeners.message({origin:'https://www.norcalveterans.org',source:{},data});
++ f.listeners.message({origin:'https://www.norcalveterans.org',source:f.parent,data:{...data,viewportHeight:Infinity}});
++ assert.equal(f.messages.length,0);assert.equal(f.classes.size,0);
++ f.listeners.message({origin:'https://www.norcalveterans.org',source:f.parent,data});
++ assert.equal(f.properties['--norcal-viewport-height'],'900px');
++ assert.ok(f.classes.has('norcal-embedded'));
++ assert.equal(f.messages[0][0].height,5001);
++ assert.equal(f.messages[0][1],'https://www.norcalveterans.org');
++ f.setHeight(4000);f.listeners.message({origin:'https://www.norcalveterans.org',source:f.parent,data});
++ assert.equal(f.messages[1][0].height,4001);
++});
++test('standalone website visits retain their original layout',()=>{
++ const f=setup(true);assert.deepEqual(f.listeners,{});assert.equal(f.messages.length,0);assert.equal(f.classes.size,0);
++});

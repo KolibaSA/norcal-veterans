@@ -106,8 +106,10 @@ test('public profiles direct contributions to review instead of unavailable phot
       const response=await worker.fetch(new Request('https://www.norcalveterans.org'+path),env);
       assert.equal(response.status,200);
       const html=await response.text();
-      assert.match(html,/Ask about contributing photos/);
-      assert.match(html,/Suggest a profile update/);
+      if(path!=='/organizations/mcl-yolo'){
+        assert.match(html,/Ask about contributing photos/);
+        assert.match(html,/Suggest a profile update/);
+      }else assert.match(html,/src="https:\/\/www\.yolomarines\.org\/"/);
       assert.match(html,/href="\/for-organizations\?org=/);
       assert.doesNotMatch(html,/href="\/hq\?org=|Add photos →|Add or update officer profiles|can add photos, create albums|can add public photos, officer profiles/);
       if(path==='/organizations/mcl-yolo')assert.doesNotMatch(html,/href="\/hq\?tab=organization"/);

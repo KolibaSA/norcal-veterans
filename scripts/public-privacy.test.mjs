@@ -89,8 +89,8 @@ test('organization photo galleries retain safe sources through repeated sanitati
  const page=render(new URL('https://test/organizations/'+ORG),[clean]);assert.ok(page.html.includes('id="photos"'));assert.ok(page.html.includes('src="https://images.example.org/hall.jpg"'));assert.ok(page.html.includes('Photo source'));assert.ok(page.html.includes('Add photos'));assert.ok(!page.html.includes(PRIVATE));assert.ok(!page.html.includes('javascript:'));assert.ok(page.html.includes('referrerpolicy="no-referrer"'));
 });
 
-test('all organization pages offer photos and a sign-in path even before their first image',()=>{
- for(const record of records){const page=render(new URL('https://test/organizations/'+record.id));assert.ok(page.html.includes('id="photos"'),record.id);assert.ok(page.html.includes('/hq?org='+record.id+'#photos'),record.id);assert.ok(page.html.includes('Authorized representatives can add photos'));}
+test('standard organization profiles offer photos and a sign-in path even before their first image',()=>{
+ for(const record of records){const page=render(new URL('https://test/organizations/'+record.id));if(record.id==='mcl-yolo'){assert.ok(page.html.includes('class="organization-website-frame"'));continue;}assert.ok(page.html.includes('id="photos"'),record.id);assert.ok(page.html.includes('/hq?org='+record.id+'#photos'),record.id);assert.ok(page.html.includes('Authorized representatives can add photos'));}
 });
 
 test('published gallery joins the correct organization and exports source and license without uploader identity',async t=>{

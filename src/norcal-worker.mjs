@@ -5,7 +5,7 @@ import { rebuildPublicOccurrences } from './app/public-occurrence-index.mjs';
 export {norcalPublicData};
 import legacy from '../worker/legacy/index.mjs';
 import { dataset, sources } from './data.mjs';
-import { render } from './site.mjs';
+import { render, mclYoloWebsite } from './site.mjs';
 import { shell } from './shared/public-shell.mjs';
 import { submitPublicForm } from './app/public-intake.mjs';
 import { publicExtension, eventCalendar, submissionPage, upcomingEvents } from './public-tools.mjs';
@@ -64,7 +64,9 @@ const norcalWorker = {
       if (path === '/data.json') return Response.json({ ...dataset, last_verified_date: null, verification_note: 'Publication and verification are separate. See each record for its source references and recorded review date; confirm current details with the organization.', records: live.records, events: live.events, sources, memorial_services: memorialServices }, { headers: { ...securityHeaders, 'Cache-Control': 'public, max-age=30' } });
       if (path === '/events.ics') return new Response(head ? null : eventCalendar(url.searchParams.has('event') ? live.events.filter(event => event.id === url.searchParams.get('event')) : upcomingEvents(live.events)), { headers: { ...securityHeaders, 'Content-Type': 'text/calendar; charset=utf-8' } });
       const page = (path === '/share' ? {status: 200, html: shareProgramPage(url, live.records, {received: url.searchParams.has('received')})} : null) || publicExtension(url, live.events, live.records, live.pagination) || render(url, live.records, live.events, live.directory);
-      return localPage(head ? '' : page.html, page.status);
+      const response=localPage(head ? '' : page.html, page.status);
+      if(path==='/organizations/mcl-yolo'&&page.status===200)response.headers.set('Content-Security-Policy',securityHeaders['Content-Security-Policy']+'; frame-src '+new URL(mclYoloWebsite).origin);
+      return response;
     } catch {
       console.error(JSON.stringify({event:'public_request_failed',request_id:crypto.randomUUID(),operation:'public_render'}));
       return localPage(shell('Temporarily unavailable | NorCal Veterans', 'Please try again soon.', '<section class="wrap"><h1>Please try again in a few minutes.</h1></section>'), 503, true);

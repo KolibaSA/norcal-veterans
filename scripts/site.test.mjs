@@ -145,11 +145,11 @@ test('every organization type uses the shared branded profile design and its fam
  for(const r of records){
   const page=render(new URL('https://test/organizations/'+r.id));
   const theme=themeByType[r.organization_type]||'community-profile';
-  assert.ok(page.html.includes(`class="wrap detail-page ${theme}"`),r.id+' '+theme);
+  assert.ok(page.html.includes(`class="wrap detail-page ${theme}${r.id==='mcl-yolo'?' mcl-website-profile':''}"`),r.id+' '+theme);
   assert.ok(page.html.includes('class="profile-heading branded-profile-heading"'),r.id);
   assert.ok(page.html.includes('class="profile-brand-logo"'),r.id);
   assert.ok(!page.html.includes('View officers'),r.id);
-  assert.ok(page.html.includes('/styles.css?v=card-text-20261028-1'),r.id);
+  assert.ok(page.html.includes('/styles.css?v='+(r.id==='mcl-yolo'?'mcl-website-20261029-2':'card-text-20261028-1')),r.id);
   assert.ok(page.html.includes('/app.js?v=regional-pagination-20261027-1'),r.id);
   assert.ok(styles.includes(`.${theme}{--profile-primary:`),theme);
  }
@@ -206,22 +206,21 @@ test('Yolo-Solano is the first NorCal Veterans regional experience',async()=>{
  assert.equal(logo.headers.get('Content-Type'),'image/png');
  assert.ok((await logo.arrayBuffer()).byteLength>100);
 });
-test('Detachment 627 uses the simple profile with its branding and content',()=>{
- const styles=readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
- for(const phrase of [".branded-profile-heading{position:relative;width:auto",".branded-profile-heading::after{content:attr(data-profile-mark)","position:absolute;z-index:2","width:min(25vw,320px)",'.mcl-profile{--profile-primary:#861f2d'])assert.ok(styles.includes(phrase),phrase);
+test('Detachment 627 keeps its banner above its official website and shared events',()=>{
  for(const path of ['/mcl-yolo','/organizations/mcl-yolo']){
   const page=render(new URL('https://test'+path));
   assert.equal(page.status,200);
-  for(const phrase of ['Detachment 627','Upcoming events','id="photos"','id="officers"','Plan your visit','Activities &amp; member information','Sources for this profile','Suggest a correction or update'])assert.ok(page.html.includes(phrase),phrase);
-  assert.ok(page.html.includes('class="wrap detail-page mcl-profile"'));
-  assert.ok(page.html.includes('class="profile-brand-logo"'));
-  assert.ok(!page.html.includes('class="org-site mcl-site"'));
-  assert.ok(page.html.includes('href="https://www.mclnational.org/"'));
-  assert.ok(page.html.includes('/hq?org=mcl-yolo#photos'));
+  for(const phrase of ['Detachment 627','class="wrap detail-page mcl-profile mcl-website-profile"','class="profile-brand-logo"','src="https://www.yolomarines.org/"','title="Marine Corps League Yolo County Detachment 627 website"','Open full website','href="#upcoming-events"','id="upcoming-events"'])assert.ok(page.html.includes(phrase),phrase);
+  assert.ok(page.html.indexOf('class="profile-heading branded-profile-heading"')<page.html.indexOf('<iframe'));
+  assert.ok(!page.html.includes('Plan your visit'));
+  assert.ok(!page.html.includes('id="photos"'));
+  assert.ok(!page.html.includes('id="officers"'));
+  assert.ok(page.html.includes('referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation"'));
   assert.ok(page.html.includes('<link rel="canonical" href="https://www.norcalveterans.org/organizations/mcl-yolo">'));
-  assert.ok(!page.html.includes('mailto:'));
-  assert.ok(!page.html.includes('tel:'));
  }
+ const other=render(new URL('https://test/organizations/mcl-ca-1486'));
+ assert.equal(other.status,200);
+ assert.ok(!other.html.includes('<iframe'));
 });
 test('resources page provides local and official help across the requested categories',()=>{
  const page=render(new URL('https://test/resources'));

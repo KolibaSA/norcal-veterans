@@ -656,6 +656,13 @@ details[open]>summary{margin-bottom:10px}
 .detail-page{--profile-primary:#174b97;--profile-deep:#102b52;--profile-accent:#c5263c;--profile-accent-text:#fff;--profile-page:#f3f5f8;--profile-panel:#fff;--profile-panel-alt:#eef3fa;--profile-line:#d7dde6;--profile-mark:rgba(255,255,255,.08);--profile-hero:radial-gradient(circle at 84% 28%,#315c83 0,#17446d 30%,#0b2949 68%);position:relative;background:var(--profile-page);box-shadow:0 0 0 100vmax var(--profile-page);clip-path:inset(0 -100vmax)}
 html:has(.detail-page),body:has(.detail-page){overflow-x:clip}
 .branded-profile-heading{position:relative;width:auto;min-height:560px;max-width:none;margin:0 calc(50% - 50vw) 56px;padding:88px max(48px,calc((100vw - 1224px)/2 + 48px));padding-right:max(410px,calc((100vw - 1224px)/2 + 390px));display:flex;flex-direction:column;justify-content:center;overflow:hidden;background:var(--profile-hero);color:#fff;border:0;border-top:5px solid var(--profile-accent);border-radius:0}
+.mcl-website-profile{padding-bottom:0}
+.mcl-website-page .organization-website{margin-bottom:48px}
+.organization-website-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding:0 max(24px,calc((100vw - 1224px)/2))}
+.organization-website-heading h2,.organization-website-heading p{margin:0}
+.organization-website-frame{display:block;width:100%;height:85vh;height:85svh;min-height:640px;max-height:1100px;border:0;background:#fff;border-radius:0}
+.organization-website-frame[data-website-expanded]{min-height:0;max-height:none}
+.organization-website-frame:focus-visible{outline:3px solid var(--red);outline-offset:4px}
 .branded-profile-heading::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,rgba(3,14,28,.08),rgba(3,14,28,.68)),repeating-linear-gradient(120deg,transparent 0 80px,rgba(255,255,255,.045) 80px 81px)}
 .branded-profile-heading::after{content:attr(data-profile-mark);position:absolute;right:-1vw;bottom:-7vw;color:var(--profile-mark);font-family:var(--display);font-size:min(42vw,600px);font-weight:900;line-height:1;pointer-events:none}
 .branded-profile-heading>*{position:relative;z-index:1}.profile-brand-logo{position:absolute;z-index:2;top:50%;right:max(48px,calc((100vw - 1224px)/2 + 48px));width:min(25vw,320px);height:min(25vw,320px);padding:32px;transform:translateY(-50%);object-fit:contain;background:rgba(255,255,255,.95);border:3px solid var(--profile-accent);border-radius:50%;box-shadow:0 30px 90px rgba(3,14,28,.34)}
