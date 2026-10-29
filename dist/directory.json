@@ -326,6 +326,23 @@
       "notes": "April 17-19 outreach is historical, not continuing service hours."
     },
     {
+      "id": "legion-77-official",
+      "title": "Yolo Post 77",
+      "publisher": "American Legion Yolo Post 77",
+      "url": "https://www.yolo-post77.org/yolo-post-77",
+      "fields": [
+        "identity",
+        "address",
+        "phone",
+        "website",
+        "meeting_schedule",
+        "activities"
+      ],
+      "published_date": null,
+      "accessed_date": "2026-10-28",
+      "notes": "Post website lists its monthly meeting, public open evenings, community remembrance and youth programs. Confirm current details with the post."
+    },
+    {
       "id": "vfw-7143-official",
       "title": "VFW Post 7143 in Esparto CA",
       "publisher": "VFW Post 7143",
@@ -1093,14 +1110,18 @@
         "map_eligible": true
       },
       "public_contacts": {
-        "phone": null,
+        "phone": "530-662-9772",
         "email": null,
-        "website": null
+        "website": "https://www.yolo-post77.org/"
       },
       "hours": null,
-      "meeting_schedule": null,
+      "meeting_schedule": "Fourth Wednesday of each month at 7 p.m.",
       "timezone": "America/Los_Angeles",
-      "service_categories": [],
+      "service_categories": [
+        "Veteran community",
+        "Remembrance",
+        "Youth programs"
+      ],
       "audience": null,
       "eligibility": null,
       "event_information": {
@@ -1112,19 +1133,19 @@
       "partnership_notes": null,
       "officers": [],
       "officers_status": "not_verified",
-      "member_information": "Woodland post documented as the host of an April 2026 veterans outreach session.",
+      "member_information": "Yolo American Legion Post 77 brings veterans and the Woodland community together through remembrance, youth programs and local activities. The post says it opens on Thursday and Friday evenings from 4 p.m. and welcomes everyone. Contact the post to confirm current details.",
       "source_ids": [
-        "legion-77"
+        "legion-77",
+        "legion-77-official"
       ],
-      "last_verified_date": "2026-09-02",
+      "last_verified_date": "2026-10-28",
       "verification_method": "public_source_review",
       "organization_confirmed_at": null,
       "confidence": "medium",
       "missing_data_flags": [
-        "routine_contact_missing",
-        "meeting_schedule_missing",
         "service_area_unknown"
-      ]
+      ],
+      "review_source_url": "https://www.yolo-post77.org/yolo-post-77"
     },
     {
       "id": "vfw-ca-7143",

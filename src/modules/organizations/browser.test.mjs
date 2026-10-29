@@ -26,6 +26,17 @@ test('organization relationships save and reopen using the parent organization I
   assert.equal(independent.relationship_type, 'independent'); assert.equal(independent.affiliated_with_id, null);
 });
 
+test('organization editors can update public meeting information and remaining verification items', () => {
+  const previous = { meeting_schedule: 'Old schedule', missing_data_flags: ['meeting_schedule_missing', 'service_area_unknown'] };
+  const fields = createFeature().fields({ payload: previous });
+  fields.meetingSchedule = 'Fourth Wednesday at 7 p.m.';
+  fields.missingDataFlags = 'service_area_unknown';
+  const updated = organizationPayload(fields, previous);
+  assert.equal(updated.meeting_schedule, 'Fourth Wednesday at 7 p.m.');
+  assert.deepEqual(updated.missing_data_flags, ['service_area_unknown']);
+  assert.deepEqual(previous.missing_data_flags, ['meeting_schedule_missing', 'service_area_unknown']);
+});
+
 test('organization scope choices use escaped public labels and their existing stable IDs', async () => {
   const { $ } = controls(), paths = [];
   await loadScopeOptions(async path => { paths.push(path); return { organizations:[{ id: 'org-"x', title: '<Example>' }], selected:[], families:[], hasMore:false }; }, $('org'));

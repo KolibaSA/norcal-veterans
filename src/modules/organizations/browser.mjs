@@ -9,6 +9,7 @@ export function organizationFields(record = {}) {
     city: p.city ?? '', county: p.location_county ?? '', type: p.organization_type ?? '',
     relationshipType: p.relationship_type ?? 'independent', affiliatedWith: p.affiliated_with_id ?? '',
     website: p.public_contacts?.website ?? '', phone: p.public_contacts?.phone ?? '', publicEmail: p.public_contacts?.email ?? '',
+    meetingSchedule: p.meeting_schedule ?? '', missingDataFlags: joined(p.missing_data_flags),
     address: p.address?.text ?? '', addressType: p.address?.type ?? '', mapEligible: p.address?.map_eligible === true,
     serviceCounties: joined(p.service_area?.counties), serviceCities: joined(p.service_area?.cities),
     serviceCategories: joined(p.service_categories), serviceNotes: p.service_area?.notes ?? '', referralNotes: p.referral_notes ?? '',
@@ -29,6 +30,7 @@ export function organizationPayload(fields, previous = {}) {
       address: fields.address ? { ...p.address, text: fields.address, type: fields.addressType, map_eligible: fields.mapEligible && fields.addressType !== 'mailing' } : null,
       service_area: { ...p.service_area, counties: splitList(fields.serviceCounties), cities: splitList(fields.serviceCities), notes: fields.serviceNotes },
       service_categories: splitList(fields.serviceCategories), referral_notes: fields.referralNotes,
+      meeting_schedule: fields.meetingSchedule || null, missing_data_flags: splitList(fields.missingDataFlags),
       source_ids: splitList(fields.sourceIds), review_source_url: fields.reviewSource,
       last_verified_date: fields.verifiedDate || null, confirmation_source_url: fields.confirmationSource,
       organization_confirmed_at: fields.confirmationDate

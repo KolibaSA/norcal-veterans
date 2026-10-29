@@ -2,6 +2,8 @@
 
 HQ organization field mapping, public contact/address/service-area editing, source/confirmation evidence, organization scope options and lifecycle.
 
+The public meeting schedule and the list of information still to confirm can be edited with the other source-reviewed profile fields. These do not create calendar events.
+
 Relationship editing uses `relationshipType` and the searchable `affiliatedWith` datalist. The saved parent value is an existing organization ID, not a display name; independent organizations clear that parent field.
 
 When the opened record is exactly `vfw-ca-8151`, `editor.html` also reveals the twelve-card meeting planner. `meeting-plans.mjs` maps its fixed month/time controls into the organization payload; all other organization records receive blank hidden planner fields and preserve their existing payload unchanged.
