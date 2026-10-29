@@ -1,6 +1,6 @@
 # MCL 627 continuous-page integration
 
-October 29, 2026: companion published and coordinated staging acceptance passed; NorCal production publication pending.
+Published October 29, 2026. NorCal commit `66981f9`, Worker `70318aea-24ae-4a4d-bed9-a3b878daab18`; companion commit `28eb382`, Worker `bbd7df2b-fea1-4bd3-be4b-d6bdf4fb909d`.
 
 ## Behavior and ownership
 
@@ -36,4 +36,4 @@ NorCal build: 340 tests passed. Active checks: 229 passed. Organizations module:
 3. Publish NorCal through connected GitHub `main`, then verify the live canonical profile, parent CSP, complete website footer, event links and main-page scrolling. No migration or production data edit is required.
 4. Code rollback on NorCal returns to `c2dd7fc` through the connected GitHub path. The companion can remain deployed because standalone behavior is unchanged. If reverting the companion, restore the preceding safe NorCal version first to avoid depending on missing height messages.
 
-Hosted acceptance confirmed exact available-width coverage at phone and desktop widths, the entire remote website footer within the expanded frame, zero inner scroll position and outer-page scrolling over the website. NorCal production still requires its connected release and live verification.
+Hosted acceptance confirmed exact available-width coverage at phone and desktop widths, the entire remote website footer within the expanded frame, zero inner scroll position and outer-page scrolling over the website. The connected NorCal production release passed live verification: full width, complete external footer, zero inner scroll, outer-page wheel scrolling, the expected page-specific CSP and an unchanged standard profile for Detachment 1486. The live page is https://www.norcalveterans.org/organizations/mcl-yolo.
