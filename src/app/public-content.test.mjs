@@ -183,7 +183,12 @@ test('regional homepage pages the directory while retaining featured and nearby 
  assert.equal(data.events.length,3);
  const page=await worker.fetch(new Request('https://site.test/yolo-solano?city=Davis'),{DB});
  const html=await page.text();assert.match(html,/aria-label="Organization pages"/);assert.match(html,/org_page=2/);
+ assert.match(html,/id="directory" data-directory-autoload/);
+ assert.match(html,/data-directory-next/);assert.match(html,/data-directory-results/);
+ assert.match(html,/app\.js\?v=continuous-directory-20261028-1/);
  assert.match(html,/Veterans Beer Club/);assert.match(html,/org-59/);
  const second=await publicDataForRequest(DB,new URL('/yolo-solano?org_page=2','https://site.test'),now);
  assert.ok(data.directory.ids.every(id=>!second.directory.ids.includes(id)));
+ const secondPage=await worker.fetch(new Request('https://site.test/yolo-solano?org_page=2'),{DB});
+ assert.doesNotMatch(await secondPage.text(),/id="directory" data-directory-autoload/);
 });

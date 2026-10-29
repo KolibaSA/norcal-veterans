@@ -63,6 +63,61 @@ if(location.pathname==='/'||location.pathname==='/yolo-solano'){
  document.querySelectorAll('[data-city-skip]').forEach(button=>button.addEventListener('click',()=>{safeWrite('sessionStorage',skipKey,'1');dialog?.close();}));
  if(dialog&&!initialCity&&!safeRead('sessionStorage',skipKey))try{dialog.showModal();}catch{}
 }
+// Populate a continuous directory from bounded regional queries. Native links
+// remain available when JavaScript is unavailable; visitors using JS never
+// need to move between directory pages.
+{
+ const directory=document.querySelector('[data-directory-autoload]');
+ const results=directory?.querySelector('[data-directory-results]');
+ const navigation=directory?.querySelector('[data-directory-pages]');
+ const status=directory?.querySelector('[data-directory-status]');
+ const count=directory?.querySelector('[data-directory-count]');
+ const place=directory?.querySelector('[name="place"]')?.value||'';
+ let next=navigation?.querySelector('[data-directory-next]')?.href,loading=false;
+ const seen=new Set(Array.from(results?.querySelectorAll('[data-organization-id]')||[]).map(card=>card.dataset.organizationId));
+ const order=(a,b)=>Number(a.dataset.directoryOrder)-Number(b.dataset.directoryOrder)||(a.getAttribute('aria-label')||'').localeCompare(b.getAttribute('aria-label')||'');
+ const merge=page=>{
+  const incoming=page.querySelector('[data-directory-results]');
+  if(!incoming)throw new Error('Directory unavailable');
+  for(const category of incoming.querySelectorAll('.logo-category')){
+   let target=Array.from(results.children).find(node=>node.id===category.id);
+   if(!target){target=document.importNode(category,true);target.querySelectorAll('.logo-type-group').forEach(node=>node.remove());results.append(target);}
+   for(const group of category.querySelectorAll('.logo-type-group')){
+    let destination=Array.from(target.querySelectorAll('.logo-type-group')).find(node=>node.dataset.organizationType===group.dataset.organizationType);
+    if(!destination){destination=document.importNode(group,true);destination.querySelector('.logo-grid').replaceChildren();target.append(destination);}
+    const grid=destination.querySelector('.logo-grid');
+    for(const card of group.querySelectorAll('[data-organization-id]'))if(!seen.has(card.dataset.organizationId)){
+     seen.add(card.dataset.organizationId);grid.append(document.importNode(card,true));
+    }
+    grid.append(...Array.from(grid.children).sort((a,b)=>Number(b.dataset.organizationCity===place)-Number(a.dataset.organizationCity===place)||(a.dataset.organizationCity||'').localeCompare(b.dataset.organizationCity||'')||(a.dataset.organizationName||'').localeCompare(b.dataset.organizationName||'')));
+    const n=grid.children.length;destination.querySelector('.logo-type-heading span').textContent=`${n} ${n===1?'connection':'connections'}`;
+   }
+   target.append(...Array.from(target.querySelectorAll('.logo-type-group')).sort(order));
+  }
+  results.append(...Array.from(results.children).sort(order));
+  if(count)count.textContent=`${seen.size} ${seen.size===1?'organization':'organizations'}`;
+ };
+ const load=async()=>{
+  if(!results||!next||loading)return;
+  loading=true;navigation.hidden=true;status.replaceChildren();status.textContent='Loading all organizations…';results.setAttribute('aria-busy','true');
+  const visited=new Set();
+  try{
+   while(next){
+    const url=new URL(next,location.href);
+    if(url.origin!==location.origin||visited.has(url.href))throw new Error('Directory unavailable');
+    visited.add(url.href);
+    const response=await fetch(url,{credentials:'omit'});if(!response.ok)throw new Error('Directory unavailable');
+    const page=new DOMParser().parseFromString(await response.text(),'text/html');
+    merge(page);next=page.querySelector('[data-directory-pages] [data-directory-next]')?.href;
+   }
+   navigation.remove();status.textContent='';
+  }catch{
+   status.textContent='Some organizations could not load. ';
+   const retry=document.createElement('button');retry.type='button';retry.className='button outline';retry.textContent='Try again';retry.addEventListener('click',load);status.append(retry);
+  }finally{loading=false;results.removeAttribute('aria-busy');}
+ };
+ if(next)load();
+}
 // Enhance archive pagination while keeping its normal links usable without JS.
 document.addEventListener('click',async event=>{
  const link=event.target.closest?.('a[data-archive-more]');

@@ -4,6 +4,10 @@ HQ organization field mapping, public contact/address/service-area editing, sour
 
 The public meeting schedule and the list of information still to confirm can be edited with the other source-reviewed profile fields. These do not create calendar events.
 
+The public directory automatically fills all matching organization cards into one continuous listing. `public/app.js` follows bounded directory queries, merges their cards into the existing category/type groups and updates counts, without showing page controls. Each card has a stable organization ID for deduplication. Failed loads offer a retry; ordinary page links remain the fallback without JavaScript. `src/site.mjs` owns the markup and the existing group/city ordering.
+
+Card text must clear the existing logo area. Branded-card headings reserve the logo's horizontal space; cards narrower than 300 pixels place their title below the emblem. Keep official artwork, logo sizing and logo positioning unchanged when adjusting text. Check long post/detachment names in both the directory and nearby cards at phone, tablet and desktop widths.
+
 Relationship editing uses `relationshipType` and the searchable `affiliatedWith` datalist. The saved parent value is an existing organization ID, not a display name; independent organizations clear that parent field.
 
 When the opened record is exactly `vfw-ca-8151`, `editor.html` also reveals the twelve-card meeting planner. `meeting-plans.mjs` maps its fixed month/time controls into the organization payload; all other organization records receive blank hidden planner fields and preserve their existing payload unchanged.

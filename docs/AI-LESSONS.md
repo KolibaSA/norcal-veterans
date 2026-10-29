@@ -48,6 +48,7 @@ Adopted September 13, 2026. Practical guidance, not doctrine. Read the current s
 - Observation: A nearby-card change passed markup checks but did not match the intended VETs appearance. The owner clarified the exact white-logo/navy-details order, divider alignment with the VFW card, and larger emblem.
 - Evidence: Owner’s October 2 screenshot correction; regression coverage in `scripts/site.test.mjs` and the corresponding rules in `public/styles.css`.
 - Next time: Translate a reference image into specific panel boundaries and logo scale, then inspect a populated browser preview and add focused layout assertions before release.
+- October 29 follow-up: Preserve the emblem artwork and its size/position when fixing text collisions. Reserving horizontal space for headings and moving titles below the emblem on narrow cards passed geometry checks for all 27 source-catalog cards at 11 viewport widths. Check both directory and nearby-card layouts; a screenshot at the user's phone width caught the intended visual result.
 - Limits: Staging may use synthetic records and lack the exact target organization; use local source records for that target when needed.
 
 <a id="l-20260913-03"></a>

@@ -61,6 +61,8 @@ October 27, 2026 scalability work adds regional directory and event pagination, 
 
 October 28 review fixes were published through GitHub commit `955a941` and production Worker version `ef3a9566-b0c1-4c14-bf09-f9181476c1e2`, after verification on staging Worker `c2711add-6497-49cc-858e-9fb6e4c1755d`. Directory and paginated HQ record searches retain literal queries up to 200 characters without D1's LIKE-pattern restriction. The regional homepage now uses the Events module's remaining-occurrence rules and shows a recurring event's next date after its original date passes. The build passed 336 tests and the active suite passed 225. Hosted checks covered long ASCII and multibyte searches, literal wildcard characters, complete-query matching, and recurring homepage dates with both fallback and indexed reads. Fictional staging records and their derived rows were removed; integrity checks passed. No migration was needed. The account's free D1 daily write allowance was exhausted during initial acceptance; ordinary staging writes succeeded after the allowance reset.
 
+October 29 directory follow-up is verified on staging, pending publication. The public directory automatically loads every matching organization card into one continuous grouped list while retaining bounded database requests. Card text reserves space for unchanged logos, including a separate title area on narrow cards. The build passed 337 tests and active checks passed 226; browser acceptance covered complete loading, filtering, retry, and all 27 source-catalog cards at phone, tablet and desktop widths. See [release acceptance and rollback](docs/norcal-deployment.md).
+
 ## Development and deployment
 
 Requires Node 24 or newer. Install the locked dependencies with pnpm.
