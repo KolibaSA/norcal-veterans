@@ -66,7 +66,7 @@ test('events page groups compact cards by month and identifies hosts and accepte
     {...base,id:'train',title:'Halloween Train',start_at:'2099-10-31T11:00:00-07:00',organization_id:'legion-ca-77',image_url:'https://images.example.org/train.jpg',volunteer_enabled:true,volunteer_url:'https://example.org/volunteer',donate_enabled:true,donate_url:'https://example.org/donate',tickets_enabled:true,tickets_url:'https://example.org/tickets'}
   ],organizations);
   assert.match(html,/September 2099/);assert.match(html,/October 2099/);
-  assert.match(html,/class="event-card-media"><span class="event-card-fallback"/);
+  assert.match(html,/class="event-card-host-logo" src="\/logos\/vfw\.png" alt="Veterans of Foreign Wars logo for Dixon VFW Post 8151"/);
   assert.match(html,/src="https:\/\/images\.example\.org\/train\.jpg"/);
   assert.match(html,/<h2>Buddy Poppy Fundraiser<\/h2>/);assert.doesNotMatch(html,/<h2><a[^>]*>Buddy Poppy Fundraiser<\/a>/);
   assert.match(html,/class="event-card-hit-area" href="\/events\/poppy"/);assert.match(html,/event-card--poppy/);
@@ -76,7 +76,7 @@ test('events page groups compact cards by month and identifies hosts and accepte
   assert.match(html,/href="https:\/\/example\.org\/volunteer"[^>]*>Volunteer Now/);
   assert.match(html,/href="https:\/\/example\.org\/donate"[^>]*>Donate Now/);
   assert.match(html,/href="https:\/\/example\.org\/tickets"[^>]*>Buy Tickets/);
-  assert.match(html,/viewBox="0 0 64 64"/);assert.match(html,/circle cx="32" cy="29" r="3\.5"/);
+  assert.doesNotMatch(html,/viewBox="0 0 64 64"/);
   assert.doesNotMatch(html,/not-a-poppy\.jpg/);
   assert.match(html,/Dixon VFW Post 8151/);assert.match(html,/Yolo American Legion Post 77/);assert.match(html,/Marine Corps League - Yolo County Detachment 627/);
   assert.match(html,/event-card-theme--vfw/);assert.match(html,/>8151<\/span>/);
@@ -91,8 +91,10 @@ test('a card shows two participants and links to a detail page listing every par
   const card=eventsPagePublic(new URL('https://test/events'),[event],organizations);
   assert.match(card,/Going:.*first organization.*second organization.*href="\/events\/many-participants">\+1 more/s);
   assert.doesNotMatch(card,/third organization/);
+  assert.match(card,/class="event-card-fallback" aria-hidden="true"/);
   const detail=eventDetail(event,organizations);
   assert.match(detail,/Organizations going.*first organization.*second organization.*third organization/s);
+  assert.doesNotMatch(detail,/event-card-host-logo/);
 });
 
 test('one event record renders, prunes, details, and exports multiple dates',()=>{
@@ -116,7 +118,7 @@ test('past events default closed, select Pacific year, preserve city and exclude
   const base={venue:'Public hall',status:'published',city:'Davis',start_at:'2026-10-08T18:00:00-07:00'};
   const events=[
     {...base,id:'recent',title:'Recent gathering'},
-    {...base,id:'older',title:'Older gathering',start_at:'2026-03-01T18:00:00-08:00'},
+    {...base,id:'older',title:'Older gathering',start_at:'2026-03-01T18:00:00-08:00',organization_id:'vfw-ca-8151'},
     {...base,id:'prior',title:'Prior Pacific year',start_at:'2026-01-01T01:00:00Z'},
     {...base,id:'private',title:'Private draft',status:'draft'},
     {...base,id:'archived',title:'Archived record',status:'archived'},
@@ -124,16 +126,18 @@ test('past events default closed, select Pacific year, preserve city and exclude
     {...base,id:'other-city',title:'Woodland gathering',city:'Woodland'},
     {...base,id:'future',title:'Future gathering',start_at:'2026-11-01T18:00:00-08:00'}
   ];
-  const html=eventsPagePublic(new URL('https://test/events?city=Davis'),events);
+  const organizations=[{id:'vfw-ca-8151',verified_name:'Dixon VFW Post 8151',organization_type:'VFW'}];
+  const html=eventsPagePublic(new URL('https://test/events?city=Davis'),events,organizations);
   const collapsed=html.match(/<details class="events-past[\s\S]*?<\/details>/)[0];
   assert.match(collapsed, /data-archive-url="\/events\?past_year=2026&amp;city=Davis#past-events"/);
   assert.doesNotMatch(collapsed, / open|Recent gathering|Older gathering|<select/);
   assert.match(collapsed, /href="\/events\?past_year=2026&amp;city=Davis#past-events"/);
-  const archive=eventsPagePublic(new URL('https://test/events?city=Davis&past_year=2026'),events).match(/<details class="events-past[\s\S]*?<\/details>/)[0];
+  const archive=eventsPagePublic(new URL('https://test/events?city=Davis&past_year=2026'),events,organizations).match(/<details class="events-past[\s\S]*?<\/details>/)[0];
   assert.match(archive, /value="2026" selected/);
   assert.match(archive, /value="2025"/);
   assert.match(archive, /name="city" value="Davis"/);
   assert.ok(archive.indexOf('Recent gathering')<archive.indexOf('Older gathering'));
+  assert.match(archive,/event-card-host-logo" src="\/logos\/vfw\.png"/);
   assert.doesNotMatch(archive,/Prior Pacific year|Private draft|Archived record|Regular meeting|Woodland gathering|Future gathering/);
   assert.ok(html.indexOf('View Past Events')<html.indexOf('Future gathering'));
   const prior=eventsPagePublic(new URL('https://test/events?city=Davis&past_year=2025'),events).match(/<details class="events-past[\s\S]*?<\/details>/)[0];
